@@ -8,7 +8,7 @@ public class SaveData
 {
     public int money;
     public int stress;
-    public float ageMonths;
+    public float ageDays;
     public float workLifeBalance;
 }
 
@@ -29,7 +29,7 @@ public static class SaveSystem
         {
             money = s.Money,
             stress = s.Stress,
-            ageMonths = s.AgeMonths,
+            ageDays = s.AgeDays,
             workLifeBalance = s.WorkLifeBalance
         };
 
@@ -48,7 +48,7 @@ public static class SaveSystem
         if (GameState.I == null || !HasSave()) return false;
 
         var data = JsonUtility.FromJson<SaveData>(PlayerPrefs.GetString(Key));
-        GameState.I.LoadValues(data.money, data.stress, data.ageMonths, data.workLifeBalance);
+        GameState.I.LoadValues(data.money, data.stress, data.ageDays, data.workLifeBalance);
         Debug.Log("[SaveSystem] ロードしました。");
         return true;
     }

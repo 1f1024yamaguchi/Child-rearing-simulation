@@ -6,6 +6,7 @@ using UnityEngine;
 /// 書き込みは必ずメソッド経由（値は自動でクランプ）、
 /// 変更時はイベントで通知するので、UI等は監視するだけで更新できる。
 /// どこからでも GameState.I で参照可能。
+/// 年齢は「日数」で保持する（GameClockが1日ずつ進める）。
 /// </summary>
 public class GameState : MonoBehaviour
 {
@@ -14,12 +15,13 @@ public class GameState : MonoBehaviour
     [Header("パラメータ初期値")]
     [SerializeField] private int money = 300000;      // お金（円）
     [SerializeField] private int stress = 30;         // ストレス 0〜100
-    [SerializeField] private float ageMonths = 0f;    // 子供の月齢（スライダー用）
+    [SerializeField] private float ageDays = 0f;      // 子供の年齢（日数・スライダー用）
     [Range(0f, 1f)]
     [SerializeField] private float workLifeBalance = 0.5f; // 0=ライフ寄り 1=ワーク寄り
 
     [Header("設定")]
     [SerializeField] private int goalAgeYears = 20;   // ゴール年齢（歳）
+    [SerializeField] private int daysPerYear = 365;   // 1年の日数
 
     // ---- 変更通知イベント（UI・SEなどがこれを購読する）----
     public event Action<int> OnMoneyChanged;
@@ -31,9 +33,10 @@ public class GameState : MonoBehaviour
     // ---- 読み取り専用プロパティ ----
     public int Money => money;
     public int Stress => stress;
-    public float AgeMonths => ageMonths;
+    public float AgeDays => ageDays;
+    public float AgeYears => ageDays / daysPerYear;   // 歳での表示用
     public float WorkLifeBalance => workLifeBalance;
-    public int GoalAgeMonths => goalAgeYears * 12;
+    public int GoalAgeDays => goalAgeYears * daysPerYear;
     public bool IsGameOver { get; private set; }
 
     private void Awake()
@@ -61,12 +64,12 @@ public class GameState : MonoBehaviour
         OnStressChanged?.Invoke(stress);
     }
 
-    public void AddAge(float months)
+    public void AddAgeDays(float days)
     {
-        ageMonths += months;
-        OnAgeChanged?.Invoke(ageMonths);
+        ageDays += days;
+        OnAgeChanged?.Invoke(ageDays);
 
-        if (!IsGameOver && ageMonths >= GoalAgeMonths)
+        if (!IsGameOver && ageDays >= GoalAgeDays)
         {
             IsGameOver = true;
             OnGameOver?.Invoke();
@@ -82,17 +85,17 @@ public class GameState : MonoBehaviour
     /// <summary>
     /// セーブ復元時などにまとめて値を差し込む。差し込み後に通知を飛ばしてUIを合わせる。
     /// </summary>
-    public void LoadValues(int newMoney, int newStress, float newAgeMonths, float newBalance)
+    public void LoadValues(int newMoney, int newStress, float newAgeDays, float newBalance)
     {
         money = Mathf.Max(0, newMoney);
         stress = Mathf.Clamp(newStress, 0, 100);
-        ageMonths = Mathf.Max(0f, newAgeMonths);
+        ageDays = Mathf.Max(0f, newAgeDays);
         workLifeBalance = Mathf.Clamp01(newBalance);
-        IsGameOver = ageMonths >= GoalAgeMonths;
+        IsGameOver = ageDays >= GoalAgeDays;
 
         OnMoneyChanged?.Invoke(money);
         OnStressChanged?.Invoke(stress);
-        OnAgeChanged?.Invoke(ageMonths);
+        OnAgeChanged?.Invoke(ageDays);
         OnBalanceChanged?.Invoke(workLifeBalance);
     }
 }
