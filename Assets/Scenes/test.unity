@@ -837,14 +837,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7c577e426d3effc4bb49243191b10080, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameHUD
-  moneyText: {fileID: 2132171540}
-  dayText: {fileID: 859164154}
-  stressText: {fileID: 0}
-  balanceSlider: {fileID: 1198403286}
-  stressBar: {fileID: 2085941807}
-  moneySuffix: ' yen'
-  daySuffix: ' day'
-  stressSuffix: ' stress'
 --- !u!1 &539011191
 GameObject:
   m_ObjectHideFlags: 0
@@ -1792,6 +1784,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2085941806}
   - component: {fileID: 2085941807}
+  - component: {fileID: 2085941808}
   m_Layer: 5
   m_Name: Strees
   m_TagString: Untagged
@@ -1873,6 +1866,18 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &2085941808
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2085941805}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 54fbee31e60ca7c40b2ff6f737d5a2b5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StressUI
 --- !u!1 &2132171538
 GameObject:
   m_ObjectHideFlags: 0
