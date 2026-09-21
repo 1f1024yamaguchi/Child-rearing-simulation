@@ -7,7 +7,7 @@ using TMPro;
 /// </summary>
 public class MoneyUI : MonoBehaviour
 {
-    [SerializeField] private string label = "Money:";
+    //[SerializeField] private string label = "Money:";
     [SerializeField] private string currencyPrefix = "¥";
 
     private TextMeshProUGUI moneyText;
@@ -43,6 +43,6 @@ public class MoneyUI : MonoBehaviour
             return;
         }
 
-        moneyText.text = $"{label} {currencyPrefix}{money:N0}";
+        moneyText.text = $"{currencyPrefix}{money:N0}";
     }
 }
