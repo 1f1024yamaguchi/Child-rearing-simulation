@@ -3273,6 +3273,8 @@ Transform:
   - {fileID: 571520963}
   - {fileID: 245499321}
   - {fileID: 639264006}
+  - {fileID: 908701340}
+  - {fileID: 800234791}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &310201545
@@ -5029,7 +5031,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ParentStatus
   displayName: "\u7236\u89AA"
   rank: 0
-  baseSalary: 300000
+  baseSalary: 200000
   workLifeBalance: 0.5
   stress: 30
   rankMultipliers:
@@ -6300,6 +6302,50 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
+--- !u!1 &800234790
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 800234791}
+  - component: {fileID: 800234792}
+  m_Layer: 0
+  m_Name: WageAccrual
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &800234791
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 800234790}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 310201544}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &800234792
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 800234790}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9f32185138a37ec48990be035e4400fa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WageAccrual
 --- !u!1 &809794037
 GameObject:
   m_ObjectHideFlags: 0
@@ -7012,6 +7058,50 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
+--- !u!1 &908701339
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 908701340}
+  - component: {fileID: 908701341}
+  m_Layer: 0
+  m_Name: DayTicker
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &908701340
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 908701339}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 310201544}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &908701341
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 908701339}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 35ea152653f96de4289eb73ea447c779, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DayTicker
 --- !u!1 &932091414
 GameObject:
   m_ObjectHideFlags: 0
@@ -11825,7 +11915,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ParentStatus
   displayName: "\u6BCD\u89AA"
   rank: 0
-  baseSalary: 200000
+  baseSalary: 300000
   workLifeBalance: 0.5
   stress: 30
   rankMultipliers:

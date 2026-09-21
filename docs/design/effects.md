@@ -2,7 +2,7 @@
 title: 効果（Effect）の共通モデル
 updated: 2026-09-21
 status: 設計中（たたき台・要合意）
-related: [docs/design/food-system.md, docs/design/events.md, docs/design/support-systems.md, docs/code/architecture.md]
+related: [docs/design/food-system.md, docs/design/events.md, docs/design/support-systems.md, docs/design/traits.md, docs/code/architecture.md]
 ---
 
 # 効果（Effect）の共通モデル
@@ -43,6 +43,8 @@ public enum EffectKind
     Hobby,          // 趣味
     GoodEventRate,  // Goodイベントの発生率補正（％）
     BadEventRate,   // Badイベントの発生率補正（％）
+    AddTrait,       // 特性（永続）を付ける → traits.md
+    AddCondition,   // 状態（一時）を付ける → traits.md
     // ここに足していく（例：Fatigue, Relationship, JobRankProgress …）
 }
 
@@ -157,9 +159,26 @@ public static class EffectApplier
 
 ---
 
+## 5.5 掛かりっぱなしの補正（特性・状態）
+
+上の `Effect` は「その場で値を動かす」もの。これに対して、**動き方そのものをずらす**ものがある。
+
+- **特性（Trait）** … 永続。例：勉強が得意、ストレスに強い、給料が5%上がる
+- **状態（Condition）** … 一時。例：風邪気味、絶好調
+
+どちらも母・父・子の誰にでも付き、**付けるのはイベント**。そのため `EffectKind` に `AddTrait` / `AddCondition` を足してある。
+
+これに伴って、補正には **加算か倍率かの区別（`ModifierOp`）** が必要になる（「給料が5%上がる」は加算では表せない）。
+3章の「継続する効果は補正として登録し、期限が来たら外す」と同じ仕組みに乗せる。**特性は「期限が来ない継続効果」**でしかない。
+
+詳細は [traits.md](traits.md)。
+
+---
+
 ## 6. 決めないといけないこと
 
 - 名前（`Effect` / `EffectKind` / `EffectTarget` / `EffectApplier` / `Choice`）をこれで確定してよいか。3人が同じ名前を使う前提の土台なので、先に決めたい。
 - データの持ち方：ScriptableObject にするか、コード内のリストにするか。バランス調整の頻度を考えると ScriptableObject が有利。
 - 継続効果の置き場所と、セーブ対象にするか（現在の `SaveSystem` は4項目しか保存していない。→ [../code/architecture.md](../code/architecture.md) 5章）。
+- `ModifierOp`（加算／倍率）と、特性・状態の名前を [traits.md](traits.md) と揃えて確定する。
 - 誰がこの土台を作るか。3機能の共通部分なので Core 側（山口）が自然。

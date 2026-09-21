@@ -24,3 +24,4 @@ status: 運用中
 | [0004](0004-pause-during-decisions.md) | プレイヤーが判断する画面を開いている間は時間を止める | 採用 |
 | [0005](0005-per-person-stress.md) | ストレスは人ごとに持ち、全員に及ぶ効果は一律に適用する | 採用 |
 | [0006](0006-effect-model.md) | 効果は共通の Effect リストで表現する | 採用 |
+| [0007](0007-traits-and-conditions.md) | 特殊能力は「永続の特性」と「一時の状態」に分ける | 採用 |

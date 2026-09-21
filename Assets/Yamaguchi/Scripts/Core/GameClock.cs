@@ -21,7 +21,7 @@ public class GameClock : MonoBehaviour
 
     private void Update()
     {
-       
+        if (!running) return;   // SetRunning(false) で止まるようにする（判断画面・ゲームオーバー用）
 
         timer += Time.deltaTime;
         // 1フレームで複数日ぶんたまっても取りこぼさないよう while で消化

@@ -49,6 +49,8 @@ Unity 製の子育てシミュレーションゲーム。**このファイルは
 | [events.md](docs/design/events.md) | メリット／デメリットイベントの一覧と発生条件 | イベントの発生を実装する（丸山） |
 | [calendar-system.md](docs/design/calendar-system.md) | カレンダー画面、申請期限の管理、予定の種類と状態 | カレンダー機能を実装する（草尾） |
 | [effects.md](docs/design/effects.md) | 効果（Effect）の共通モデル。食事・イベント・制度が共通で使う | **3機能のどれを実装するときも必ず** |
+| [child-status.md](docs/design/child-status.md) | 子どものステータス（成績・趣味・体調・勉強⇔遊び）と子どもカードのUI | 子どもの値やカードを実装する |
+| [traits.md](docs/design/traits.md) | 特性（永続）と状態（一時）。風邪気味・特殊能力の持ち方 | イベントで特性・状態を付ける |
 | [support-systems.md](docs/design/support-systems.md) | 子育て支援制度のカテゴリ、メリットとデメリットの型、制度一覧画面の設計 | 制度データを扱う（草尾・丸山の共通の土台） |
 
 ### 実装メモ — `docs/code/`
@@ -64,6 +66,7 @@ Unity 製の子育てシミュレーションゲーム。**このファイルは
 | ファイル | 内容 |
 |---|---|
 | [handout.md](docs/team/handout.md) | 3機能の実装ハンドアウト（担当・サンプルコード・組み込み手順） |
+| [antigravity-child-status.md](docs/team/antigravity-child-status.md) | 子どもステータス・特性・状態を AI に実装依頼するための段階別プロンプト |
 
 ### 設計判断の履歴 — `docs/decisions/`
 
@@ -71,6 +74,7 @@ Unity 製の子育てシミュレーションゲーム。**このファイルは
 
 - [0001-realtime-time-model.md](docs/decisions/0001-realtime-time-model.md) — ターン制ではなくリアルタイム進行にした理由
 - [0002-support-systems-have-drawbacks.md](docs/decisions/0002-support-systems-have-drawbacks.md) — 支援制度にデメリットを持たせる理由
+- [0007-traits-and-conditions.md](docs/decisions/0007-traits-and-conditions.md) — 特殊能力を「永続の特性」と「一時の状態」に分けた理由
 
 ---
 
@@ -82,12 +86,13 @@ Unity 製の子育てシミュレーションゲーム。**このファイルは
 
 - **Effect の土台を誰が作るか**：[docs/design/effects.md](docs/design/effects.md) の `Effect` / `EffectApplier` はまだ存在しない。名前の確定も含めて先に決めたい。
 - **一時停止の窓口を誰が作るか**：判断画面では時間を止めると決まったが（[docs/decisions/0004-pause-during-decisions.md](docs/decisions/0004-pause-during-decisions.md)）、`PushPause` / `PopPause` がまだ無い。
-- **ストレスの持ち方の整理**：仕様は人ごと（母親・父親・子ども）だが、コードには `GameState.Stress`（世帯にひとつ・旧仕様）が残っており、子ども用の入れ物も無い。→ [docs/code/architecture.md](docs/code/architecture.md) 3章
+- **ストレスの持ち方の整理**：仕様は人ごと（母親・父親・子ども）だが、コードには `GameState.Stress`（世帯にひとつ・旧仕様）が残っており、子ども用の入れ物も無い。設計案は [docs/design/child-status.md](docs/design/child-status.md) 1章（`PersonStatus` にまとめる）。→ [docs/code/architecture.md](docs/code/architecture.md) 3章
+- **特性・状態の土台を誰が作るか**：`StatModifier` / `ModifierOp` と、補正を集める仕組み。`Effect` の土台と同じ場所なので、同じ人が作るのが自然。→ [docs/design/traits.md](docs/design/traits.md)
 
 **仕様として未決定**
 
-- **子どものステータス**：子のストレス／成績／趣味／体調を誰がいつ作るか。
-- **家出までの日数**：子のストレスが限界のまま何日続いたらゲームオーバーか。
+- **子どものステータス**：仕様は [docs/design/child-status.md](docs/design/child-status.md) にまとめた。残るは **テスト・受験の時期**（節目テスト＋本番／毎年／20歳の1回のみ）と、「進路が狭まる」の具体的な判定。
+- **家出までの日数**：子のストレスが限界のまま何日続いたらゲームオーバーか。仮で30日。→ [docs/design/child-status.md](docs/design/child-status.md) 4章
 - **カレンダー機能の仕様**：[docs/design/calendar-system.md](docs/design/calendar-system.md) はまだ合意前のたたき台。締め切りの厳しさ、メモをセーブするか、など。
 - **1ヶ月の長さ**：仕様書は「30日 = 1ヶ月」、実装は実際の暦（28〜31日）。日給の基準だけ30日固定。→ [docs/code/architecture.md](docs/code/architecture.md) 2章
 - **家族構成**：親2人＋子1人？ プレイヤー＋子2人？ → [docs/design/concept.md](docs/design/concept.md) 6章
