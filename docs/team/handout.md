@@ -1,13 +1,26 @@
+---
+title: 機能実装ハンドアウト（3人向け）
+updated: 2026-09-21
+status: 運用中
+related: [docs/code/architecture.md]
+---
+
+> 📌 このハンドアウトは「まず1機能を動かす」ための最短手順です。
+> 土台の正確な API・時間の流れ・未実装の一覧は [../code/architecture.md](../code/architecture.md) を参照してください。
+> ハンドアウト中の `GameHUD` は現在 `MainTestHUD` ほかに分かれています。また親のストレスは `ParentStatus` 側にも存在するため、どちらを使うかは実装前に確認してください。
+
 # 子育てゲーム 機能実装ハンドアウト（3人向け）
 
 土台（GameState / GameClock / GameHUD）はできています。ここから **1人1機能ずつ**、
 GameHUD と同じ「GameState を叩くだけ」のやり方で作ります。
 他人のコードには触らず、`GameState` の窓口だけを使うので、並行作業しても競合しません。
 
-担当（入れ替え可）：
-- 有坂さん … 食事システム
-- 草尾さん … 政府支援システム
-- 丸山さん … 仕事／勉強タスクシステム
+**担当（2026-09-21 時点。これが最新）：**
+- 有坂さん … 食事のランク選択と効果 → [../design/food-system.md](../design/food-system.md)
+- 草尾さん … カレンダー機能（申請期限の管理・メモ） → [../design/calendar-system.md](../design/calendar-system.md)
+- 丸山さん … メリット／デメリットイベントの発生 → [../design/events.md](../design/events.md)
+
+> ⚠ 下の ②③ のサンプルコードは**担当が変わる前のもの**です。`GameState` の叩き方の見本としては今も有効なので残してありますが、作るものは上の表に従ってください。
 
 ---
 
@@ -48,7 +61,9 @@ int now = GameState.I.Money;   // 今の値を直接読む
 
 ---
 
-## ① 有坂さん：食事システム（MealSystem）
+## ① 有坂さん：食事のランク選択と効果（MealSystem）
+
+> グレードは最安値／普通／高級の3段階。効果の数値は [../design/food-system.md](../design/food-system.md) 1章の表を参照（調整前のたたき台）。
 
 **概要**：食事を選ぶとお金とストレスが変わる。
 - いい食事 … ストレスは下がるが、お金が減る
@@ -82,7 +97,9 @@ public class MealSystem : MonoBehaviour
 
 ---
 
-## ② 草尾さん：政府支援システム（SupportSystem）
+## ② 政府支援システム（SupportSystem）※旧・草尾さん担当
+
+> 現在の草尾さんの担当は**カレンダー機能**（[../design/calendar-system.md](../design/calendar-system.md)）です。以下は `GameState` の呼び出し方の見本として残しています。
 
 **概要**：社会制度を使うと、お金が少し動く代わりにストレスが下がったり支援金が出る。
 - 児童手当 … 支援金が入り、少し安心（ストレス減）
@@ -117,7 +134,9 @@ public class SupportSystem : MonoBehaviour
 
 ---
 
-## ③ 丸山さん：仕事／勉強タスクシステム（TaskSystem）
+## ③ 仕事／勉強タスクシステム（TaskSystem）※旧・丸山さん担当
+
+> 現在の丸山さんの担当は**メリット／デメリットイベントの発生**（[../design/events.md](../design/events.md)）です。以下は `GameState` を読んで判定する書き方の見本として残しています。
 
 **概要**：仕事や勉強のタスクに挑戦する。**ストレスが高いほど失敗しやすい**。
 - 成功 … お金が入る（＋少しストレス）
