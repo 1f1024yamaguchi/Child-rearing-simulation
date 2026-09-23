@@ -1,6 +1,6 @@
 ---
 title: Antigravity 用プロンプト（子どもステータス・特性・状態）
-updated: 2026-09-21
+updated: 2026-09-23
 status: 運用中
 related: [docs/design/child-status.md, docs/design/traits.md, docs/design/effects.md]
 ---
@@ -17,6 +17,7 @@ related: [docs/design/child-status.md, docs/design/traits.md, docs/design/effect
 |---|---|---|
 | ① | `PersonStatus` を作り、`ParentStatus` を移行 | 見た目は何も変わらない（土台の入れ替え） |
 | ② | `ChildStatus` ＋ 毎日の成長計算 ＋ 家出判定 | 子どもの値が時間とともに動く（UIはまだ無い） |
+| ②-b | 段階②のレビュー指摘の修正 | ③④がそのまま乗る状態になる |
 | ③ | 特性（Trait）・状態（Condition）と補正計算 | Inspector で特性を付けると効果が出る |
 | ④ | UI スクリプト | 子どもカードが表示される（配置は人間が行う） |
 
@@ -181,6 +182,55 @@ Assets/Kusao/ / シーンファイル
 - GameManager にどのコンポーネントを足せばよいか（ChildStatus を付ける
   GameObject、ChildGrowthSystem、RunawayWatcher）を報告に書くこと。
   シーンへの配置は人間が行う。
+```
+
+---
+
+## 段階②-b：レビュー指摘の修正
+
+> 段階②の実装をレビューして見つかった4点を直す。
+> いずれも仕様書に書き漏れていたもので、child-status.md に追記済み。
+> ③に入る前にここを直すと、③④がそのまま乗る。
+
+```
+docs/design/child-status.md をもう一度読んでください（追記があります）。
+すでにある実装を修正するタスクです。新しいファイルは作りません。
+
+【修正1】家出を一度きりにする
+対象：Assets/Yamaguchi/Scripts/Core/RunawayWatcher.cs
+仕様：docs/design/child-status.md 4章「家出は一度きり」
+- 家出したらフラグを立て、以降は日が進んでも判定を行わない
+- OnRunaway は必ず1回だけ発火させる
+- フラグを外から読めるよう HasRunAway のようなプロパティを公開する
+- 現状は GameClock を止めているので結果的に1回だが、
+  後から一時停止やイベントが入ると二重で発火するため、フラグで明示的に止める
+
+【修正2】値が変わらないときは変更通知を出さない
+対象：PersonStatus.cs の AddStress / SetStress、
+      ChildStatus.cs の AddGrade / AddHealth
+仕様：docs/design/child-status.md 2章「通知は『表示が変わるときだけ』出す」
+- 変更前の丸めた整数と変更後の丸めた整数を比べ、違うときだけ Invoke する
+- 内部の float はこれまでどおり毎日更新する（累積を落とさない）
+- AddHobbyExp と SetStudyPlayBalance は現状のままでよい
+
+【修正3】合格ラインの判定を表示と揃える
+対象：ChildStatus.cs の IsAbovePassLine
+仕様：docs/design/child-status.md 5章
+- 内部の float ではなく、丸めた整数（Grade）で比べる
+- 成績 59.6 のときに「60%」と表示しながら「不足」と出る状態をなくす
+
+【修正4】Parents / Members が毎回リストを作らないようにする
+対象：Household.cs
+仕様：docs/design/child-status.md 1章
+- いまはプロパティを呼ぶたびに new List している
+- yield return で返すか、内部でリストを使い回す形にする
+- 毎日全員をなめる処理（③の ConditionSystem）から呼ばれるため
+
+【確認】
+- カードに表示する値がこれまでと変わらないこと（修正2は通知の回数を減らすだけで、
+  値そのものは変えない）
+- 家出のログが1回しか出ないこと
+- コンパイルが通ること
 ```
 
 ---

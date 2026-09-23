@@ -3,14 +3,17 @@ using UnityEngine;
 
 public enum JobRank { 平社員 = 0, 主任, 係長, 課長, 部長 }
 
-public class ParentStatus : MonoBehaviour
+/// 親（母親・父親）固有のステータス。
+/// 表示名・ストレスの共通部分は PersonStatus に持ち、
+/// 役職・月給・ワークライフバランス関連はここで管理する。
+public class ParentStatus : PersonStatus
 {
-    [Header("この親の設定")]
-    [SerializeField] private string displayName = "母親";
+    [Header("役職・給料")]
     [SerializeField] private JobRank rank = JobRank.平社員;
     [SerializeField] private int baseSalary = 200000;          // 平社員の基本給
+
+    [Header("ワークライフバランス")]
     [Range(0f, 1f)][SerializeField] private float workLifeBalance = 0.5f;
-    [SerializeField] private float stress = 30;
 
     private float pendingWage;                // まだ受け取っていない積立給料
 
@@ -21,11 +24,8 @@ public class ParentStatus : MonoBehaviour
     public event Action<int> OnDailyWageChanged;        // 日給（バランスを動かすたび）
     public event Action<float> OnPendingWageChanged;    // 積立給与
     public event Action<float> OnBalanceChanged;
-    public event Action<int> OnStressChanged;
 
-    public string DisplayName => displayName;
     public float WorkLifeBalance => workLifeBalance;
-    public int Stress => Mathf.RoundToInt(stress);
 
     public const int WageDaysPerMonth = 30;   // 日給の計算基準
 
@@ -39,9 +39,17 @@ public class ParentStatus : MonoBehaviour
         }
     }
 
-    /// 今日の働き方で決まる日給。
-    public int DailyWage =>
-        Mathf.RoundToInt(MonthlySalary / (float)WageDaysPerMonth * BalanceMultiplier(workLifeBalance));
+    /// 今日の働き方で決まる日給。Money 補正（特性・状態）を最後に掛ける。
+    /// traits.md 3章：Money は DailyWage の計算の最後に適用。
+    public int DailyWage
+    {
+        get
+        {
+            float base_ = MonthlySalary / (float)WageDaysPerMonth * BalanceMultiplier(workLifeBalance);
+            var (addSum, mulSum) = CollectModifier(EffectKind.Money);
+            return Mathf.RoundToInt((base_ + addSum) * (1f + mulSum));
+        }
+    }
 
     public float PendingWage => pendingWage;
 
@@ -61,12 +69,6 @@ public class ParentStatus : MonoBehaviour
         workLifeBalance = Mathf.Clamp01(value);
         OnBalanceChanged?.Invoke(workLifeBalance);
         OnDailyWageChanged?.Invoke(DailyWage);     // バランスが変わると日給が変わる
-    }
-
-    public void AddStress(float delta)
-    {
-        stress = Mathf.Clamp(stress + delta, 0, 100);
-        OnStressChanged?.Invoke(Stress);
     }
 
     /// 1日ぶん働いた分を積み立てる。DayTicker.OnDayPassed から呼ぶ。
