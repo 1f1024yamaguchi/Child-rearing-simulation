@@ -125,6 +125,8 @@ private void UpdateAge(float ageDays)
 
     // ---------------- ボタンの動作（今は仮：ログ出力／パネル開閉） ----------------
 
+    private CalendarUI calendarUI;
+
     private void ToggleStatus()
     {
         if (statusPanel == null) return;
@@ -134,7 +136,13 @@ private void UpdateAge(float ageDays)
     }
 
     private void OnSupport()  { Debug.Log("[HUD] サポート を押した（制度一覧を開く予定）"); }
-    private void OnCalendar() { Debug.Log("[HUD] カレンダー を押した"); }
+    
+    private void OnCalendar() 
+    { 
+        Debug.Log("[HUD] カレンダー を押した");
+        calendarUI = CalendarUI.ShowCalendar();
+    }
+
     private void OnSave()     { Debug.Log("[HUD] セーブ を押した"); }
     private void OnSettings() { Debug.Log("[HUD] 設定 を押した"); }
 
@@ -351,6 +359,7 @@ private void BindExisting(Transform root)
 
         WireButton(root, "Btn_サポート", OnSupport);
         WireButton(root, "Btn_カレンダー", OnCalendar);
+        WireButton(root, "calendar", OnCalendar);
         WireButton(root, "Btn_セーブ", OnSave);
         WireButton(root, "Btn_設定", OnSettings);
     }

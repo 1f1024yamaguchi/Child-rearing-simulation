@@ -47,6 +47,24 @@ public class GameDate : MonoBehaviour
         return year +"歳" + month + "月" + day + "日";
     }
 
+    /// <summary>指定した月（1〜12）の日数を取得する</summary>
+    public static int DaysInMonth(int month)
+    {
+        if (month < 1 || month > 12) return 31;
+        return MonthDays[month - 1];
+    }
+
+    /// <summary>歳・月・日 から通算日数（ageDays）を取得する</summary>
+    public static int ToAgeDays(int year, int month, int day)
+    {
+        int total = year * DaysPerYear;
+        for (int i = 0; i < month - 1 && i < MonthDays.Length; i++)
+        {
+            total += MonthDays[i];
+        }
+        return total + (day - 1);
+    }
+
 
 
     

@@ -1,7 +1,7 @@
 ---
 title: カレンダー機能
 updated: 2026-09-23
-status: 設計中（たたき台・要合意）
+status: 実装完了 (UI・時間停止連動)
 related: [docs/design/support-systems.md, docs/design/events.md, docs/code/architecture.md, docs/code/ui-main-test-hud.md]
 ---
 
