@@ -1,7 +1,7 @@
 ---
 title: カレンダー機能
 updated: 2026-09-23
-status: 設計中（主要な仕様は決定済み）
+status: 実装中（画面・時間停止は実装済み／主要な仕様は決定済み）
 related: [docs/design/support-systems.md, docs/design/events.md, docs/code/architecture.md, docs/code/ui-main-test-hud.md]
 ---
 
