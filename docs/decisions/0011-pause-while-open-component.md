@@ -1,10 +1,12 @@
 ---
 title: 時間を止めるのは「画面が表示されている間」とし、画面に PauseWhileOpen を付けるだけにする
-updated: 2026-09-23
-status: 採用
+updated: 2026-09-25
+status: 廃止
 ---
 
 # 時間を止めるのは「画面が表示されている間」とし、画面に PauseWhileOpen を付けるだけにする
+
+> ⚠ **廃止（2026-09-25）。** 時間停止は `GameClock.PushPause()` / `PopPause()` で実装され、`CalendarUI` の `OnEnable` / `OnDisable` から呼ぶ形なら閉じ方による呼び忘れも起きないため、実装どおりに確定した。現在有効なのは [0004-pause-during-decisions.md](0004-pause-during-decisions.md)。
 
 > [0004-pause-during-decisions.md](0004-pause-during-decisions.md) の**実装方法（`PushPause` / `PopPause`）だけ**を置き換えるもの。「判断画面を開いている間は時間を止める」という 0004 の決定そのものは変わらない。
 

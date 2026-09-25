@@ -1,6 +1,6 @@
 ---
 title: 設計判断の履歴（ADR）
-updated: 2026-09-23
+updated: 2026-09-25
 status: 運用中
 ---
 
@@ -21,11 +21,12 @@ status: 運用中
 | [0001](0001-realtime-time-model.md) | ターン制ではなくリアルタイム進行にする | 採用 |
 | [0002](0002-support-systems-have-drawbacks.md) | 支援制度に必ずデメリットを持たせる | 採用 |
 | [0003](0003-pause-while-calendar-open.md) | カレンダーを開いている間はゲームの進行を止める | 廃止（0004に統合） |
-| [0004](0004-pause-during-decisions.md) | プレイヤーが判断する画面を開いている間は時間を止める | 採用（実装方法は0011に置き換え） |
+| [0004](0004-pause-during-decisions.md) | プレイヤーが判断する画面を開いている間は時間を止める | 採用 |
 | [0005](0005-per-person-stress.md) | ストレスは人ごとに持ち、全員に及ぶ効果は一律に適用する | 採用 |
 | [0006](0006-effect-model.md) | 効果は共通の Effect リストで表現する | 採用 |
 | [0007](0007-traits-and-conditions.md) | 特殊能力は「永続の特性」と「一時の状態」に分ける | 採用 |
-| [0008](0008-birth-day-is-monday.md) | 生まれた日（0歳1月1日）を月曜日とし、7日周期で曜日を回す | 採用 |
+| [0008](0008-calendar-ui-implementation.md) | カレンダー画面のUI構成と時間停止連動の実装 | 採用 |
 | [0009](0009-real-calendar-months.md) | 1ヶ月は実際の暦の日数（28〜31日）とし、1年365日で回す | 採用 |
 | [0010](0010-calendar-follows-reality.md) | カレンダーの予定と期限切れは現実の制度と同じ扱いにする | 採用 |
-| [0011](0011-pause-while-open-component.md) | 時間を止めるのは画面が表示されている間とし、画面に PauseWhileOpen を付けるだけにする | 採用 |
+| [0011](0011-pause-while-open-component.md) | 時間を止めるのは画面が表示されている間とし、画面に PauseWhileOpen を付けるだけにする | 廃止（0004 の実装どおり） |
+| [0012](0012-birth-day-is-monday.md) | 生まれた日（0歳1月1日）を月曜日とし、7日周期で曜日を回す | 廃止（曜日は使わない） |

@@ -1,6 +1,6 @@
 ---
 title: カレンダー機能
-updated: 2026-09-23
+updated: 2026-09-25
 status: 実装中（画面・時間停止は実装済み／主要な仕様は決定済み）
 related: [docs/design/support-systems.md, docs/design/events.md, docs/code/architecture.md, docs/code/ui-main-test-hud.md]
 ---
@@ -28,7 +28,9 @@ related: [docs/design/support-systems.md, docs/design/events.md, docs/code/archi
 
 ## 2. 画面の構成（たたき台）
 
-`Main_test` 下部の「カレンダー」ボタンから開く（現在は `Debug.Log` の仮ハンドラ。→ [../code/ui-main-test-hud.md](../code/ui-main-test-hud.md)）。
+`Main_test` 下部の「カレンダー」ボタンから開く（`MainTestHUD.OnCalendar` → `CalendarUI.ShowCalendar()`。実装は `Assets/Kusao/CalendarUI.cs`）。
+
+> **実装済みの画面**（2026-09-23、[../decisions/0008-calendar-ui-implementation.md](../decisions/0008-calendar-ui-implementation.md)）：タイトル「〇歳 〇月」＋前月／翌月ボタン＋右上の✕、42マスの日付グリッド、今日のマスを強調、押した日を選択色にする。**曜日は表示しない**（1日は常に左上のマスから始まる）。2026-09-25、この形で確定。
 
 ```
 カレンダー画面
@@ -41,7 +43,19 @@ related: [docs/design/support-systems.md, docs/design/events.md, docs/code/archi
 ```
 
 - ゲーム内の暦は `GameDate` が持っている（0歳1月1日起点、1年365日、月の日数は実際の暦）。**自前で日付計算をしない**こと。→ [../code/architecture.md](../code/architecture.md) 2章
-- **カレンダーを開いている間はゲーム内時間を止める**（決定済み）。`CalendarPanel` に `PauseWhileOpen` を付けて、`SetActive(true/false)` で開閉するだけ（8.2）。→ [../decisions/0011-pause-while-open-component.md](../decisions/0011-pause-while-open-component.md)
+- **カレンダーを開いている間はゲーム内時間を止める**（実装済み）。`CalendarUI` の `OnEnable` / `OnDisable` で `GameClock.PushPause()` / `PopPause()` を呼んでいる（8.2）。→ [../decisions/0004-pause-during-decisions.md](../decisions/0004-pause-during-decisions.md)
+
+### 2.1 日付を押してメモを付ける
+
+**カレンダーの日付マスを押すと、その日にメモを付けられる**（2026-09-25 決定）。
+
+- 当月の日付マスを押すと、その日のメモ入力欄が開く。`CalendarUI` にある `OnDaySelected(通算日数)` イベントを使う（押した日は選択色になるところまで実装済み）。
+- 入力して確定すると、その日の通算日数と一緒に保存する。**保存と同時にオートセーブ**（8.3）。
+- 0歳1月〜19歳12月のどの日にも付けられる（過去の日・先の日も可）。前月・翌月のグレーのマスは押せない（実装どおり）。
+- メモがある日は、マスに印を付けて分かるようにする。【たたき台】印の形は画面で見て決める。
+- 1日に付けられるメモは1つ。中身を空にして確定したら削除。【たたき台】
+- メモは効果を持たない（3章）。
+- メモを書いている間もカレンダーは開いたままなので、時間は止まったまま。
 
 ---
 
@@ -133,6 +147,8 @@ public class CalendarEntry
 
 ## 6. 画面の作り方（Qiita 記事の方式で作る）
 
+> ⚠ **実装はこの章の手順とは一部違う形で完成している**（`Assets/Kusao/CalendarUI.cs`）。UI はスクリプトが自動で組み立てる形、**曜日は使わない**（1日は常に左上から）、時間停止は `PushPause` / `PopPause`。この章は実装前に書いた手順書として残す。**曜日まわり（`BirthDayOfWeek` / `DayOfWeek`・土日の色分け・1日の曜日ぶんずらす処理）は採用しなかった。**
+
 > **月グリッドは、Qiita の記事「[Unity でカレンダーを作る（hire1105）](https://qiita.com/hire1105/items/b23e905bbcc062f70376)」の方式で作ることに決定。**
 > ただし記事は `System.DateTime`（現実の暦）で日付を出しているので、このゲームでは日付計算を **`GameDate` に置き換える**。下の手順とコードはその置き換え済みのもの。
 
@@ -192,7 +208,7 @@ public static int DayOfWeek(int ageDays)
 }
 ```
 
-- ゲーム内の暦には本来「曜日」が無い。記事どおり土日を色分けするために、**生まれた日（0歳1月1日）を月曜日**として 7 日周期で回す（決定済み → [../decisions/0008-birth-day-is-monday.md](../decisions/0008-birth-day-is-monday.md)）。
+- ゲーム内の暦には本来「曜日」が無い。記事どおり土日を色分けするために、**生まれた日（0歳1月1日）を月曜日**として 7 日周期で回す（決定済み → [../decisions/0012-birth-day-is-monday.md](../decisions/0012-birth-day-is-monday.md)）。
   - 例：0歳1月1日＝月曜なので、カレンダーの 0歳1月は日曜の列を 1 マス空けて、月曜の列から 1日が始まる。
   - 1年が 365日（52週＋1日）なので、翌年の1月1日は1つずつ曜日がずれる（1歳1月1日＝火曜）。
 
@@ -293,7 +309,7 @@ public class CalendarView : MonoBehaviour
         GameDate.FromAgeDays(GameState.I.AgeDays, out viewYear, out viewMonth, out day);
         Refresh();
 
-        // 時間を止める処理はここに書かない。CalendarPanel に付けた PauseWhileOpen が、表示中は自動で止める（8.2）
+        // 時間を止める：実装では OnEnable で GameClock.PushPause()、OnDisable で PopPause() を呼ぶ（8.2）
     }
 
     private void ShiftMonth(int delta)
@@ -374,54 +390,30 @@ public class CalendarView : MonoBehaviour
 
 ---
 
-## 8. 実装の前に作るもの（担当：草尾）
+## 8. 残りの作業（担当：草尾）
 
-カレンダーの画面を作る前に、次の3つを作る必要がある。どれもまだコードに無い。
+1・2 は実装済み。残りは 3・4。
 
-| # | 作るもの | 場所 | 詳しくは |
+| # | 作るもの | 状態 | 詳しくは |
 |---|---|---|---|
-| 1 | `GameDate` に日付計算の関数を3つ足す | `Assets/Yamaguchi/Scripts/Core/GameDate.cs` | 6.3 |
-| 2 | 時間を止める仕組み（`PauseWhileOpen`） | `Assets/Yamaguchi/Scripts/Core/` ＋ `GameClock` に1行 | [../decisions/0011-pause-while-open-component.md](../decisions/0011-pause-while-open-component.md) |
-| 3 | メモと制度の状態のセーブ | `Assets/Kusao/` ＋ `SaveData` への項目追加 | 5章、この章の 8.3 |
+| 1 | `GameDate` に日付計算の関数を足す（`DaysInMonth` / `ToAgeDays`） | **実装済み** | 8.1 |
+| 2 | 時間を止める仕組み（`PushPause` / `PopPause`） | **実装済み** | 8.2 |
+| 3 | メモと制度の状態のセーブ | 未着手 | 5章、8.3 |
+| 4 | 日付を押してメモを付ける画面 | 未着手（日付を押すと選択されるところまでは実装済み） | 2.1 |
 
-### 8.1 GameDate の関数
+### 8.1 GameDate の関数（実装済み）
 
 - `DaysInMonth(月)` … その月の日数
 - `ToAgeDays(歳, 月, 日)` … 歳・月・日 → 通算日数（`FromAgeDays` の逆）
-- `DayOfWeek(通算日数)` … 曜日（0=日 … 6=土。生まれた日＝月曜）
-- コードは 6.3 にある。`GameDate.cs` は山口さんの Core フォルダにあるので、足したことを伝える。
+- 曜日を出す `DayOfWeek` は、曜日を使わないことになったので作らない。
 
-### 8.2 時間を止める仕組み
+### 8.2 時間を止める仕組み（実装済み）
 
-**画面のゲームオブジェクトが表示されている間は時間を止める**（2026-09-23 決定 → [../decisions/0011-pause-while-open-component.md](../decisions/0011-pause-while-open-component.md)）。
+`GameClock` に `PushPause()` / `PopPause()` が入っていて、`CalendarUI` の `OnEnable` で `PushPause()`、`OnDisable` で `PopPause()` を呼んでいる（2026-09-23 実装、2026-09-25 この形で確定 → [../decisions/0004-pause-during-decisions.md](../decisions/0004-pause-during-decisions.md)）。
 
-```csharp
-// Assets/Yamaguchi/Scripts/Core/PauseWhileOpen.cs
-// 付けたオブジェクトが表示されている間、ゲーム内時間を止める
-public class PauseWhileOpen : MonoBehaviour
-{
-    public static int OpenCount { get; private set; }   // 今開いている画面の数
-    public static bool IsPaused => OpenCount > 0;
-
-    private void OnEnable()  { OpenCount++; }   // SetActive(true) で呼ばれる
-    private void OnDisable() { OpenCount--; }   // SetActive(false)・Destroy で呼ばれる
-
-    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-    private static void ResetCount() { OpenCount = 0; }   // 再生のたびに 0 に戻す
-}
-```
-
-```csharp
-// GameClock.Update() の先頭を変更
-if (!running || PauseWhileOpen.IsPaused) return;
-```
-
-- **使い方**：止めたい画面のルート（`CalendarPanel`）に `PauseWhileOpen` を Add Component して、`SetActive(true/false)` で開閉するだけ。画面側にコードは要らない。
-- ×ボタン／決定ボタン／背景タップのどれで閉じても、非表示になれば Unity が `OnDisable` を呼ぶので、止まったまま戻らない事故が起きない。
-- 画面が重なっても、開いている数を数えているので、全部閉じるまで止まったまま。
-- **その画面はゲーム開始時は非表示にしておく。** 表示したまま始めると最初から時間が止まる。
-- 制度一覧・食事選択・イベントの行動選択も同じコンポーネントを付けるだけで使える。
-- `GameClock.SetRunning(false)` はゲームオーバーで完全に止めるとき専用。画面の開閉には使わない。
+- 表示・非表示のタイミングで呼んでいるので、×ボタンなどどの閉じ方でも必ず解除される。
+- 他の判断画面（制度一覧・食事選択・イベントの行動選択）も、同じように `OnEnable` / `OnDisable` で呼ぶ。
+- 画面を開閉するのに `GameClock.SetRunning` を直接呼ばない（ゲームオーバー専用）。
 
 ### 8.3 メモと制度の状態のセーブ
 

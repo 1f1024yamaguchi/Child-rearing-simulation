@@ -1,6 +1,6 @@
 ---
 title: アーキテクチャ（時間・お金・親ステータス）
-updated: 2026-09-23
+updated: 2026-09-25
 status: 実装済み（一部未実装）
 related: [docs/design/rules-and-stats.md, docs/code/ui-main-test-hud.md]
 ---
@@ -37,8 +37,8 @@ GameClock （実時間 1秒 = ゲーム内 1日）
 
 | クラス | 役割 |
 |---|---|
-| `GameClock` | 実時間 `secondsPerDay`（既定 1秒）ごとに1日進める。`SetRunning(bool)` で一時停止（ゲームオーバー用）。判断画面の一時停止は `PauseWhileOpen`（予定） |
-| `GameDate` | 経過日数 → 歳・月・日 に変換する static ユーティリティ。`FromAgeDays()` / `Format()` |
+| `GameClock` | 実時間 `secondsPerDay`（既定 1秒）ごとに1日進める。`SetRunning(bool)` で一時停止（ゲームオーバー用）。判断画面の一時停止は `PushPause()` / `PopPause()`（停止要求を数える）。`GameClock.I` でアクセス |
+| `GameDate` | 経過日数 ↔ 歳・月・日 を変換する static ユーティリティ。`FromAgeDays()` / `Format()` / `DaysInMonth()` / `ToAgeDays()` |
 | `DayTicker` | `OnDayPassed(int 通算日数)` |
 | `MonthTicker` | `OnMonthChanged(int 歳, int 月)` |
 
@@ -124,7 +124,6 @@ GameClock （実時間 1秒 = ゲーム内 1日）
 - **エンディングの分岐**：20歳で `OnGameOver` が飛ぶだけ。成績／趣味／体調による進路分岐は未実装。
 - **月次の食事選択・イベント抽選**：`MonthTicker.OnMonthChanged` は用意できているので、購読する側を作れば繋がる。
 - **昇進の条件**：`SetRank()` はあるが、誰がいつ呼ぶか（ワーク寄りを続けたら昇進、など）は未実装。
-- **一時停止の仕組み（`PauseWhileOpen`）**：**担当は草尾**（2026-09-23 決定）。判断画面のルートに付けると、表示中は時間が止まるコンポーネント。`GameClock.Update()` に `PauseWhileOpen.IsPaused` のチェックを1行足す。まだ無い。→ [../decisions/0011-pause-while-open-component.md](../decisions/0011-pause-while-open-component.md)
 - **効果（Effect）の共通モデル**：食事・イベント・制度が共通で使う `Effect` / `EffectApplier` がまだ無い。3機能の土台なので、各自が `GameState` を直接叩き始める前に用意したい。→ [../design/effects.md](../design/effects.md)
 - **ストレスの持ち方の整理**：`ParentStatus.stress`（正）と `GameState.Stress`（旧仕様）が並存している。子ども用の入れ物も要る。→ 3章
 

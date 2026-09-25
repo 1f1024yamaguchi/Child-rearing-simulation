@@ -1,10 +1,14 @@
 ---
 title: 生まれた日（0歳1月1日）を月曜日とし、7日周期で曜日を回す
-updated: 2026-09-23
-status: 採用
+updated: 2026-09-25
+status: 廃止
 ---
 
 # 生まれた日（0歳1月1日）を月曜日とし、7日周期で曜日を回す
+
+> ※ 元は `0008` として作成したが、同じ日に別の `0008`（[0008-calendar-ui-implementation.md](0008-calendar-ui-implementation.md)）が作られたため `0012` に付け替えた（2026-09-25）。
+
+> ⚠ **廃止（2026-09-25）。** カレンダーは曜日を表示しない形で実装され（[0008-calendar-ui-implementation.md](0008-calendar-ui-implementation.md)）、その形で確定したため、曜日そのものを使わなくなった。
 
 ## 背景
 カレンダー機能（[../design/calendar-system.md](../design/calendar-system.md) 6章）は、Qiita 記事の方式で 7列×6行のグリッドに日付を並べ、土日を色分けする。

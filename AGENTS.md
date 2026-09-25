@@ -17,7 +17,7 @@ Unity 製の子育てシミュレーションゲーム。**このファイルは
 5. **他のメンバーの担当領域に踏み込まない。** 作業は `Assets/<担当者名>/` の中で完結させ、同じシーンファイルを複数人で同時に編集しない（自分の UI はプレハブ化する）。担当は下の表。
 6. **仕様やコードを変えたら、同じ PR で該当ドキュメントも更新する。** 更新したファイルの frontmatter の `updated` を当日の日付にする。
 7. **設計判断をしたら `docs/decisions/` に 1 ファイル追加する。**（テンプレート：`docs/decisions/_template.md`）
-8. **判断画面を作るときは時間を止める。** 画面のルートに `PauseWhileOpen` を付けて `SetActive(true/false)` で開閉するだけ。`GameClock.SetRunning` は画面の開閉に使わない。→ [docs/decisions/0011-pause-while-open-component.md](docs/decisions/0011-pause-while-open-component.md)
+8. **判断画面を作るときは時間を止める。** 画面の `OnEnable` で `GameClock.I.PushPause()`、`OnDisable` で `PopPause()` を呼ぶ（`CalendarUI` と同じ形）。`GameClock.SetRunning` は画面の開閉に使わない。→ [docs/decisions/0004-pause-during-decisions.md](docs/decisions/0004-pause-during-decisions.md)
 9. **コーディング規約は `.agents/rules/` を読む。** 特に Unity / TextMeshPro 固有のハマりどころが書いてある。
 10. **「シュミレーション」は誤記。** 文中の表記は「シミュレーション」に統一する（既存の固有名詞はそのまま）。
 
@@ -75,7 +75,7 @@ Unity 製の子育てシミュレーションゲーム。**このファイルは
 - [0001-realtime-time-model.md](docs/decisions/0001-realtime-time-model.md) — ターン制ではなくリアルタイム進行にした理由
 - [0002-support-systems-have-drawbacks.md](docs/decisions/0002-support-systems-have-drawbacks.md) — 支援制度にデメリットを持たせる理由
 - [0007-traits-and-conditions.md](docs/decisions/0007-traits-and-conditions.md) — 特殊能力を「永続の特性」と「一時の状態」に分けた理由
-- [0011-pause-while-open-component.md](docs/decisions/0011-pause-while-open-component.md) — 判断画面で時間を止める方法（`PauseWhileOpen` を付けるだけ）
+- [0004-pause-during-decisions.md](docs/decisions/0004-pause-during-decisions.md) — 判断画面で時間を止める方法（`OnEnable` / `OnDisable` で `PushPause` / `PopPause`）
 
 ---
 
@@ -86,7 +86,6 @@ Unity 製の子育てシミュレーションゲーム。**このファイルは
 **まず土台側で決める・作るもの（3人が実装に入る前に）**
 
 - **Effect の土台を誰が作るか**：[docs/design/effects.md](docs/design/effects.md) の `Effect` / `EffectApplier` はまだ存在しない。名前の確定も含めて先に決めたい。
-- **一時停止の仕組み**：**草尾が作る**（2026-09-23 決定）。画面に付ける `PauseWhileOpen` と、`GameClock` への1行。まだ無い。→ [docs/decisions/0011-pause-while-open-component.md](docs/decisions/0011-pause-while-open-component.md)
 - **ストレスの持ち方の整理**：仕様は人ごと（母親・父親・子ども）だが、コードには `GameState.Stress`（世帯にひとつ・旧仕様）が残っており、子ども用の入れ物も無い。設計案は [docs/design/child-status.md](docs/design/child-status.md) 1章（`PersonStatus` にまとめる）。→ [docs/code/architecture.md](docs/code/architecture.md) 3章
 - **特性・状態の土台を誰が作るか**：`StatModifier` / `ModifierOp` と、補正を集める仕組み。`Effect` の土台と同じ場所なので、同じ人が作るのが自然。→ [docs/design/traits.md](docs/design/traits.md)
 
