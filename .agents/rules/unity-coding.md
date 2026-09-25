@@ -1,6 +1,6 @@
 ---
 title: Unity コーディング規約
-updated: 2026-09-21
+updated: 2026-09-23
 status: 運用中
 ---
 
@@ -23,7 +23,7 @@ status: 運用中
 
 - ゲームの状態は **`GameState.I`（シングルトン）に集約**する。UI スクリプトが独自に値を保持しない。
 - **日次・月次の処理を作るときは、自分で時間を数えない。** `DayTicker.OnDayPassed` / `MonthTicker.OnMonthChanged` を購読する。
-- **プレイヤーが判断する画面を開くときは時間を止める。** `GameClock.SetRunning` を直接呼ばず、停止要求をカウントする共通の窓口（`PushPause` / `PopPause`）をペアで呼ぶ。閉じるルートが複数ある画面は、どのルートでも必ず `PopPause` を通すこと。→ [../../docs/decisions/0004-pause-during-decisions.md](../../docs/decisions/0004-pause-during-decisions.md)
+- **プレイヤーが判断する画面を開くときは時間を止める。** 画面のルートに `PauseWhileOpen` を付けて、`SetActive(true/false)` で開閉するだけ。`GameClock.SetRunning` は画面の開閉に使わない（ゲームオーバー専用）。画面はゲーム開始時に非表示にしておくこと。→ [../../docs/decisions/0011-pause-while-open-component.md](../../docs/decisions/0011-pause-while-open-component.md)
 - `GameState` の値を直接書き換えず、必ず `AddMoney` / `AddStress` / `AddAgeDays` / `SetBalance` などの窓口メソッドを通す。
 - UI は `OnMoneyChanged` などの **イベント購読で更新**する。`Update()` で毎フレーム読みに行かない。
 - 購読したイベントは必ず `OnDisable` / `OnDestroy` で解除する。

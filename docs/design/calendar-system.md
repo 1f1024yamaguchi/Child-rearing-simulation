@@ -1,13 +1,13 @@
 ---
 title: カレンダー機能
 updated: 2026-09-23
-status: 設計中（たたき台・要合意）
+status: 設計中（主要な仕様は決定済み）
 related: [docs/design/support-systems.md, docs/design/events.md, docs/code/architecture.md, docs/code/ui-main-test-hud.md]
 ---
 
 # カレンダー機能
 
-> **このファイルは合意前のたたき台です。** 他の design ドキュメントと違い、話し合って決まった内容ではなく、担当（草尾）が決めるための出発点として書かれています。確定した項目から順に「たたき台」の断りを外していってください。
+> **主要な仕様は 2026-09-23 に決定済み**（[../decisions/0010-calendar-follows-reality.md](../decisions/0010-calendar-follows-reality.md) ほか）。「たたき台」と書いてある箇所（状態の色、画面の数値など）だけがまだ仮。担当は草尾。
 > 位置づけ：[support-systems.md](support-systems.md) 2.5章で整理した現実のデメリット（**①申請の手間 / ⑦手続きの継続**）を、プレイヤーが操作できる形にしたもの。
 
 ---
@@ -41,38 +41,55 @@ related: [docs/design/support-systems.md, docs/design/events.md, docs/code/archi
 ```
 
 - ゲーム内の暦は `GameDate` が持っている（0歳1月1日起点、1年365日、月の日数は実際の暦）。**自前で日付計算をしない**こと。→ [../code/architecture.md](../code/architecture.md) 2章
-- **カレンダーを開いている間はゲーム内時間を止める**（決定済み）。ただし `SetRunning` を直接呼ばず、停止要求をカウントする共通の窓口（`PushPause` / `PopPause`）を使うこと。→ [../decisions/0004-pause-during-decisions.md](../decisions/0004-pause-during-decisions.md)
+- **カレンダーを開いている間はゲーム内時間を止める**（決定済み）。`CalendarPanel` に `PauseWhileOpen` を付けて、`SetActive(true/false)` で開閉するだけ（8.2）。→ [../decisions/0011-pause-while-open-component.md](../decisions/0011-pause-while-open-component.md)
 
 ---
 
-## 3. カレンダーに載るもの（たたき台）
+## 3. カレンダーに載るもの
 
 | 種類 | 誰が入れる | 例 | 期限を過ぎると |
 |---|---|---|---|
-| 申請期限 | 自動（条件を満たすと出現） | 児童手当の申請、幼保無償化の手続き | その制度を受けられない／受給開始が遅れる |
-| 定期手続き | 自動（受給を始めると毎年出現） | 現況届の提出 | 受給が停止・失効する |
-| 予防接種 | 自動（子の年齢で出現） | 定期接種のスケジュール | 体調イベントの発生率が下がらないまま |
+| 申請期限 | 自動（最初から載っている） | 児童手当の申請、幼保無償化の手続き | その制度を受けられない／受給開始が遅れる |
+| 定期手続き | 自動（受給を始めると毎年出現） | 児童扶養手当の現況届（毎年8月） | 受給が停止・失効する |
+| 予防接種 | 自動（最初から載っている） | 定期接種のスケジュール | 体調イベントの発生率が下がらないまま |
 | 行事・イベント | 自動 | 運動会、学校行事 | 子の趣味・ストレスに影響 |
 | プレイヤーのメモ | 手動 | 「来月は高級食にする」「保育園の見学」 | 何も起きない（自分用の備忘） |
 
-- 自動で入る予定は、制度データ（[support-systems.md](support-systems.md)）側に「いつから／いつまで」を持たせて、カレンダーがそれを読む形にする。
+- 申請できる期間は、**制度を1つ追加するときに Inspector で設定する**（決定済み → [support-systems.md](support-systems.md) 3.5）。
+  - 開始日：歳・月・日（例：0歳1月1日）
+  - 期限：なし／1回だけ（歳・月・日）／毎年（○月○日）
+  - カレンダーは制度データの `StartAgeDays` / `DeadlineAgeDays` / `yearly` を読んで、その日のマスに予定を出す。「毎年」の期限は受給中の間だけ毎年出す。
+- **予定は現実と同じように、先の月の分も最初から見える**（決定済み）。現実でも制度の期限や予防接種の時期は調べれば分かるので、隠さない。まだ条件を満たしていない制度はグレーで載せる。
+- **突然のイベント（[events.md](events.md)）はカレンダーに載せない。** ゲームの驚きはイベントで出す。
 - **手動メモは効果を持たない。** 効果を持たせると「メモしないと損」になり、作業感が出る。
 
 ---
 
-## 4. 状態と締め切りの扱い（たたき台）
+## 4. 状態と締め切りの扱い
 
 [support-systems.md](support-systems.md) 3章の状態表示と揃える。
 
-| 状態 | 色 | 意味 |
+| 状態 | 色（たたき台） | 意味 |
 |---|---|---|
 | 条件未達 | グレー | まだ対象外（例：子が3歳になるまで） |
 | 申請できる | オレンジ | 条件を満たした。**締め切りあり** |
 | 受給中 | 緑 | 申請済みで効果が出ている |
+| 支給停止 | 赤 | 毎年の手続きを逃して止まっている。手続きすれば再開 |
 | 期限切れ | 赤 | 逃した。損をした |
 
-- 締め切りの数日前からセルの色を変える／バッジを出す（何日前かは**未決定**）。
+- **締め切りの10日前から**セルの色を変える／バッジを出す（決定済み）。10 は Inspector で変えられるようにする（`[SerializeField] int warnDaysBefore = 10`）。
+- 期限日の**その日のうちは申請できる**。翌日になったら期限切れ（`DayTicker.OnDayPassed` で判定）。
 - 期限切れになったら、逃したことがプレイヤーに分かるように一度だけ通知する。黙って消さない。
+
+### 期限切れの扱い（現実の制度と同じ・決定済み）
+
+| 期限の種類 | 過ぎるとどうなるか | 現実の例 |
+|---|---|---|
+| 1回だけ | その制度はもう申請できない | 出産育児一時金（出産の翌日から2年で時効） |
+| 受給中は毎月もらう制度 | 受給は**申請した月の翌月分から**。申請が遅れた月の分はさかのぼってもらえない（期限前でも遅いほど損） | 児童手当 |
+| 毎年 | 支給が止まる（支給停止）。後から手続きすれば再開し、止まっていた分も受け取れる。**期限から2年**手続きしないと受給資格がなくなる | 児童扶養手当の現況届 |
+
+- 制度ごとの違いは Inspector で設定する（効果のタイミング、資格を失うまでの年数 → [support-systems.md](support-systems.md) 3.5）。
 
 ---
 
@@ -92,6 +109,22 @@ public class CalendarEntry
 }
 ```
 
+- **プレイヤーのメモはセーブする**（決定済み）。メモを書いたときに自動でセーブする（8.3）。`SaveData` に次を足す（[../code/architecture.md](../code/architecture.md) 5章）。
+
+  ```csharp
+  [System.Serializable]
+  public class MemoSave
+  {
+      public int    ageDays;   // どの日のメモか（通算日数）
+      public string text;
+  }
+
+  // SaveData に追加
+  public List<MemoSave> calendarMemos = new List<MemoSave>();
+  ```
+
+  `JsonUtility` は `List<中身が [Serializable] のクラス>` をそのまま保存できる。
+- 制度の状態（申請済み・受給中・支給停止など）も、セーブしないとロードで消える。`SupportScheme.id` をキーにして同じく `SaveData` に持たせる（制度も草尾の担当なので、メモと一緒に作る → 8.3）。
 - 時間との接続：`MonthTicker.OnMonthChanged` で月表示を更新、`DayTicker.OnDayPassed` で締め切りの判定。**自分で時間を数えない。** → [../code/architecture.md](../code/architecture.md) 1章
 - 作業場所は `Assets/Kusao/`。自分の UI はプレハブ化して、他のメンバーとシーンが衝突しないようにする。
 - 予定リストの表示は、既存の `StatusListUI` / `StatusRowUI` と同じ「データ → 行を生成」の形にすると揃う。スクロールの組み方は [../code/ui-scroll-patterns.md](../code/ui-scroll-patterns.md)。
@@ -125,15 +158,18 @@ public class CalendarEntry
 | 前月／翌月ボタンなし | ヘッダーに前月／翌月ボタンを付ける | 2章の画面構成に必要。記事には無いので自分で足す。 |
 | `set_Date` で `Debug.Log` | 選択した日の**通算日数**をイベントで通知 | 5章のデータ（`CalendarEntry.ageDays`）と同じ単位にそろえる。 |
 
-### 6.3 GameDate に足す関数（山口さんと要相談）
+### 6.3 GameDate に足す関数（決定済み）
 
-今の `GameDate` には「歳・月・日 → 通算日数」と「その月の日数」と「曜日」を出す関数が無い。カレンダー側で計算すると「自前で日付計算をしない」に反するので、`GameDate` に足してもらう（担当が山口さんなので相談してから）。
+今の `GameDate` には「歳・月・日 → 通算日数」と「その月の日数」と「曜日」を出す関数が無い。カレンダー側で計算すると「自前で日付計算をしない」に反するので、**`GameDate` に下の3つを追加する**（2026-09-23 決定）。
+
+- **`GameState` ではなく `GameDate` に置く理由**：どれも「日数 ↔ 日付」の変換だけで、ゲームの状態を持たない。`GameDate` は static なので、`GameState.I` がまだ無いタイミング（シーン読み込み直後・エディタ上のテスト）でも呼べる。暦の決まり（月の日数の表）も `GameDate` にしかないので、ここに置けば暦の計算が1か所にまとまる。
+- 1ヶ月は実際の暦の日数（[../decisions/0009-real-calendar-months.md](../decisions/0009-real-calendar-months.md)）。
 
 ```csharp
 // Assets/Yamaguchi/Scripts/Core/GameDate.cs に追加
 
-// 生まれた日（0歳1月1日）の曜日。0=日 … 6=土。【たたき台】
-public const int BirthDayOfWeek = 0;
+// 生まれた日（0歳1月1日）の曜日。0=日 … 6=土。月曜日に決定（2026-09-23）
+public const int BirthDayOfWeek = 1;
 
 // その月の日数（うるう年なし）
 public static int DaysInMonth(int month)
@@ -156,9 +192,15 @@ public static int DayOfWeek(int ageDays)
 }
 ```
 
-- ゲーム内の暦には本来「曜日」が無い。記事どおり土日を色分けするために、**生まれた日を何曜日とするか**だけ決めて 7 日周期で回す（7章の未決定事項）。
+- ゲーム内の暦には本来「曜日」が無い。記事どおり土日を色分けするために、**生まれた日（0歳1月1日）を月曜日**として 7 日周期で回す（決定済み → [../decisions/0008-birth-day-is-monday.md](../decisions/0008-birth-day-is-monday.md)）。
+  - 例：0歳1月1日＝月曜なので、カレンダーの 0歳1月は日曜の列を 1 マス空けて、月曜の列から 1日が始まる。
+  - 1年が 365日（52週＋1日）なので、翌年の1月1日は1つずつ曜日がずれる（1歳1月1日＝火曜）。
 
-### 6.4 Unity での組み立て手順
+### 6.4 見られる範囲
+
+前月／翌月ボタンで **0歳1月〜19歳12月まで全部見られる**（2026-09-23 決定）。20歳ちょうど（7300日）でゲームが終わるので、それより先の月は無い。先の月の予定も最初から全部見える（3章・決定済み）。
+
+### 6.5 Unity での組み立て手順
 
 作業場所は `Assets/Kusao/`。シーンに直接置かず、最後にプレハブ化する（5章）。
 
@@ -188,7 +230,7 @@ public static int DayOfWeek(int ageDays)
 5. **開閉をつなぐ**：`Main_test` 下部の「カレンダー」ボタン（今は `Debug.Log` の仮ハンドラ）で `CalendarPanel.SetActive(true)`、`CloseButton` で `SetActive(false)`。
 6. `CalendarPanel` を `Assets/Kusao/Prefabs/` にプレハブ化する。
 
-### 6.5 スクリプト（たたき台）
+### 6.6 スクリプト（たたき台）
 
 ```csharp
 // Assets/Kusao/CalendarView.cs
@@ -251,7 +293,7 @@ public class CalendarView : MonoBehaviour
         GameDate.FromAgeDays(GameState.I.AgeDays, out viewYear, out viewMonth, out day);
         Refresh();
 
-        // TODO: 時間を止める。PushPause / PopPause ができたら OnEnable / OnDisable で呼ぶ（0004）
+        // 時間を止める処理はここに書かない。CalendarPanel に付けた PauseWhileOpen が、表示中は自動で止める（8.2）
     }
 
     private void ShiftMonth(int delta)
@@ -259,7 +301,8 @@ public class CalendarView : MonoBehaviour
         viewMonth += delta;
         if (viewMonth < 1)  { viewMonth = 12; viewYear--; }
         if (viewMonth > 12) { viewMonth = 1;  viewYear++; }
-        if (viewYear < 0)   { viewYear = 0;   viewMonth = 1; }   // 生まれる前には戻れない
+        if (viewYear < 0)   { viewYear = 0;   viewMonth = 1; }    // 生まれる前には戻れない
+        if (viewYear > 19)  { viewYear = 19;  viewMonth = 12; }   // 20歳（=ゲーム終了）より先は無い
         Refresh();
     }
 
@@ -326,9 +369,70 @@ public class CalendarView : MonoBehaviour
 
 ## 7. 決めないといけないこと
 
-- 締め切りの何日前から警告を出すか。
-- 期限切れをどこまで厳しくするか（完全に受けられない／遅れて受給開始 など）。
-- 自動で入る予定をどこまで最初から見せるか。全部見せると「知っていれば得をする」の驚きが減り、見せなさすぎると理不尽になる。
-- プレイヤーのメモをセーブ対象にするか（現在の `SaveSystem` は4項目しか保存していない。→ [../code/architecture.md](../code/architecture.md) 5章）。
-- 生まれた日（0歳1月1日）を何曜日とするか（`GameDate.BirthDayOfWeek`。6.3）。そもそも土日の色分けが要るか。
-- `GameDate` への関数追加（6.3）を山口さんと合意する。
+- 状態の色（4章）とグリッドのサイズ（6.5）はたたき台。実際に画面で見て決める。
+- それ以外の仕様は決定済み（2026-09-23）。実装の前に作るものは 8章。
+
+---
+
+## 8. 実装の前に作るもの（担当：草尾）
+
+カレンダーの画面を作る前に、次の3つを作る必要がある。どれもまだコードに無い。
+
+| # | 作るもの | 場所 | 詳しくは |
+|---|---|---|---|
+| 1 | `GameDate` に日付計算の関数を3つ足す | `Assets/Yamaguchi/Scripts/Core/GameDate.cs` | 6.3 |
+| 2 | 時間を止める仕組み（`PauseWhileOpen`） | `Assets/Yamaguchi/Scripts/Core/` ＋ `GameClock` に1行 | [../decisions/0011-pause-while-open-component.md](../decisions/0011-pause-while-open-component.md) |
+| 3 | メモと制度の状態のセーブ | `Assets/Kusao/` ＋ `SaveData` への項目追加 | 5章、この章の 8.3 |
+
+### 8.1 GameDate の関数
+
+- `DaysInMonth(月)` … その月の日数
+- `ToAgeDays(歳, 月, 日)` … 歳・月・日 → 通算日数（`FromAgeDays` の逆）
+- `DayOfWeek(通算日数)` … 曜日（0=日 … 6=土。生まれた日＝月曜）
+- コードは 6.3 にある。`GameDate.cs` は山口さんの Core フォルダにあるので、足したことを伝える。
+
+### 8.2 時間を止める仕組み
+
+**画面のゲームオブジェクトが表示されている間は時間を止める**（2026-09-23 決定 → [../decisions/0011-pause-while-open-component.md](../decisions/0011-pause-while-open-component.md)）。
+
+```csharp
+// Assets/Yamaguchi/Scripts/Core/PauseWhileOpen.cs
+// 付けたオブジェクトが表示されている間、ゲーム内時間を止める
+public class PauseWhileOpen : MonoBehaviour
+{
+    public static int OpenCount { get; private set; }   // 今開いている画面の数
+    public static bool IsPaused => OpenCount > 0;
+
+    private void OnEnable()  { OpenCount++; }   // SetActive(true) で呼ばれる
+    private void OnDisable() { OpenCount--; }   // SetActive(false)・Destroy で呼ばれる
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    private static void ResetCount() { OpenCount = 0; }   // 再生のたびに 0 に戻す
+}
+```
+
+```csharp
+// GameClock.Update() の先頭を変更
+if (!running || PauseWhileOpen.IsPaused) return;
+```
+
+- **使い方**：止めたい画面のルート（`CalendarPanel`）に `PauseWhileOpen` を Add Component して、`SetActive(true/false)` で開閉するだけ。画面側にコードは要らない。
+- ×ボタン／決定ボタン／背景タップのどれで閉じても、非表示になれば Unity が `OnDisable` を呼ぶので、止まったまま戻らない事故が起きない。
+- 画面が重なっても、開いている数を数えているので、全部閉じるまで止まったまま。
+- **その画面はゲーム開始時は非表示にしておく。** 表示したまま始めると最初から時間が止まる。
+- 制度一覧・食事選択・イベントの行動選択も同じコンポーネントを付けるだけで使える。
+- `GameClock.SetRunning(false)` はゲームオーバーで完全に止めるとき専用。画面の開閉には使わない。
+
+### 8.3 メモと制度の状態のセーブ
+
+**セーブ機能の本体（ステータス・日時などを保存して、ゲームを続きから遊べるようにする）は山口が作る**（2026-09-23 決定）。草尾が作るのは、カレンダーと制度に関わる部分だけ。
+
+| 担当 | 作るもの |
+|---|---|
+| 山口 | `SaveSystem` の本体。お金・日時・ステータスなどの保存と、「続きから」の読み込み |
+| 草尾 | メモと制度の状態（申請済み・受給中・支給停止など）を保存用の形に変える部分。`SaveData` にその項目を足す |
+
+- **メモはオートセーブ**（2026-09-23 決定）。メモを書いた・直した・消したときに、その場で自動的にセーブする。プレイヤーがセーブボタンを押さなくても消えない。
+- オートセーブでは `SaveSystem.Save()` を呼んで**ゲーム全体を1つのセーブにまとめて保存**する。メモだけ別の場所に保存すると、ロードしたときに「メモは新しいのに日付は古い」というずれが起きるため。
+- 制度の状態は `SupportScheme.id` をキーにして保存する（アセットの中には書かない → [support-systems.md](support-systems.md) 3.5）。
+- 保存する形（5章の `MemoSave` など）を `SaveData` に足すときは、山口さんと項目名を合わせる。

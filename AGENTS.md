@@ -17,7 +17,7 @@ Unity 製の子育てシミュレーションゲーム。**このファイルは
 5. **他のメンバーの担当領域に踏み込まない。** 作業は `Assets/<担当者名>/` の中で完結させ、同じシーンファイルを複数人で同時に編集しない（自分の UI はプレハブ化する）。担当は下の表。
 6. **仕様やコードを変えたら、同じ PR で該当ドキュメントも更新する。** 更新したファイルの frontmatter の `updated` を当日の日付にする。
 7. **設計判断をしたら `docs/decisions/` に 1 ファイル追加する。**（テンプレート：`docs/decisions/_template.md`）
-8. **判断画面を作るときは時間を止める。** `GameClock.SetRunning` を直接呼ばず、共通の窓口を使う。→ [docs/decisions/0004-pause-during-decisions.md](docs/decisions/0004-pause-during-decisions.md)
+8. **判断画面を作るときは時間を止める。** 画面のルートに `PauseWhileOpen` を付けて `SetActive(true/false)` で開閉するだけ。`GameClock.SetRunning` は画面の開閉に使わない。→ [docs/decisions/0011-pause-while-open-component.md](docs/decisions/0011-pause-while-open-component.md)
 9. **コーディング規約は `.agents/rules/` を読む。** 特に Unity / TextMeshPro 固有のハマりどころが書いてある。
 10. **「シュミレーション」は誤記。** 文中の表記は「シミュレーション」に統一する（既存の固有名詞はそのまま）。
 
@@ -28,9 +28,9 @@ Unity 製の子育てシミュレーションゲーム。**このファイルは
 | 担当 | 機能 | 作業フォルダ | 仕様書 |
 |---|---|---|---|
 | 有坂 | 食事のランク選択と効果 | `Assets/Arisaka/` | [food-system.md](docs/design/food-system.md) |
-| 草尾 | カレンダー機能（申請期限の管理・メモ） | `Assets/Kusao/` | [calendar-system.md](docs/design/calendar-system.md) |
+| 草尾 | カレンダー機能（申請期限の管理・メモ）。実装前に作るもの：`GameDate` の関数3つ／時間を止める仕組み／メモと制度の状態のセーブ（→ calendar-system.md 8章） | `Assets/Kusao/` | [calendar-system.md](docs/design/calendar-system.md) |
 | 丸山 | メリット／デメリットイベントの発生 | `Assets/Maruyama/` | [events.md](docs/design/events.md) |
-| 山口 | 共通の土台（Core）・HUD | `Assets/Yamaguchi/` | [architecture.md](docs/code/architecture.md) |
+| 山口 | 共通の土台（Core）・HUD・セーブ機能（続きから遊べるようにする） | `Assets/Yamaguchi/` | [architecture.md](docs/code/architecture.md) |
 
 実装の進め方は [docs/team/handout.md](docs/team/handout.md)。
 ※ ハンドアウトのサンプルコードは担当が変わる前のもの。担当の対応はこの表が正。
@@ -75,6 +75,7 @@ Unity 製の子育てシミュレーションゲーム。**このファイルは
 - [0001-realtime-time-model.md](docs/decisions/0001-realtime-time-model.md) — ターン制ではなくリアルタイム進行にした理由
 - [0002-support-systems-have-drawbacks.md](docs/decisions/0002-support-systems-have-drawbacks.md) — 支援制度にデメリットを持たせる理由
 - [0007-traits-and-conditions.md](docs/decisions/0007-traits-and-conditions.md) — 特殊能力を「永続の特性」と「一時の状態」に分けた理由
+- [0011-pause-while-open-component.md](docs/decisions/0011-pause-while-open-component.md) — 判断画面で時間を止める方法（`PauseWhileOpen` を付けるだけ）
 
 ---
 
@@ -85,7 +86,7 @@ Unity 製の子育てシミュレーションゲーム。**このファイルは
 **まず土台側で決める・作るもの（3人が実装に入る前に）**
 
 - **Effect の土台を誰が作るか**：[docs/design/effects.md](docs/design/effects.md) の `Effect` / `EffectApplier` はまだ存在しない。名前の確定も含めて先に決めたい。
-- **一時停止の窓口を誰が作るか**：判断画面では時間を止めると決まったが（[docs/decisions/0004-pause-during-decisions.md](docs/decisions/0004-pause-during-decisions.md)）、`PushPause` / `PopPause` がまだ無い。
+- **一時停止の仕組み**：**草尾が作る**（2026-09-23 決定）。画面に付ける `PauseWhileOpen` と、`GameClock` への1行。まだ無い。→ [docs/decisions/0011-pause-while-open-component.md](docs/decisions/0011-pause-while-open-component.md)
 - **ストレスの持ち方の整理**：仕様は人ごと（母親・父親・子ども）だが、コードには `GameState.Stress`（世帯にひとつ・旧仕様）が残っており、子ども用の入れ物も無い。設計案は [docs/design/child-status.md](docs/design/child-status.md) 1章（`PersonStatus` にまとめる）。→ [docs/code/architecture.md](docs/code/architecture.md) 3章
 - **特性・状態の土台を誰が作るか**：`StatModifier` / `ModifierOp` と、補正を集める仕組み。`Effect` の土台と同じ場所なので、同じ人が作るのが自然。→ [docs/design/traits.md](docs/design/traits.md)
 
@@ -93,7 +94,6 @@ Unity 製の子育てシミュレーションゲーム。**このファイルは
 
 - **子どものステータス**：仕様は [docs/design/child-status.md](docs/design/child-status.md) にまとめた。残るは **テスト・受験の時期**（節目テスト＋本番／毎年／20歳の1回のみ）と、「進路が狭まる」の具体的な判定。
 - **家出までの日数**：子のストレスが限界のまま何日続いたらゲームオーバーか。仮で30日。→ [docs/design/child-status.md](docs/design/child-status.md) 4章
-- **カレンダー機能の仕様**：[docs/design/calendar-system.md](docs/design/calendar-system.md) はまだ合意前のたたき台。締め切りの厳しさ、メモをセーブするか、など。
-- **1ヶ月の長さ**：仕様書は「30日 = 1ヶ月」、実装は実際の暦（28〜31日）。日給の基準だけ30日固定。→ [docs/code/architecture.md](docs/code/architecture.md) 2章
+- **カレンダー機能の仕様**：主要な仕様は決定済み（[docs/decisions/0010-calendar-follows-reality.md](docs/decisions/0010-calendar-follows-reality.md)）。残りは状態の色と画面サイズ（たたき台）だけ。→ [docs/design/calendar-system.md](docs/design/calendar-system.md) 7章
 - **家族構成**：親2人＋子1人？ プレイヤー＋子2人？ → [docs/design/concept.md](docs/design/concept.md) 6章
 - **テンポ**：20歳到達まで約2時間。判断画面で止まるぶんさらに長くなる。速度設定でどう調整するか。

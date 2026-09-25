@@ -1,6 +1,6 @@
 ---
 title: 基本ルールとステータス設計
-updated: 2026-09-21
+updated: 2026-09-23
 status: 設計中
 related: [docs/design/concept.md, docs/design/food-system.md, docs/code/architecture.md]
 ---
@@ -17,11 +17,11 @@ related: [docs/design/concept.md, docs/design/food-system.md, docs/code/architec
 
 ### 時間の流れ（リアルタイム進行）
 - **1秒 = ゲーム内1日**でリアルタイムに進む（ターン制ではない）。→ 経緯は [../decisions/0001-realtime-time-model.md](../decisions/0001-realtime-time-model.md)
-- **30日 = 1ヶ月**。**7300日 = 20歳**でゴール（実装の `GoalAgeDays` 既定値 7300 と一致）。
+- **1ヶ月は実際の暦の日数（28〜31日、うるう年なし）、1年 = 365日**。**7300日 = 20歳**でゴール（実装の `GoalAgeDays` 既定値 7300 と一致）。→ [../decisions/0009-real-calendar-months.md](../decisions/0009-real-calendar-months.md)
 - 画面下部の年齢バーは `AgeDays ÷ GoalAgeDays` の進捗。満タン＝20歳＝エンディング。
 - 意思決定のタイミング：
   - **バランススライダー（親＝ライフ⇔ワーク／子＝勉強⇔遊び）は、いつでもリアルタイムに調整**できる。
-  - **食事の選択・給料の精算・月初イベントは、1ヶ月ごと（＝30日ごと＝実時間30秒ごと）に発生**。
+  - **食事の選択・給料の精算・月初イベントは、月が変わるたび（28〜31日ごと＝実時間28〜31秒ごと）に発生**。
 - ※ 1日＝1秒だと20歳到達まで7300秒（約2時間）。テンポは速度設定でチューニングの余地あり（**未決定**）。
 
 ### ゴール：20歳でのエンディング（＝「何になったか」）
@@ -59,7 +59,7 @@ related: [docs/design/concept.md, docs/design/food-system.md, docs/code/architec
 - お金がマイナス継続 → 生活が回らず、子のステータスが下がりやすくなる。
 - 子の体調が長期低下 → bad エンディングに寄る。
 
-### 1ヶ月ごとの処理（30日 = 実時間30秒ごと）
+### 1ヶ月ごとの処理（月が変わるたび = 実時間28〜31秒ごと）
 リアルタイムで時間が進む一方、以下は「月が変わったタイミング」でまとめて処理する：
 
 1. **月初イベント**：メリット/デメリットが確率で発生（[events.md](events.md) 参照）。

@@ -1,8 +1,8 @@
 ---
 title: 子育て支援制度とボタン設計
-updated: 2026-09-03
+updated: 2026-09-23
 status: 設計中
-related: [docs/design/events.md, docs/code/ui-scroll-patterns.md]
+related: [docs/design/events.md, docs/code/ui-scroll-patterns.md, docs/design/calendar-system.md]
 ---
 
 # 子育て支援制度とボタン設計
@@ -35,7 +35,7 @@ related: [docs/design/events.md, docs/code/ui-scroll-patterns.md]
 ### 政府（国）
 | 制度 | メリット | 現実のデメリット・注意 |
 |---|---|---|
-| 児童手当 | 高校生年代まで毎月／第3子以降 月3万 | 申請しないと0円・現況届などの手続き継続が必要 |
+| 児童手当 | 高校生年代まで毎月／第3子以降 月3万 | 申請しないと0円・申請が遅れた月の分はさかのぼってもらえない（現況届は2022年6月から原則不要） |
 | 出産育児一時金 | 出産で原則50万円 | 出産費用がこれを超えると差額は自己負担 |
 | 出産・子育て応援給付金 | 計10万円相当 | 面談・申請が前提 |
 | 幼児教育・保育の無償化 | 3〜5歳の保育料が無料 | 給食費・延長保育・行事費は対象外で自己負担。そもそも入園できないと無意味（待機児童） |
@@ -101,6 +101,125 @@ related: [docs/design/events.md, docs/code/ui-scroll-patterns.md]
   - 条件未達（グレー）：まだ対象外（例：子が3歳で無償化 など）
 - 制度カードの中身：アイコン／名前／ひとこと説明／メリットチップ／デメリットチップ／状態バッジ（＋申請ボタン）。
 - 上部にタブ（政府・自治体・会社・アプリ）を置き、切り替えられると1画面で完結。
+- 名前・説明・効果・申請できる期間（開始日と期限）はカードごとに Inspector で設定する（3.5）。
+
+---
+
+## 3.5 制度データの設定（制度を1つ追加するとき）
+
+**制度（カード1枚）の中身は、すべて Inspector で設定する**（2026-09-23 決定）。名前・説明・アイコン・メリット／デメリット・効果・申請できる期間を、コードを書かずに入れられるようにする。カレンダー（[calendar-system.md](calendar-system.md)）は、この「申請できる期間」を読んで予定を出す。
+
+### 申請できる期間
+
+日付はすべてゲーム内の暦（`GameDate`：0歳1月1日起点、1ヶ月は実際の暦の日数）。「年」は子どもの**歳**のこと。
+
+| 項目 | 入れ方 | 例 |
+|---|---|---|
+| 開始日 | 歳・月・日（必須） | 0歳 1月 1日 ＝ 生まれた日から申請できる |
+| 期限の種類 | なし／1回だけ／毎年 から選ぶ | |
+| 期限（1回だけ） | 歳・月・日 | 0歳 4月 30日 ＝ この日まで申請できる |
+| 期限（毎年） | 毎年 ○月 ○日 | 毎年 8月 31日 ＝ 受給中は毎年この日までに更新の手続き |
+
+- 入力できる範囲：歳 0〜19、月 1〜12、日 1〜その月の日数。範囲外は Inspector で自動的に直す（下の `OnValidate`）。
+- 期限日の**その日のうちは申請できる**。翌日になったら期限切れ（`DayTicker.OnDayPassed` で判定）。
+- 「毎年」の期限は**受給中の間だけ**カレンダーに出る。期限を過ぎると支給停止、後から手続きすれば再開、`lapseYears`（既定2年）手続きしないと受給資格を失う（現実の児童扶養手当と同じ・決定済み）。
+
+### データの形（たたき台）
+
+制度データは ScriptableObject にして、**制度1つ ＝ アセット1つ**で追加する（Project ウィンドウで右クリック → Create → 子育て → 支援制度）。
+
+```csharp
+// 歳・月・日を Inspector で入力するための入れ物
+[System.Serializable]
+public struct GameDay
+{
+    [Min(0)]       public int year;    // 歳（0〜19）
+    [Range(1, 12)] public int month;
+    [Range(1, 31)] public int day;
+
+    public int ToAgeDays() => GameDate.ToAgeDays(year, month, day);   // → 通算日数
+}
+
+// 「毎年 ○月○日」用
+[System.Serializable]
+public struct MonthDay
+{
+    [Range(1, 12)] public int month;
+    [Range(1, 31)] public int day;
+}
+
+public enum DeadlineType { None, Once, Yearly }   // なし／1回だけ／毎年
+
+public enum EffectTiming
+{
+    OnApply,   // 申請したとき1回（例：出産育児一時金）
+    Monthly,   // 受給中は毎月。申請した月の翌月分から（例：児童手当）
+}
+
+[CreateAssetMenu(menuName = "子育て/支援制度")]
+public class SupportScheme : ScriptableObject
+{
+    [Header("表示")]
+    public string id;                        // 例 "child_allowance"（セーブ用。後から変えない）
+    public string title;                     // 例 "児童手当"
+    [TextArea] public string description;    // 例 "高校生年代まで毎月もらえる"
+    public Sprite icon;
+    public List<string> merits;              // 緑のチップ
+    public List<string> demerits;            // 赤のチップ
+
+    [Header("効果")]
+    public EffectTiming effectTiming = EffectTiming.OnApply;   // 申請したとき1回／受給中は毎月
+    public List<Effect> effects;             // effects.md の共通の形。Inspector で行を足していける
+
+    [Header("申請できる期間")]
+    public GameDay      start    = new GameDay  { year = 0, month = 1, day = 1 };
+    public DeadlineType deadlineType = DeadlineType.None;
+    public GameDay      deadline = new GameDay  { year = 0, month = 1, day = 1 };  // Once のとき
+    public MonthDay     yearly   = new MonthDay { month = 8, day = 31 };           // Yearly のとき
+    [Min(1)] public int lapseYears = 2;   // Yearly：期限から何年手続きしないと受給資格を失うか
+
+    public int StartAgeDays    => start.ToAgeDays();
+    public int DeadlineAgeDays => deadline.ToAgeDays();
+
+    // 入力ミスを自動で直す（2月30日 → 2月28日 など）
+    private void OnValidate()
+    {
+        start    = Fix(start);
+        deadline = Fix(deadline);
+        yearly.month = Mathf.Clamp(yearly.month, 1, 12);
+        yearly.day   = Mathf.Clamp(yearly.day, 1, GameDate.DaysInMonth(yearly.month));
+    }
+
+    private static GameDay Fix(GameDay d)
+    {
+        d.year  = Mathf.Clamp(d.year, 0, 19);
+        d.month = Mathf.Clamp(d.month, 1, 12);
+        d.day   = Mathf.Clamp(d.day, 1, GameDate.DaysInMonth(d.month));
+        return d;
+    }
+}
+```
+
+- `GameDate.ToAgeDays` / `DaysInMonth` は [calendar-system.md](calendar-system.md) 6.3 で `GameDate` に追加するもの。
+- `Effect` は [effects.md](effects.md) で `[Serializable]` にしてあるので、`List<Effect>` はそのまま Inspector に出る（種類・対象・量・期間をプルダウンと数値で入れる）。
+- **申請済み／受給中といった「今の状態」はこのアセットに書かない。** ScriptableObject は Play 中に書き換えるとエディタ上で値が残ってしまうため。状態はゲーム側（セーブ対象）で `id` をキーにして持つ。
+- カードの表示（`SupportSchemeCard`）とリスト生成（`SupportPanelController`）の分け方は [../code/ui-scroll-patterns.md](../code/ui-scroll-patterns.md) 2章の「今後」どおり。
+- **効果のタイミングは制度ごとに Inspector で選ぶ**（2026-09-23 決定）。
+  - `OnApply`：申請ボタンを押したときに `effects` を1回だけ適用。
+  - `Monthly`：受給中のあいだ、月が変わるたび（`MonthTicker.OnMonthChanged`）に `effects` を適用。申請した月の翌月分から始まるので、申請が遅れた月の分はもらえない（現実の児童手当と同じ）。
+- 期限切れの扱いは現実の制度と同じ（[calendar-system.md](calendar-system.md) 4章、[../decisions/0010-calendar-follows-reality.md](../decisions/0010-calendar-follows-reality.md)）。
+
+### 毎年の手続きがある制度（現実の例・2026年時点）
+
+「毎年 ○月○日」の期限を使う候補。
+
+- **児童扶養手当の現況届**（ひとり親）… 毎年8月1日〜31日。出さないと11月分以降が止まり、2年出さないと受給資格がなくなる。
+- **ひとり親家庭等医療費助成** … 多くの自治体で児童扶養手当と同じ8月に更新。
+- **特別児童扶養手当の所得状況届**（障害のある子）… 毎年8月12日〜9月11日。
+- **就学援助**（給食費・学用品費など）… 多くの自治体で年度ごとに申請し直す。
+- **保育所・学童保育** … 毎年の現況届や翌年度の申込みが要る自治体が多い（自治体で差がある）。
+- 参考：**児童手当の現況届は2022年6月から原則不要**になった（離婚協議中の別居など一部の人だけ提出）。そのため2章の表の児童手当のデメリットは「申請が遅れた月の分はさかのぼってもらえない」に直した。
+- 参考：**高等学校等就学支援金**は2026年度から所得制限が撤廃された。以前あった毎年7月の収入状況の届出が今後どうなるかは要確認。
 
 ---
 
@@ -110,3 +229,6 @@ related: [docs/design/events.md, docs/code/ui-scroll-patterns.md]
 - 幼保無償化の対象外費用（給食費・延長保育など）：日本経済新聞ほか
 - 時短勤務・マミートラックのデメリット：各社解説記事
 - 子育て支援制度の一覧：andlife.media「子育て世帯向け助成金・補助金一覧【2026年版】」ほか
+- 児童手当の現況届が原則不要（2022.6〜）・申請が遅れた月の扱い：こども家庭庁「児童手当制度のご案内」 https://www.cfa.go.jp/policies/kokoseido/jidouteate/annai
+- 児童扶養手当の現況届（毎年8月・2年で資格喪失）：浦添市 https://www.city.urasoe.lg.jp/doc/2024062000042/ ほか各自治体
+- 特別児童扶養手当の所得状況届（8/12〜9/11）：各都道府県・市のページ

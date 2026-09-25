@@ -1,6 +1,6 @@
 ---
 title: アーキテクチャ（時間・お金・親ステータス）
-updated: 2026-09-21
+updated: 2026-09-23
 status: 実装済み（一部未実装）
 related: [docs/design/rules-and-stats.md, docs/code/ui-main-test-hud.md]
 ---
@@ -37,14 +37,15 @@ GameClock （実時間 1秒 = ゲーム内 1日）
 
 | クラス | 役割 |
 |---|---|
-| `GameClock` | 実時間 `secondsPerDay`（既定 1秒）ごとに1日進める。`SetRunning(bool)` で一時停止 |
+| `GameClock` | 実時間 `secondsPerDay`（既定 1秒）ごとに1日進める。`SetRunning(bool)` で一時停止（ゲームオーバー用）。判断画面の一時停止は `PauseWhileOpen`（予定） |
 | `GameDate` | 経過日数 → 歳・月・日 に変換する static ユーティリティ。`FromAgeDays()` / `Format()` |
 | `DayTicker` | `OnDayPassed(int 通算日数)` |
 | `MonthTicker` | `OnMonthChanged(int 歳, int 月)` |
 
 **`GameDate` の暦**：生まれた日を 0歳1月1日として数える。1年 = 365日で、月の日数は実際の暦（31/28/31/30…）。うるう年は無い。
 
-> ⚠ **仕様書との差**：[../design/rules-and-stats.md](../design/rules-and-stats.md) は「30日 = 1ヶ月」と書いているが、実装は**実際の暦の月**（28〜31日）。日給の計算基準 `ParentStatus.WageDaysPerMonth` だけが 30 固定なので、2月は 28日分しか積み立たず月給より少なくなる。仕様書側を実装に合わせるか、実装を30日固定にするかは**未決定**。
+> **1ヶ月は実際の暦の日数に決定**（[../decisions/0009-real-calendar-months.md](../decisions/0009-real-calendar-months.md)）。この `GameDate` の実装が正。
+> ⚠ ただし日給の計算基準 `ParentStatus.WageDaysPerMonth` だけが 30 固定なので、2月は 28日分しか積み立たず月給より少なくなる（31日の月は多くなる）。**30 のまま差を許すと決定**（[../decisions/0009-real-calendar-months.md](../decisions/0009-real-calendar-months.md)）。
 
 ---
 
@@ -97,10 +98,12 @@ GameClock （実時間 1秒 = ゲーム内 1日）
 
 ## 5. セーブ
 
-`Core/SaveSystem.cs`。`PlayerPrefs` + `JsonUtility`。`Save()` / `Load()` / `HasSave()` / `Delete()`。
+`Core/SaveSystem.cs`。`PlayerPrefs` + `JsonUtility`。**セーブ機能（ステータス・日時などを保存して続きから遊べるようにする）は山口が作る**（2026-09-23 決定）。`Save()` / `Load()` / `HasSave()` / `Delete()`。
 
 保存しているのは `SaveData` の4項目だけ：`money` / `stress` / `ageDays` / `workLifeBalance`。
 **役職・積立給与・親ごとのステータスは保存されない**ので、`ParentStatus` を増やすときは `SaveData` も一緒に拡張すること。
+
+**追加が決まっているもの**：カレンダーのメモ（`calendarMemos`）と、制度の状態（`SupportScheme.id` ごと）。この2つを保存用の形にする部分は草尾が作る。メモはオートセーブで、書いたときに `SaveSystem.Save()` を呼んでゲーム全体をまとめて保存する。→ [../design/calendar-system.md](../design/calendar-system.md) 8.3
 
 ---
 
@@ -121,7 +124,7 @@ GameClock （実時間 1秒 = ゲーム内 1日）
 - **エンディングの分岐**：20歳で `OnGameOver` が飛ぶだけ。成績／趣味／体調による進路分岐は未実装。
 - **月次の食事選択・イベント抽選**：`MonthTicker.OnMonthChanged` は用意できているので、購読する側を作れば繋がる。
 - **昇進の条件**：`SetRank()` はあるが、誰がいつ呼ぶか（ワーク寄りを続けたら昇進、など）は未実装。
-- **一時停止の窓口（`PushPause` / `PopPause`）**：判断画面を開いている間は時間を止める方針だが、停止要求をカウントする仕組みがまだ無い。各画面が `SetRunning` を直接呼ぶと、画面が重なったときに破綻する。→ [../decisions/0004-pause-during-decisions.md](../decisions/0004-pause-during-decisions.md)
+- **一時停止の仕組み（`PauseWhileOpen`）**：**担当は草尾**（2026-09-23 決定）。判断画面のルートに付けると、表示中は時間が止まるコンポーネント。`GameClock.Update()` に `PauseWhileOpen.IsPaused` のチェックを1行足す。まだ無い。→ [../decisions/0011-pause-while-open-component.md](../decisions/0011-pause-while-open-component.md)
 - **効果（Effect）の共通モデル**：食事・イベント・制度が共通で使う `Effect` / `EffectApplier` がまだ無い。3機能の土台なので、各自が `GameState` を直接叩き始める前に用意したい。→ [../design/effects.md](../design/effects.md)
 - **ストレスの持ち方の整理**：`ParentStatus.stress`（正）と `GameState.Stress`（旧仕様）が並存している。子ども用の入れ物も要る。→ 3章
 

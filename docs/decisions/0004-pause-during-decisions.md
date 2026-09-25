@@ -1,10 +1,12 @@
 ---
 title: プレイヤーが判断する画面を開いている間は時間を止める
-updated: 2026-09-21
-status: 採用
+updated: 2026-09-23
+status: 採用（実装方法は 0011 に置き換え）
 ---
 
 # プレイヤーが判断する画面を開いている間は時間を止める
+
+> ⚠ **「## 実装：停止要求はカウントで管理する」の `PushPause` / `PopPause` は [0011-pause-while-open-component.md](0011-pause-while-open-component.md) に置き換わりました。** 今は画面に `PauseWhileOpen` を付けて表示／非表示するだけです。「判断画面を開いている間は時間を止める」という決定と対象の画面は、この ADR のまま有効です。
 
 > [0003-pause-while-calendar-open.md](0003-pause-while-calendar-open.md)（カレンダーのみ）を、対象を広げて置き換えたもの。
 
