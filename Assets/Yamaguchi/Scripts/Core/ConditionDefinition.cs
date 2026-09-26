@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// 状態（一時的な効果）の定義アセット。
-/// TraitDefinition に加えて「既定の持続日数・バッジ色・優先度」を持つ。
+/// TraitDefinition に加えて「既定の持続日数・バッジ色・優先度・毎日の効果」を持つ。
 /// traits.md 5章。
 [CreateAssetMenu(menuName = "ChildRearing/ConditionDefinition", fileName = "Condition_New")]
 public class ConditionDefinition : ScriptableObject
@@ -17,8 +17,11 @@ public class ConditionDefinition : ScriptableObject
     [TextArea]
     public string description;
 
-    [Tooltip("この状態が持つ補正のリスト")]
+    [Tooltip("この状態が持つ補正のリスト（伸び方を変える。プラスのときだけ効く）")]
     public List<StatModifier> modifiers = new List<StatModifier>();
+
+    [Tooltip("この状態が毎日1回だけ直接加算する効果のリスト（値を直接動かす）")]
+    public List<DailyEffect> dailyEffects = new List<DailyEffect>();
 
     [Tooltip("既定の持続日数。AddCondition で days を省略したときに使う")]
     public int defaultDays = 7;

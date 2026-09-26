@@ -22,6 +22,12 @@ public abstract class PersonStatus : MonoBehaviour
     [SerializeField] private TraitSet traits = new TraitSet();
     [SerializeField] private ConditionSet conditions = new ConditionSet();
 
+    [Header("テスト用（再生中にのみ有効）")]
+    [Tooltip("「テスト：特性を付ける」で付ける特性")]
+    [SerializeField] private TraitDefinition testTrait;
+    [Tooltip("「テスト：状態を付ける」で付ける状態（日数は定義の既定値）")]
+    [SerializeField] private ConditionDefinition testCondition;
+
     // ─── 変更通知 ───────────────────────────────────────────
     /// ストレス値（整数）が変わったときに通知される。
     public event Action<int> OnStressChanged;
@@ -88,6 +94,26 @@ public abstract class PersonStatus : MonoBehaviour
         return (addSum, mulSum);
     }
 
+    // ─── 毎日の効果（dailyEffects）────────────────────────
+    /// 状態の dailyEffects を1件適用する。
+    /// PersonStatus 側は Stress / Money を処理する。
+    /// ChildStatus でオーバーライドして Health / Grades / Hobby を加える。
+    /// 書き込み窓口を必ず通す。
+    public virtual void ApplyDailyEffect(DailyEffect effect)
+    {
+        switch (effect.kind)
+        {
+            case EffectKind.Stress:
+                AddStress(effect.value);
+                break;
+            case EffectKind.Money:
+                if (GameState.I != null)
+                    GameState.I.AddMoney(Mathf.RoundToInt(effect.value));
+                break;
+            // その人が持っていない値（親の Grades など）は何もしない
+        }
+    }
+
     // ─── 特性・状態の追加・除去 ─────────────────────────────
     /// 特性を付ける。すでに同じ id なら無視する。
     public void AddTrait(TraitDefinition def)
@@ -132,5 +158,54 @@ public abstract class PersonStatus : MonoBehaviour
         stress = Mathf.Clamp(value, 0f, 100f);
         if (Stress != prev)
             OnStressChanged?.Invoke(Stress);
+    }
+
+    // ─── テスト用（Inspector 右クリックメニュー）────────────
+    /// 再生中でなければ何もせず警告ログを出す（停止中に付けるとシーンに保存されてしまうため）。
+    [ContextMenu("テスト：特性を付ける")]
+    private void Test_AddTrait()
+    {
+        if (!Application.isPlaying)
+        {
+            Debug.LogWarning($"[PersonStatus] 停止中は特性を付けられません。再生中に実行してください。({gameObject.name})");
+            return;
+        }
+        if (testTrait == null)
+        {
+            Debug.LogWarning($"[PersonStatus] testTrait が設定されていません。({gameObject.name})");
+            return;
+        }
+        AddTrait(testTrait);
+        Debug.Log($"[PersonStatus] 特性を付けました：{testTrait.displayName}（{gameObject.name}）");
+    }
+
+    [ContextMenu("テスト：状態を付ける")]
+    private void Test_AddCondition()
+    {
+        if (!Application.isPlaying)
+        {
+            Debug.LogWarning($"[PersonStatus] 停止中は状態を付けられません。再生中に実行してください。({gameObject.name})");
+            return;
+        }
+        if (testCondition == null)
+        {
+            Debug.LogWarning($"[PersonStatus] testCondition が設定されていません。({gameObject.name})");
+            return;
+        }
+        AddCondition(testCondition);
+        Debug.Log($"[PersonStatus] 状態を付けました：{testCondition.displayName}（既定 {testCondition.defaultDays} 日）（{gameObject.name}）");
+    }
+
+    [ContextMenu("テスト：特性・状態を全部外す")]
+    private void Test_RemoveAll()
+    {
+        if (!Application.isPlaying)
+        {
+            Debug.LogWarning($"[PersonStatus] 停止中は特性・状態を外せません。再生中に実行してください。({gameObject.name})");
+            return;
+        }
+        traits.RemoveAll();
+        conditions.RemoveAll();
+        Debug.Log($"[PersonStatus] 特性・状態をすべて外しました。（{gameObject.name}）");
     }
 }

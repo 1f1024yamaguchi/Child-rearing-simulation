@@ -1,6 +1,6 @@
 ---
 title: Antigravity 用プロンプト（子どもステータス・特性・状態）
-updated: 2026-09-23
+updated: 2026-09-25
 status: 運用中
 related: [docs/design/child-status.md, docs/design/traits.md, docs/design/effects.md]
 ---
@@ -19,6 +19,7 @@ related: [docs/design/child-status.md, docs/design/traits.md, docs/design/effect
 | ② | `ChildStatus` ＋ 毎日の成長計算 ＋ 家出判定 | 子どもの値が時間とともに動く（UIはまだ無い） |
 | ②-b | 段階②のレビュー指摘の修正 | ③④がそのまま乗る状態になる |
 | ③ | 特性（Trait）・状態（Condition）と補正計算 | Inspector で特性を付けると効果が出る |
+| ③-b | 状態の毎日の効果・残り日数の通知・確認用メニュー | 風邪気味が毎日確実に効く。右クリックで特性・状態を付けられる |
 | ④ | UI スクリプト | 子どもカードが表示される（配置は人間が行う） |
 
 ## 始める前に確認すること
@@ -316,6 +317,63 @@ Effect クラスと EffectApplier（別担当）
 
 ---
 
+## 段階③-b：毎日の効果・残り日数の通知・確認用メニュー
+
+> 段階③の動作確認で見つかった点と、④の UI 確認に必要なもの。Core 側の変更なので ④ の前にやる。
+> **サンプルアセットの修正は人間が行う**（末尾参照）。
+
+```
+docs/design/traits.md の 3章「補正は『値が上がるときだけ』掛ける」と
+「状態の『毎日の効果』（dailyEffects）」を読んでから作業してください。
+
+【修正1】状態に「毎日の効果」を持たせる
+作るもの：Assets/Yamaguchi/Scripts/Core/DailyEffect.cs
+- [Serializable] class DailyEffect { EffectKind kind; float value; }
+- 加算のみ。倍率（ModifierOp）は持たせない
+
+変更するもの：
+- ConditionDefinition.cs に List<DailyEffect> dailyEffects を追加
+  （TraitDefinition には追加しない。毎日の効果は状態だけが持つ）
+- PersonStatus.cs に「毎日の効果を1件適用する」メソッドを virtual で用意する
+  - PersonStatus 側：Stress → AddStress、Money → GameState.I.AddMoney（整数に丸める）
+  - ChildStatus 側で override：Health → AddHealth、Grades → AddGrade、Hobby → AddHobbyExp
+  - その人が持っていない値（親の Grades など）は何もしない
+  - 必ず書き込み窓口を通すこと。値を直接書き換えない
+- ConditionSystem.cs：毎日、家族全員の付いている状態について
+  ① dailyEffects を適用 → ② TickDay の順で行う
+  （7日の状態なら、毎日の効果はちょうど7回効く）
+
+【修正2】残り日数が減るたびに通知する
+対象：ConditionSet.cs の TickDay
+- いまは状態が外れたときしか OnChanged が出ない
+- 状態が1件でもあれば、日数を減らしたときに OnChanged を出す
+  （④でカードに「風邪気味 ｜ あと5日」と出すため）
+- 状態が0件の日は通知しない
+
+【修正3】確認用の右クリックメニューを作る
+対象：PersonStatus.cs（親にも子にも使えるように基底クラスで）
+- Inspector に「テスト用」の欄を作り、TraitDefinition と ConditionDefinition を
+  1つずつ入れられるようにする
+- [ContextMenu] で次の3つを用意する
+  「テスト：特性を付ける」→ AddTrait
+  「テスト：状態を付ける」→ AddCondition（日数は定義の既定値）
+  「テスト：特性・状態を全部外す」
+- 必ず AddTrait / AddCondition を通すこと（通知を出すため。リストを直接触らない）
+- 再生中でなければ何もせず、警告ログだけ出す
+  （停止中に付けるとシーンに保存されてしまうため）
+
+【確認】
+- コンパイルが通ること
+- すでに動いている補正（成績の伸び・給料）の挙動を変えないこと
+```
+
+### ③-b のあと、人間がやること
+
+`Condition_風邪気味` の **Modifiers から `Health / Add / -1` を消し、Daily Effects に `Health / -1` を入れ直す**。
+（Modifiers には `Grades / Multiply / -0.5` だけ残る）
+
+---
+
 ## 段階④：UI スクリプト
 
 ```
@@ -404,3 +462,41 @@ docs/code/ui-scroll-patterns.md の「ハマりどころ」を必ず読むこと
   どの GameObject に何のコンポーネントを付け、Inspector の
   どのフィールドに何を入れればよいかを、上から順に書く
 ```
+
+---
+
+## 今後：イベント機能と繋ぐ段階で必ずやること
+
+> まだ着手しない。Effect / EffectApplier の土台ができて、イベントから `AddTrait` / `AddCondition` を呼ぶようになったら、
+> その段階の指示文に **下のブロックをそのまま足す**。
+> いまはステータスの変化を受けて状態を付け外しする処理が無いので実害はない。
+
+```
+【必須】ConditionSystem のループ中に状態が増減しても壊れないようにする
+対象：Assets/Yamaguchi/Scripts/Core/ConditionSystem.cs の TickAll
+
+【背景】
+TickAll は member.Conditions.All を foreach で回しながら ApplyDailyEffect を呼んでいる。
+ApplyDailyEffect は AddStress などを呼び、その変更通知を受けた処理が
+同じ人に AddCondition / RemoveCondition すると、回している最中のリストが変わり、
+InvalidOperationException（Collection was modified）で止まる。
+止まるとその日の残り日数が減らず、後ろの家族も処理されない。
+例：「ストレスが限界になったら寝不足になる」「体調が回復したら風邪を外す」
+
+【直し方】
+- 回す前に、その人の状態リストを写しに詰め、写しのほうを回す
+- 写しは ConditionSystem のフィールドに1つ持って使い回す（毎日 new List しない）
+  Clear してから AddRange で詰め直す
+- 写しを回す中で、適用する前に「その状態がまだ付いているか」を
+  member.Conditions.Has(id) で確かめ、外れていたら飛ばす
+- TickDay はこれまでどおり元のリストに対して呼ぶ（後ろから for で回しているので安全）
+- PersonStatus / ConditionSet には手を入れない
+
+【挙動として正しいもの】
+- ループ中に付いた状態は、その日は毎日の効果がかからず、翌日からかかる
+- ループ中に外れた状態は、その日の残りの効果もかからない
+
+【確認】
+- 既存の挙動（風邪気味が7日で外れ、毎日体調が1下がる）が変わらないこと
+```
+

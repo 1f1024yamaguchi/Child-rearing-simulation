@@ -1,6 +1,6 @@
 ---
 title: 特性（Trait）と状態（Condition）
-updated: 2026-09-21
+updated: 2026-09-25
 status: 設計中（たたき台・要合意）
 related: [docs/design/effects.md, docs/design/child-status.md, docs/design/events.md, docs/code/architecture.md]
 ---
@@ -64,7 +64,7 @@ Trait も Condition も、持ち物は `List<StatModifier>` ひとつ。デー�
 | ストレスに強い | 特性 | `Stress × −0.3`（上がる分だけ7割に） |
 | 要領がいい | 特性 | `Money × +0.05` |
 | 病気になりにくい | 特性 | `BadEventRate + −10`（%ポイント） |
-| 風邪気味 | 状態（7日） | `Health + −1`（毎日）、`Grades × −0.5` |
+| 風邪気味 | 状態（7日） | 補正：`Grades × −0.5`　／　毎日の効果：`Health −1` |
 | 絶好調 | 状態（3日） | `Grades × +0.5`、`Hobby × +0.5` |
 
 ---
@@ -77,8 +77,8 @@ Trait も Condition も、持ち物は `List<StatModifier>` ひとつ。デー�
 |---|---|
 | Stress | `PersonStatus.AddStress()` の中。**`delta > 0` のときだけ**掛ける（上がりにくさであって、下がりにくさではない） |
 | Grades | `ChildStatus.AddGrade()` の中。同じくプラスのときだけ |
-| Hobby | `ChildStatus.AddHobbyExp()` の中 |
-| Health | `ChildStatus.AddHealth()` の中 |
+| Hobby | `ChildStatus.AddHobbyExp()` の中。プラスのときだけ |
+| Health | `ChildStatus.AddHealth()` の中。プラスのときだけ |
 | Money | `ParentStatus.DailyWage` の計算の最後 |
 | GoodEventRate / BadEventRate | イベント抽選のときに、家族全員ぶんを合算して使う |
 
@@ -87,6 +87,37 @@ Trait も Condition も、持ち物は `List<StatModifier>` ひとつ。デー�
 ```
 最終値 = (元の値 + Add の合計) × (1 + Multiply の合計)
 ```
+
+### 補正は「値が上がるときだけ」掛ける
+
+補正は **変化量がプラスのときだけ** 掛ける。マイナスのときはそのまま通す。
+特性の意味は「伸び方（上がり方）を変える」だから。下がるときにも掛けると、意味が逆になる。
+
+| 特性 | 上がるときだけ掛ける（正しい） | 下がるときにも掛けると（誤り） |
+|---|---|---|
+| ストレスに強い（Stress × −0.3） | ストレスが溜まりにくい | ストレスが**抜けにくい**（回復も七割になる） |
+| 勉強が得意（Grades × +0.2） | 成績が伸びやすい | 成績が**落ちやすい**（下がり幅も 1.2 倍） |
+
+このルールのため、補正は「毎日 体調−1」のような **値を直接動かす効果には使えない**。
+体調が下がっている日はマイナスなので補正が掛からず、効かない日が出るため。そういうものは次の「毎日の効果」で表す。
+
+### 状態の「毎日の効果」（dailyEffects）
+
+状態（Condition）は補正とは別に **毎日の効果** を持てる。
+
+- 状態が付いている間、`ConditionSystem` が **1日に1回だけ** その値を足す
+- 足すときも書き込み窓口（`AddHealth` など）を通す。マイナスなら補正は掛からない
+- 形は `EffectKind` と値の組のリスト（加算のみ。倍率は持たない）
+- その人が持っていない値（親の成績など）は無視する
+- 適用してから残り日数を減らす（7日の状態なら、毎日の効果はちょうど7回）
+
+つまり：
+
+| | 補正（modifiers） | 毎日の効果（dailyEffects） |
+|---|---|---|
+| 意味 | 伸び方を変える | 値を直接動かす |
+| 効くタイミング | 値が上がるとき | 毎日1回 |
+| 持てるもの | 特性・状態 | 状態のみ |
 
 補正を集めるのは `PersonStatus` の1メソッド（Traits と Conditions の両方をなめて合計する）。
 `effects.md` 3章にある継続効果の登録先（`ModifierRegistry` など）と同じ仕組みに乗せる。**Trait は「期限が来ない継続効果」でしかない。**
@@ -122,6 +153,10 @@ public enum EffectKind
 
 残り日数を毎日1つ減らして、0 になったら外す処理は **1箇所にまとめる**（家族全員の Conditions をなめる）。Traits はなめる必要がない。
 
+> **イベントと繋ぐときの注意：** ステータスの変化を受けて状態を付け外しする処理を入れると、
+> `ConditionSystem` が状態リストを回している最中にリストが変わり例外になる。
+> その段階で「写しを回す」形に直すこと。手順は [../team/antigravity-child-status.md](../team/antigravity-child-status.md) 末尾。
+
 ---
 
 ## 5. データの持ち方
@@ -135,6 +170,7 @@ public enum EffectKind
 | 説明 | ○ | ○ |
 | 補正のリスト | ○ | ○ |
 | 既定の持続日数 | — | ○ |
+| 毎日の効果（dailyEffects） | — | ○ |
 | バッジ色 | — | ○（将来カードに出す場合） |
 
 **数値効果は定義アセットが持ち、`EffectApplier` 側には書かない。** 効果の種類を足すときに触るのは `EffectKind` と `EffectApplier` の1箇所だけ、という `effects.md` 4章の方針を崩さないため。

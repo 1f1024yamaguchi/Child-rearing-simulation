@@ -136,4 +136,29 @@ public class ChildStatus : PersonStatus
         hobby = newHobby;
         OnHobbyChanged?.Invoke(hobby, HobbyLevel);
     }
+
+    // ─── 毎日の効果（dailyEffects） override ────────────────
+    /// PersonStatus の実装（Stress / Money）に加えて、
+    /// Health / Grades / Hobby を処理する。
+    /// 書き込み窓口を通すので、マイナスには補正は掛からない（仕様どおり）。
+    /// 親の Grades など「この人が持っていない値」は何もしない。
+    public override void ApplyDailyEffect(DailyEffect effect)
+    {
+        switch (effect.kind)
+        {
+            case EffectKind.Health:
+                AddHealth(effect.value);
+                break;
+            case EffectKind.Grades:
+                AddGrade(effect.value);
+                break;
+            case EffectKind.Hobby:
+                AddHobbyExp(effect.value);
+                break;
+            default:
+                // Stress / Money は PersonStatus に任せる
+                base.ApplyDailyEffect(effect);
+                break;
+        }
+    }
 }

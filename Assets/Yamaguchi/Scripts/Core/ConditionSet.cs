@@ -78,18 +78,26 @@ public class ConditionSet
 
     /// 全状態の残り日数を1日減らし、0 になったものを除去する。
     /// ConditionSystem が毎日呼ぶ。
+    /// 状態が1件でもあれば OnChanged を出す（カードの「あと○日」更新のため）。
     public void TickDay()
     {
-        bool changed = false;
+        if (conditions.Count == 0) return;
+
         for (int i = conditions.Count - 1; i >= 0; i--)
         {
             conditions[i].remainingDays--;
             if (conditions[i].remainingDays <= 0)
-            {
                 conditions.RemoveAt(i);
-                changed = true;
-            }
         }
-        if (changed) OnChanged?.Invoke();
+        // 状態が1件でもあれば常に通知（残り日数の変化をカードに伝えるため）。
+        OnChanged?.Invoke();
+    }
+
+    /// 全状態を除去する（テスト用）。
+    public void RemoveAll()
+    {
+        if (conditions.Count == 0) return;
+        conditions.Clear();
+        OnChanged?.Invoke();
     }
 }

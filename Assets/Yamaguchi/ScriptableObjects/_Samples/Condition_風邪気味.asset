@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 961bb2068c33857419daf04bf1c518b4, type: 3}
+  m_Name: "Condition_\u98A8\u90AA\u6C17\u5473"
+  m_EditorClassIdentifier: Assembly-CSharp::ConditionDefinition
+  id: cold
+  displayName: "\u98A8\u90AA\u6C17\u5473"
+  description: "\u98A8\u90AA\u6C17\u5473"
+  modifiers:
+  - kind: 3
+    op: 1
+    value: -0.5
+  dailyEffects:
+  - kind: 2
+    value: -1
+  defaultDays: 7
+  badgeColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  priority: 0

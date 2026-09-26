@@ -39,4 +39,12 @@ public class TraitSet
         traits.RemoveAt(idx);
         OnChanged?.Invoke();
     }
+
+    /// 全特性を除去する（テスト用）。
+    public void RemoveAll()
+    {
+        if (traits.Count == 0) return;
+        traits.Clear();
+        OnChanged?.Invoke();
+    }
 }
