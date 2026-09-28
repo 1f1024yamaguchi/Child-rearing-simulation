@@ -8,6 +8,12 @@ public class ParentCardUI : MonoBehaviour
     [SerializeField] private StatusListUI statusList;
     [SerializeField] private Slider stressSlider;
 
+    [Header("特性・状態")]
+    [Tooltip("ストレス段階バッジ（任意）")]
+    [SerializeField] private StressBadgeUI stressBadge;
+    [Tooltip("特性・状態の行を管理する PersonTraitRowsUI（任意）")]
+    [SerializeField] private PersonTraitRowsUI traitRows;
+
     private ParentStatus parent;
 
     // Household.Awake より後に実行されるので Start で取得する
@@ -23,8 +29,12 @@ public class ParentCardUI : MonoBehaviour
         Subscribe();
         ShowSalary(parent.MonthlySalary);
         ShowDailyWage(parent.DailyWage);      // 追加
-        ShowPending(parent.PendingWage); 
+        ShowPending(parent.PendingWage);
         ShowStress(parent.Stress); //ストレスの表示
+
+        // バッジ・特性行を parent に接続する
+        stressBadge?.Bind(parent);
+        traitRows?.Bind(parent);
     }
 
     private void OnEnable()  { if (parent != null) Subscribe(); }
@@ -33,20 +43,19 @@ public class ParentCardUI : MonoBehaviour
     private void Subscribe()
     {
         balanceSlider.onValueChanged.AddListener(parent.SetBalance);
-        parent.OnSalaryChanged += ShowSalary;
-        parent.OnDailyWageChanged  += ShowDailyWage;
+        parent.OnSalaryChanged      += ShowSalary;
+        parent.OnDailyWageChanged   += ShowDailyWage;
         parent.OnPendingWageChanged += ShowPending;
-        parent.OnStressChanged += ShowStress;
+        parent.OnStressChanged      += ShowStress;
     }
 
     private void Unsubscribe()
     {
         balanceSlider.onValueChanged.RemoveListener(parent.SetBalance);
-        parent.OnSalaryChanged -= ShowSalary;
-        parent.OnDailyWageChanged  -= ShowDailyWage;
+        parent.OnSalaryChanged      -= ShowSalary;
+        parent.OnDailyWageChanged   -= ShowDailyWage;
         parent.OnPendingWageChanged -= ShowPending;
-        parent.OnStressChanged -= ShowStress;
-
+        parent.OnStressChanged      -= ShowStress;
     }
 
     private void ShowSalary(int salary)
@@ -66,9 +75,7 @@ public class ParentCardUI : MonoBehaviour
 
     private void ShowStress(int stress)
     {
-        if(stressSlider != null)
-        {
+        if (stressSlider != null)
             stressSlider.SetValueWithoutNotify(stress / 100f);
-        }
     }
 }
