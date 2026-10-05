@@ -24,10 +24,7 @@ public class PersonStressUI : MonoBehaviour
         if (target == null)
         {
             Debug.LogWarning("PersonStressUI: target が設定されていません。", this);
-            return;
         }
-        slider.SetValueWithoutNotify(target.Stress / 100f);
-        target.OnStressChanged += UpdateSlider;
     }
 
     private void OnEnable()

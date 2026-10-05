@@ -313,8 +313,7 @@ MonoBehaviour:
   balanceSlider: {fileID: 798726120}
   statusList: {fileID: 1075462953}
   stressSlider: {fileID: 165708703}
-  stressBadge: {fileID: 0}
-  traitRows: {fileID: 0}
+  traitRows: {fileID: 1075462955}
 --- !u!1 &27929412
 GameObject:
   m_ObjectHideFlags: 0
@@ -762,7 +761,7 @@ GameObject:
   - component: {fileID: 89809394}
   - component: {fileID: 89809395}
   m_Layer: 0
-  m_Name: halth_row (1)
+  m_Name: health_row
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1810,8 +1809,8 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 38312721}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0.6108179}
-  m_AnchorMax: {x: 1, y: 1}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -2079,7 +2078,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 419194520}
   m_HandleRect: {fileID: 419194519}
   m_Direction: 2
-  m_Value: 1
+  m_Value: 0
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -2239,7 +2238,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 680492437}
   m_HandleRect: {fileID: 680492436}
   m_Direction: 2
-  m_Value: 1
+  m_Value: 0
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -2320,10 +2319,10 @@ RectTransform:
   - {fileID: 1900269692}
   m_Father: {fileID: 869146226}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 341, y: -708}
-  m_SizeDelta: {x: 666, y: 84}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &196352201
 MonoBehaviour:
@@ -3036,6 +3035,7 @@ GameObject:
   m_Component:
   - component: {fileID: 267915647}
   - component: {fileID: 267915648}
+  - component: {fileID: 267915649}
   m_Layer: 5
   m_Name: Slider
   m_TagString: Untagged
@@ -3104,7 +3104,7 @@ MonoBehaviour:
     m_PressedTrigger: Pressed
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
-  m_Interactable: 1
+  m_Interactable: 0
   m_TargetGraphic: {fileID: 701474197}
   m_FillRect: {fileID: 1937237945}
   m_HandleRect: {fileID: 701474196}
@@ -3116,6 +3116,18 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &267915649
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 267915646}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1c775476702f7394eb3dcf10a3bda71f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DayUI
 --- !u!1 &280375581
 GameObject:
   m_ObjectHideFlags: 0
@@ -3411,10 +3423,10 @@ RectTransform:
   - {fileID: 782530943}
   m_Father: {fileID: 869146226}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 341, y: -614}
-  m_SizeDelta: {x: 666, y: 84}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &292658737
 MonoBehaviour:
@@ -3846,8 +3858,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.25}
   m_AnchorMax: {x: 1, y: 0.75}
-  m_AnchoredPosition: {x: -5, y: 0}
-  m_SizeDelta: {x: -20, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &333039982
 GameObject:
@@ -5108,10 +5120,10 @@ RectTransform:
   - {fileID: 419951918}
   m_Father: {fileID: 869146226}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 341, y: -332}
-  m_SizeDelta: {x: 666, y: 84}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &435889815
 MonoBehaviour:
@@ -6158,6 +6170,7 @@ GameObject:
   m_Component:
   - component: {fileID: 557140112}
   - component: {fileID: 557140113}
+  - component: {fileID: 557140114}
   m_Layer: 5
   m_Name: Strees_meter
   m_TagString: Untagged
@@ -6227,7 +6240,7 @@ MonoBehaviour:
     m_PressedTrigger: Pressed
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
-  m_Interactable: 1
+  m_Interactable: 0
   m_TargetGraphic: {fileID: 0}
   m_FillRect: {fileID: 1369032654}
   m_HandleRect: {fileID: 0}
@@ -6239,6 +6252,23 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &557140114
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 557140111}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3490789d599f73649973e029ee29ff9b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StatMeterUI
+  labelText: {fileID: 1695999462}
+  slider: {fileID: 557140113}
+  fillImage: {fileID: 0}
+  valueText: {fileID: 0}
+  valueFormat: '{0}%'
 --- !u!1 &571520962
 GameObject:
   m_ObjectHideFlags: 0
@@ -6534,11 +6564,11 @@ MonoBehaviour:
   hobbyExpAtPlay: 30
   hobbyExpParentLife: 2
   hobbyExpParentWork: -2
-  stressAtStudy: 6
-  stressAtPlay: -5
-  stressParentLife: -3
-  stressParentWork: 6
-  stressParentOverloadBonus: 3
+  stressPerDayAtStudy: 5
+  stressPerDayAtPlay: -5
+  stressPerDayParentLife: -1
+  stressPerDayParentWork: 2
+  stressPerDayParentOverloadBonus: 1
   parentStressOverloadThreshold: 70
   healthRecovery: 2
   healthStressPenalty: -4
@@ -7001,7 +7031,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 126, y: 0}
+  m_AnchoredPosition: {x: -126, y: 0}
   m_SizeDelta: {x: 80, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &720615207
@@ -7024,7 +7054,9 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u52C9\u5F37"
+  m_text: 'life
+
+'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -7141,10 +7173,10 @@ RectTransform:
   - {fileID: 849188604}
   m_Father: {fileID: 869146226}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 341, y: -426}
-  m_SizeDelta: {x: 666, y: 84}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &726507385
 MonoBehaviour:
@@ -7888,6 +7920,7 @@ GameObject:
   - component: {fileID: 820365334}
   - component: {fileID: 820365333}
   - component: {fileID: 820365332}
+  - component: {fileID: 820365336}
   m_Layer: 0
   m_Name: status_scroll
   m_TagString: Untagged
@@ -7999,6 +8032,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 820365330}
   m_CullTransparentMesh: 1
+--- !u!114 &820365336
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 820365330}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 77d348830fde32f4db6a739d793b0d06, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PersonTraitRowsUI
+  statusList: {fileID: 820365332}
 --- !u!1 &849188603
 GameObject:
   m_ObjectHideFlags: 0
@@ -8133,6 +8179,7 @@ GameObject:
   - component: {fileID: 849684199}
   - component: {fileID: 849684198}
   - component: {fileID: 849684197}
+  - component: {fileID: 849684201}
   m_Layer: 0
   m_Name: status_scroll
   m_TagString: Untagged
@@ -8244,6 +8291,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 849684195}
   m_CullTransparentMesh: 1
+--- !u!114 &849684201
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 849684195}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 77d348830fde32f4db6a739d793b0d06, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PersonTraitRowsUI
+  statusList: {fileID: 849684197}
 --- !u!1 &854103830
 GameObject:
   m_ObjectHideFlags: 0
@@ -8389,15 +8449,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3752de16e0d16b947bf6c4d429c514d5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ChildCardUI
-  studyPlaySlider: {fileID: 0}
+  studyPlaySlider: {fileID: 44569017}
   profileLineText: {fileID: 0}
   gradeMeter: {fileID: 1436905425}
-  stressMeter: {fileID: 0}
-  healthMeter: {fileID: 0}
-  stressBadge: {fileID: 0}
-  traitRows: {fileID: 0}
-  statusList: {fileID: 0}
-  runawayWatcher: {fileID: 0}
+  stressMeter: {fileID: 557140114}
+  healthMeter: {fileID: 254818718}
+  traitRows: {fileID: 820365336}
+  statusList: {fileID: 820365332}
+  runawayWatcher: {fileID: 145133765}
 --- !u!1 &859579152
 GameObject:
   m_ObjectHideFlags: 0
@@ -8516,7 +8575,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: -0.000030517578}
-  m_SizeDelta: {x: 0, y: 758}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &869146227
 MonoBehaviour:
@@ -9187,8 +9246,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 136557445}
   m_HandleRect: {fileID: 136557444}
   m_Direction: 2
-  m_Value: 1.0000001
-  m_Size: 0.3891821
+  m_Value: 1
+  m_Size: 0.38918206
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -9942,6 +10001,7 @@ GameObject:
   - component: {fileID: 1075462951}
   - component: {fileID: 1075462954}
   - component: {fileID: 1075462953}
+  - component: {fileID: 1075462955}
   m_Layer: 0
   m_Name: status_scroll
   m_TagString: Untagged
@@ -10053,6 +10113,19 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &1075462955
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1075462949}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 77d348830fde32f4db6a739d793b0d06, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PersonTraitRowsUI
+  statusList: {fileID: 1075462953}
 --- !u!1 &1080850884
 GameObject:
   m_ObjectHideFlags: 0
@@ -10087,7 +10160,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -94, y: 0}
+  m_AnchoredPosition: {x: 94, y: 0}
   m_SizeDelta: {x: 80, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1080850886
@@ -10110,7 +10183,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Life
+  m_text: "\u52C9\u5F37"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -10241,7 +10314,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -10927,10 +11000,10 @@ RectTransform:
   - {fileID: 1883949621}
   m_Father: {fileID: 869146226}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 341, y: -520}
-  m_SizeDelta: {x: 666, y: 84}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1152868400
 MonoBehaviour:
@@ -12321,7 +12394,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 10, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1369032655
 MonoBehaviour:
@@ -12337,7 +12410,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -14089,7 +14162,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 10, y: 0}
+  m_SizeDelta: {x: 9.999999, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1626400061
 MonoBehaviour:
@@ -15199,7 +15272,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1708479049
 RectTransform:
   m_ObjectHideFlags: 0
@@ -16063,8 +16136,7 @@ MonoBehaviour:
   balanceSlider: {fileID: 854103832}
   statusList: {fileID: 849684197}
   stressSlider: {fileID: 255358758}
-  stressBadge: {fileID: 0}
-  traitRows: {fileID: 0}
+  traitRows: {fileID: 849684201}
 --- !u!1 &1882374000
 GameObject:
   m_ObjectHideFlags: 0
@@ -16842,10 +16914,10 @@ RectTransform:
   - {fileID: 735440111}
   m_Father: {fileID: 869146226}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 341, y: -50}
-  m_SizeDelta: {x: 666, y: 84}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1940944000
 MonoBehaviour:
@@ -17674,9 +17746,7 @@ MonoBehaviour:
   traits:
     traits: []
   conditions:
-    conditions:
-    - definition: {fileID: 11400000, guid: c14d0748fbe939141b22b5c3bbf5d9e0, type: 2}
-      remainingDays: 5
+    conditions: []
   testTrait: {fileID: 0}
   testCondition: {fileID: 0}
   studyPlayBalance: 0.5
@@ -17849,10 +17919,10 @@ RectTransform:
   - {fileID: 1382598875}
   m_Father: {fileID: 869146226}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 341, y: -238}
-  m_SizeDelta: {x: 666, y: 84}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2025179753
 MonoBehaviour:
@@ -18178,7 +18248,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1139379953}
   m_HandleRect: {fileID: 1139379952}
   m_Direction: 2
-  m_Value: 1
+  m_Value: 0
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -18396,10 +18466,10 @@ RectTransform:
   - {fileID: 1123910571}
   m_Father: {fileID: 869146226}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 341, y: -144}
-  m_SizeDelta: {x: 666, y: 84}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2110191085
 MonoBehaviour:

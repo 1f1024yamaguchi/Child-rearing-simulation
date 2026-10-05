@@ -31,18 +31,18 @@ public class ChildGrowthSystem : MonoBehaviour
     [Tooltip("ワーク寄り(w=1)の親の影響（趣味）")]
     [SerializeField] private float hobbyExpParentWork = -2f;
 
-    // ─── 子ストレスの係数 ──────────────────────────────────────
-    [Header("ストレス（1ヶ月あたり・たたき台）")]
-    [Tooltip("勉強寄り(b=0)のときの子ストレス変化")]
-    [SerializeField] private float stressAtStudy = 6f;
-    [Tooltip("遊び寄り(b=1)のときの子ストレス変化")]
-    [SerializeField] private float stressAtPlay = -5f;
-    [Tooltip("ライフ寄り(w=0)の親の影響（子ストレス）")]
-    [SerializeField] private float stressParentLife = -3f;
-    [Tooltip("ワーク寄り(w=1)の親の影響（子ストレス）")]
-    [SerializeField] private float stressParentWork = 6f;
-    [Tooltip("親の平均ストレスがこの値を超えたとき、子ストレスへの追加分")]
-    [SerializeField] private float stressParentOverloadBonus = 3f;
+    // ─── 子ストレスの係数（1日あたり） ────────────────────────
+    [Header("ストレス Lerp係数（1日あたり・たたき台）")]
+    [Tooltip("勉強寄り(b=0)のときの子ストレス変化（1日あたり）")]
+    [SerializeField] private float stressPerDayAtStudy = 5f;
+    [Tooltip("遊び寄り(b=1)のときの子ストレス変化（1日あたり）")]
+    [SerializeField] private float stressPerDayAtPlay = -5f;
+    [Tooltip("ライフ寄り(w=0)の親の影響（子ストレス、1日あたり）")]
+    [SerializeField] private float stressPerDayParentLife = -1f;
+    [Tooltip("ワーク寄り(w=1)の親の影響（子ストレス、1日あたり）")]
+    [SerializeField] private float stressPerDayParentWork = 2f;
+    [Tooltip("親の平均ストレスがこの値を超えたとき、子ストレスへの追加分（1日あたり）")]
+    [SerializeField] private float stressPerDayParentOverloadBonus = 1f;
     [Tooltip("この値を超えた親の平均ストレスを「過負荷」と見なす閾値")]
     [SerializeField] private float parentStressOverloadThreshold = 70f;
 
@@ -85,7 +85,7 @@ public class ChildGrowthSystem : MonoBehaviour
             if (child == null) return;
         }
 
-        float b = child.StudyPlayBalance;           // 0=勉強 / 1=遊び
+        float b = child.StudyPlayBalance;           // 1=勉強 / 0=遊び
         float w = AverageParentWorkLifeBalance();   // 0=ライフ / 1=ワーク
         float avgParentStress = AverageParentStress();
 
@@ -106,13 +106,12 @@ public class ChildGrowthSystem : MonoBehaviour
         hobbyDelta = Mathf.Max(0f, hobbyDelta);
         child.AddHobbyExp(hobbyDelta);
 
-        // ─── 子ストレス ──────────────────────────────────────
-        // Lerp(+6, -5, b) + Lerp(-3, +6, w)  親ストレス>70 なら +3
-        float stressDelta = (Mathf.Lerp(stressAtStudy, stressAtPlay, b)
-                            + Mathf.Lerp(stressParentLife, stressParentWork, w))
-                            / DaysPerMonth;
+        // ─── 子ストレス（1日あたり） ──────────────────────────
+        // Lerp(+5, -5, b) + Lerp(-1, +2, w)  親ストレス>70 なら +1
+        float stressDelta = Mathf.Lerp(stressPerDayAtStudy, stressPerDayAtPlay, b)
+                          + Mathf.Lerp(stressPerDayParentLife, stressPerDayParentWork, w);
         if (avgParentStress > parentStressOverloadThreshold)
-            stressDelta += stressParentOverloadBonus / DaysPerMonth;
+            stressDelta += stressPerDayParentOverloadBonus;
         child.AddStress(stressDelta);
 
         // ─── 体調 ────────────────────────────────────────────

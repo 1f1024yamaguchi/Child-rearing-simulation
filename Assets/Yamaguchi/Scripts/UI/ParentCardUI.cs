@@ -9,8 +9,6 @@ public class ParentCardUI : MonoBehaviour
     [SerializeField] private Slider stressSlider;
 
     [Header("特性・状態")]
-    [Tooltip("ストレス段階バッジ（任意）")]
-    [SerializeField] private StressBadgeUI stressBadge;
     [Tooltip("特性・状態の行を管理する PersonTraitRowsUI（任意）")]
     [SerializeField] private PersonTraitRowsUI traitRows;
 
@@ -32,8 +30,7 @@ public class ParentCardUI : MonoBehaviour
         ShowPending(parent.PendingWage);
         ShowStress(parent.Stress); //ストレスの表示
 
-        // バッジ・特性行を parent に接続する
-        stressBadge?.Bind(parent);
+        // 特性行を parent に接続する
         traitRows?.Bind(parent);
     }
 

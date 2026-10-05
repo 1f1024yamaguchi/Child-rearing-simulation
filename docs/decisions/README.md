@@ -30,3 +30,4 @@ status: 運用中
 | [0010](0010-calendar-follows-reality.md) | カレンダーの予定と期限切れは現実の制度と同じ扱いにする | 採用 |
 | [0011](0011-pause-while-open-component.md) | 時間を止めるのは画面が表示されている間とし、画面に PauseWhileOpen を付けるだけにする | 廃止（0004 の実装どおり） |
 | [0012](0012-birth-day-is-monday.md) | 生まれた日（0歳1月1日）を月曜日とし、7日周期で曜日を回す | 廃止（曜日は使わない） |
+| [0013](0013-child-stress-per-day-and-badge-removal.md) | 子どものストレス計算を1日あたりに変更し、カードのストレス段階バッジを廃止する | 採用 |

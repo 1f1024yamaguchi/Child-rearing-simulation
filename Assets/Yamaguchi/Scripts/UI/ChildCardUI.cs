@@ -9,7 +9,7 @@ using UnityEngine.UI;
 public class ChildCardUI : MonoBehaviour
 {
     [Header("参照：子どものステータス")]
-    [Tooltip("勉強⇔遊びスライダー（値が変わったら ChildStatus.SetStudyPlayBalance を呼ぶ）")]
+    [Tooltip("勉強⇔遊びスライダー（右=勉強 / 左=遊び。値が変わったら反転して ChildStatus.SetStudyPlayBalance を呼ぶ）")]
     [SerializeField] private Slider studyPlaySlider;
 
     [Tooltip("プロフィール 1行（例：「8歳・スポーツが好き」）")]
@@ -23,9 +23,7 @@ public class ChildCardUI : MonoBehaviour
     [Tooltip("体調メーター")]
     [SerializeField] private StatMeterUI healthMeter;
 
-    [Header("参照：バッジ・特性行")]
-    [Tooltip("ストレス段階バッジ")]
-    [SerializeField] private StressBadgeUI stressBadge;
+    [Header("参照：特性行")]
     [Tooltip("特性・状態の行を管理する PersonTraitRowsUI")]
     [SerializeField] private PersonTraitRowsUI traitRows;
 
@@ -39,6 +37,7 @@ public class ChildCardUI : MonoBehaviour
 
     // ─── 内部 ─────────────────────────────────────────────
     private ChildStatus child;
+    private bool isSubscribed = false;
 
     private const string KeyHobby    = "hobby";
     private const string KeyPassLine = "passLine";
@@ -54,12 +53,11 @@ public class ChildCardUI : MonoBehaviour
             return;
         }
 
-        // スライダーの初期値
+        // スライダーの初期値（画面上は右[1]が勉強、左[0]が遊び）
         if (studyPlaySlider != null)
-            studyPlaySlider.SetValueWithoutNotify(child.StudyPlayBalance);
+            studyPlaySlider.SetValueWithoutNotify(1f - child.StudyPlayBalance);
 
-        // バッジ・特性行のバインド
-        stressBadge?.Bind(child);
+        // 特性行のバインド
         traitRows?.Bind(child);
 
         // 初期表示
@@ -72,14 +70,6 @@ public class ChildCardUI : MonoBehaviour
 
         // 購読開始
         Subscribe();
-
-        // 年齢の購読（プロフィール行の更新に必要）
-        if (GameState.I != null)
-            GameState.I.OnAgeChanged += _ => ShowProfile();
-
-        // 家出ウォッチャー
-        if (runawayWatcher != null)
-            runawayWatcher.OnDangerDaysChanged += ShowRunaway;
     }
 
     private void OnEnable()
@@ -89,32 +79,70 @@ public class ChildCardUI : MonoBehaviour
 
     private void OnDisable()
     {
-        if (child != null) Unsubscribe();
+        Unsubscribe();
+    }
+
+    private void OnDestroy()
+    {
+        Unsubscribe();
     }
 
     // ─── 購読 ─────────────────────────────────────────────
     private void Subscribe()
     {
-        if (studyPlaySlider != null)
-            studyPlaySlider.onValueChanged.AddListener(child.SetStudyPlayBalance);
+        if (isSubscribed) return;
 
-        child.OnGradeChanged            += ShowGrade;
-        child.OnStressChanged           += ShowStress;
-        child.OnHealthChanged           += ShowHealth;
-        child.OnHobbyChanged            += ShowHobby;
-        child.OnStudyPlayBalanceChanged += ShowBalance;
+        if (child != null)
+        {
+            if (studyPlaySlider != null)
+                studyPlaySlider.onValueChanged.AddListener(OnSliderValueChanged);
+
+            child.OnGradeChanged            += ShowGrade;
+            child.OnStressChanged           += ShowStress;
+            child.OnHealthChanged           += ShowHealth;
+            child.OnHobbyChanged            += ShowHobby;
+            child.OnStudyPlayBalanceChanged += ShowBalance;
+        }
+
+        // 年齢の購読（プロフィール行の更新に必要）
+        if (GameState.I != null)
+            GameState.I.OnAgeChanged += HandleAgeChanged;
+
+        // 家出ウォッチャー
+        if (runawayWatcher != null)
+            runawayWatcher.OnDangerDaysChanged += ShowRunaway;
+
+        isSubscribed = true;
     }
 
     private void Unsubscribe()
     {
-        if (studyPlaySlider != null)
-            studyPlaySlider.onValueChanged.RemoveListener(child.SetStudyPlayBalance);
+        if (!isSubscribed) return;
 
-        child.OnGradeChanged            -= ShowGrade;
-        child.OnStressChanged           -= ShowStress;
-        child.OnHealthChanged           -= ShowHealth;
-        child.OnHobbyChanged            -= ShowHobby;
-        child.OnStudyPlayBalanceChanged -= ShowBalance;
+        if (child != null)
+        {
+            if (studyPlaySlider != null)
+                studyPlaySlider.onValueChanged.RemoveListener(OnSliderValueChanged);
+
+            child.OnGradeChanged            -= ShowGrade;
+            child.OnStressChanged           -= ShowStress;
+            child.OnHealthChanged           -= ShowHealth;
+            child.OnHobbyChanged            -= ShowHobby;
+            child.OnStudyPlayBalanceChanged -= ShowBalance;
+        }
+
+        if (GameState.I != null)
+            GameState.I.OnAgeChanged -= HandleAgeChanged;
+
+        if (runawayWatcher != null)
+            runawayWatcher.OnDangerDaysChanged -= ShowRunaway;
+
+        isSubscribed = false;
+    }
+
+    private void HandleAgeChanged(float _)
+    {
+        ShowProfile();
     }
 
     // ─── 表示メソッド ─────────────────────────────────────
@@ -141,10 +169,17 @@ public class ChildCardUI : MonoBehaviour
         healthMeter?.SetValue(health);
     }
 
-    private void ShowBalance(float _)
+    private void OnSliderValueChanged(float sliderValue)
     {
-        // スライダーは onValueChanged から SetStudyPlayBalance を呼ぶので
-        // ここでは通知の受け取りのみ（必要なら他の表示に使う）
+        if (child != null)
+            child.SetStudyPlayBalance(1f - sliderValue);
+    }
+
+    private void ShowBalance(float balance)
+    {
+        // 外部（イベント等）から値が変わった場合にスライダー位置を同期（右[1]=勉強、左[0]=遊び）
+        if (studyPlaySlider != null)
+            studyPlaySlider.SetValueWithoutNotify(1f - balance);
     }
 
     private void ShowHobby(HobbyKind hobby, int level)

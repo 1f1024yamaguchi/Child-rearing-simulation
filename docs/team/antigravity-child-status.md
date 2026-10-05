@@ -1,6 +1,6 @@
 ---
 title: Antigravity 用プロンプト（子どもステータス・特性・状態）
-updated: 2026-09-25
+updated: 2026-10-05
 status: 運用中
 related: [docs/design/child-status.md, docs/design/traits.md, docs/design/effects.md]
 ---
@@ -21,6 +21,7 @@ related: [docs/design/child-status.md, docs/design/traits.md, docs/design/effect
 | ③ | 特性（Trait）・状態（Condition）と補正計算 | Inspector で特性を付けると効果が出る |
 | ③-b | 状態の毎日の効果・残り日数の通知・確認用メニュー | 風邪気味が毎日確実に効く。右クリックで特性・状態を付けられる |
 | ④ | UI スクリプト | 子どもカードが表示される（配置は人間が行う） |
+| ④-b | 動作確認で見つかった点の修正 | ストレス日次化・バッジ廃止・購読バグ修正 |
 
 ## 始める前に確認すること
 
@@ -461,6 +462,50 @@ docs/code/ui-scroll-patterns.md の「ハマりどころ」を必ず読むこと
 - 人間がシーンに配置するための手順を報告に書くこと。
   どの GameObject に何のコンポーネントを付け、Inspector の
   どのフィールドに何を入れればよいかを、上から順に書く
+```
+
+---
+
+## 段階④-b：動作確認で見つかった点の修正
+
+```
+docs/design/child-status.md の 3章・6章を読んでから作業してください（追記があります）。
+既存の実装を直すタスクです。
+
+【修正1】子どものストレスを「1日あたり」にする
+対象：Assets/Yamaguchi/Scripts/Core/ChildGrowthSystem.cs
+- ストレスの計算だけ 30 で割らず、そのまま毎日適用する
+  （親の ParentStressSystem と同じ単位に揃える）
+- 成績・趣味・体調はこれまでどおり 1ヶ月あたり÷30
+- ストレスの既定値を child-status.md 3章の表に合わせる
+  （勉強 +5 / 遊び −5 / 親ライフ −1 / 親ワーク +2 / 親過負荷 +1、すべて 1日あたり）
+- Inspector の Header と Tooltip を「1日あたり」に書き換える
+- ※ 同じフィールド名のままだと、シーンに保存済みの旧い値（6 / −5 / −3 / 6 / 3）が
+  そのまま使われ、「1日 +6」のような意図しない値になる。
+  フィールド名を新しくして（例：stressPerDayAtStudy）、新しい既定値が使われるようにする。
+  [FormerlySerializedAs] は付けない（付けると旧い値が引き継がれる）
+
+【修正2】ChildCardUI の購読解除漏れ
+対象：Assets/Yamaguchi/Scripts/UI/ChildCardUI.cs
+- Start で登録している GameState.I.OnAgeChanged（ラムダ式）と
+  runawayWatcher.OnDangerDaysChanged が解除されていない
+- ラムダをやめてメソッドにし、Subscribe / Unsubscribe の中で登録・解除する
+  （GameState と RunawayWatcher はシーンをまたいで残るので、解除しないと
+  シーン切替後に消えたカードへ通知が届いてエラーになる）
+
+【修正3】PersonStressUI の二重登録
+対象：Assets/Yamaguchi/Scripts/UI/PersonStressUI.cs
+- Start と OnEnable の両方で OnStressChanged を登録している。登録は OnEnable だけにする
+
+【修正4】ストレスバッジの廃止
+- バッジは使わないと決めた（child-status.md 6章）
+- Assets/Yamaguchi/Scripts/UI/StressBadgeUI.cs を削除し、
+  ChildCardUI と ParentCardUI から stressBadge の欄と呼び出しを取り除く
+
+【確認】
+- コンパイルが通ること
+- 子どもを勉強側いっぱいにすると、ストレスが親と同じくらいの速さ（1日約 +5）で上がること
+- 成績・体調の伸び方は変わらないこと
 ```
 
 ---

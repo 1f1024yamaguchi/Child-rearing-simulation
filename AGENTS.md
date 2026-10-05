@@ -76,6 +76,7 @@ Unity 製の子育てシミュレーションゲーム。**このファイルは
 - [0002-support-systems-have-drawbacks.md](docs/decisions/0002-support-systems-have-drawbacks.md) — 支援制度にデメリットを持たせる理由
 - [0007-traits-and-conditions.md](docs/decisions/0007-traits-and-conditions.md) — 特殊能力を「永続の特性」と「一時の状態」に分けた理由
 - [0004-pause-during-decisions.md](docs/decisions/0004-pause-during-decisions.md) — 判断画面で時間を止める方法（`OnEnable` / `OnDisable` で `PushPause` / `PopPause`）
+- [0013-child-stress-per-day-and-badge-removal.md](docs/decisions/0013-child-stress-per-day-and-badge-removal.md) — 子どものストレス計算を1日あたりに変更し、カードのストレス段階バッジを廃止した理由
 
 ---
 
