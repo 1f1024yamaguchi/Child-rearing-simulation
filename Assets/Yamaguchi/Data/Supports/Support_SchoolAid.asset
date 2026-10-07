@@ -1,0 +1,59 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea7ceb50aff1b1d4a80539c5d7a3a83e, type: 3}
+  m_Name: Support_SchoolAid
+  m_EditorClassIdentifier: Assembly-CSharp::SupportScheme
+  id: school_aid
+  title: "\u5C31\u5B66\u63F4\u52A9"
+  description: "\u7D66\u98DF\u8CBB\u30FB\u5B66\u7528\u54C1\u8CBB\u3092\u63F4\u52A9\uFF08\u81EA\u6CBB\u4F53\uFF09"
+  icon: {fileID: 0}
+  category: 1
+  merits:
+  - "\u7D66\u98DF\u8CBB\u30FB\u5B66\u7528\u54C1\u8CBB\u304C\u52A9\u304B\u308B"
+  demerits:
+  - "\u6BCE\u5E74\u7533\u8ACB\u3057\u76F4\u3057\u304C\u5FC5\u8981"
+  effectTiming: 1
+  effects: []
+  applyRequirements:
+  - {fileID: 11400000, guid: 8b0da0221726c60469939c0a22b8bd31, type: 2}
+  - {fileID: 11400000, guid: 78bb53ebee4d2d246a530f540b484a36, type: 2}
+  monthlyTiers:
+  - label: "\u5C0F\u30FB\u4E2D\u5B66\u751F"
+    fromAge:
+      year: 6
+      month: 4
+      day: 1
+    toAge:
+      year: 15
+      month: 3
+      day: 31
+    monthlyEffects:
+    - kind: 0
+      target: 0
+      value: 8000
+      duration: 0
+      days: 0
+    requirements: []
+  start:
+    year: 6
+    month: 4
+    day: 1
+  deadlineType: 2
+  deadline:
+    year: 0
+    month: 1
+    day: 1
+  yearly:
+    month: 4
+    day: 30
+  lapseYears: 2
+  renewWindowDays: 31

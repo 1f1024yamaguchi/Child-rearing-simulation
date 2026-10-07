@@ -1,8 +1,8 @@
 ---
 title: 子育て支援制度とボタン設計
-updated: 2026-09-23
+updated: 2026-10-05
 status: 設計中
-related: [docs/design/events.md, docs/code/ui-scroll-patterns.md, docs/design/calendar-system.md]
+related: [docs/design/support-apply.md, docs/design/events.md, docs/code/ui-scroll-patterns.md, docs/design/calendar-system.md]
 ---
 
 # 子育て支援制度とボタン設計
@@ -207,6 +207,7 @@ public class SupportScheme : ScriptableObject
 - **効果のタイミングは制度ごとに Inspector で選ぶ**（2026-09-23 決定）。
   - `OnApply`：申請ボタンを押したときに `effects` を1回だけ適用。
   - `Monthly`：受給中のあいだ、月が変わるたび（`MonthTicker.OnMonthChanged`）に `effects` を適用。申請した月の翌月分から始まるので、申請が遅れた月の分はもらえない（現実の児童手当と同じ）。
+- **申請したあとの状態の管理・効果の適用・カードの表示（申請前後に期限や受給状況を出す）は [support-apply.md](support-apply.md)。**
 - 期限切れの扱いは現実の制度と同じ（[calendar-system.md](calendar-system.md) 4章、[../decisions/0010-calendar-follows-reality.md](../decisions/0010-calendar-follows-reality.md)）。
 
 ### 毎年の手続きがある制度（現実の例・2026年時点）

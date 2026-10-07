@@ -33,6 +33,7 @@ Unity 製の子育てシミュレーションゲーム。**このファイルは
 | 山口 | 共通の土台（Core）・HUD・セーブ機能（続きから遊べるようにする） | `Assets/Yamaguchi/` | [architecture.md](docs/code/architecture.md) |
 
 実装の進め方は [docs/team/handout.md](docs/team/handout.md)。
+他のメンバーの合意待ちの項目は [docs/team/agreements-needed.md](docs/team/agreements-needed.md)。
 ※ ハンドアウトのサンプルコードは担当が変わる前のもの。担当の対応はこの表が正。
 
 ---
@@ -52,6 +53,8 @@ Unity 製の子育てシミュレーションゲーム。**このファイルは
 | [child-status.md](docs/design/child-status.md) | 子どものステータス（成績・趣味・体調・勉強⇔遊び）と子どもカードのUI | 子どもの値やカードを実装する |
 | [traits.md](docs/design/traits.md) | 特性（永続）と状態（一時）。風邪気味・特殊能力の持ち方 | イベントで特性・状態を付ける |
 | [support-systems.md](docs/design/support-systems.md) | 子育て支援制度のカテゴリ、メリットとデメリットの型、制度一覧画面の設計 | 制度データを扱う（草尾・丸山の共通の土台） |
+| [support-apply.md](docs/design/support-apply.md) | 制度の申請→状態管理→効果の反映、申請前後のカード表示（期限・受給状況） | サポート画面の申請・制度の状態を実装する |
+| [expenses.md](docs/design/expenses.md) | 毎月の支出（固定費・保育料・学費・塾）、無償化の肩代わり、家計簿 | お金の出入りに関わる機能を実装する |
 
 ### 実装メモ — `docs/code/`
 
@@ -60,6 +63,7 @@ Unity 製の子育てシミュレーションゲーム。**このファイルは
 | [architecture.md](docs/code/architecture.md) | 時間の流れ（GameClock→DayTicker/MonthTicker）、GameState の API、給与・親ストレスの計算、未実装の一覧 | **ゲームロジックに触る前に必ず** |
 | [ui-main-test-hud.md](docs/code/ui-main-test-hud.md) | Main_test シーンの HUD 構成と `MainTestHUD` の動作方式 | HUD を触る |
 | [ui-scroll-patterns.md](docs/code/ui-scroll-patterns.md) | uGUI スクロールの作り方、ステータス行プレハブ、TMP のハマりどころ | 一覧・スクロール UI を作る |
+| [ui-support-card.md](docs/code/ui-support-card.md) | 制度カード（SupportCard）の階層・状態ごとの表示・使い方 | サポート画面やカレンダーで制度の情報を表示する |
 
 ### チーム — `docs/team/`
 

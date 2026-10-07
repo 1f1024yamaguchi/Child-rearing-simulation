@@ -1,0 +1,46 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea7ceb50aff1b1d4a80539c5d7a3a83e, type: 3}
+  m_Name: Support_BirthLumpSum
+  m_EditorClassIdentifier: Assembly-CSharp::SupportScheme
+  id: birth_lump_sum
+  title: "\u51FA\u7523\u80B2\u5150\u4E00\u6642\u91D1"
+  description: "\u51FA\u7523\u306E\u3068\u304D\u306B\u307E\u3068\u307E\u3063\u305F\u4E00\u6642\u91D1"
+  icon: {fileID: 0}
+  category: 0
+  merits:
+  - "50\u4E07\u5186\u3082\u3089\u3048\u308B"
+  demerits:
+  - "\u51FA\u7523\u8CBB\u7528\u304C\u4E0A\u56DE\u308B\u3068\u5DEE\u984D\u306F\u81EA\u5DF1\u8CA0\u62C5"
+  effectTiming: 0
+  effects:
+  - kind: 0
+    target: 0
+    value: 500000
+    duration: 0
+    days: 0
+  applyRequirements: []
+  monthlyTiers: []
+  start:
+    year: 0
+    month: 1
+    day: 1
+  deadlineType: 1
+  deadline:
+    year: 2
+    month: 1
+    day: 1
+  yearly:
+    month: 8
+    day: 31
+  lapseYears: 2
+  renewWindowDays: 31
