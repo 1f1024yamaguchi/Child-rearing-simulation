@@ -200,9 +200,21 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 4352077615403391462}
     m_Modifications:
+    - target: {fileID: 2839698744226255889, guid: 52bf56b7c6c354142a2e21ff7f3e4082, type: 3}
+      propertyPath: m_TextStyleHashCode
+      value: -1183493901
+      objectReference: {fileID: 0}
     - target: {fileID: 3043561534345423433, guid: 52bf56b7c6c354142a2e21ff7f3e4082, type: 3}
       propertyPath: m_Name
       value: DemeritCard
+      objectReference: {fileID: 0}
+    - target: {fileID: 3899088308939104833, guid: 52bf56b7c6c354142a2e21ff7f3e4082, type: 3}
+      propertyPath: m_TextStyleHashCode
+      value: -1183493901
+      objectReference: {fileID: 0}
+    - target: {fileID: 6180860914759545201, guid: 52bf56b7c6c354142a2e21ff7f3e4082, type: 3}
+      propertyPath: m_TextStyleHashCode
+      value: -1183493901
       objectReference: {fileID: 0}
     - target: {fileID: 7398674847173389538, guid: 52bf56b7c6c354142a2e21ff7f3e4082, type: 3}
       propertyPath: m_Pivot.x
@@ -214,19 +226,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7398674847173389538, guid: 52bf56b7c6c354142a2e21ff7f3e4082, type: 3}
       propertyPath: m_AnchorMax.x
-      value: 0.5
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7398674847173389538, guid: 52bf56b7c6c354142a2e21ff7f3e4082, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0.5
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7398674847173389538, guid: 52bf56b7c6c354142a2e21ff7f3e4082, type: 3}
       propertyPath: m_AnchorMin.x
-      value: 0.5
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7398674847173389538, guid: 52bf56b7c6c354142a2e21ff7f3e4082, type: 3}
       propertyPath: m_AnchorMin.y
-      value: 0.5
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7398674847173389538, guid: 52bf56b7c6c354142a2e21ff7f3e4082, type: 3}
       propertyPath: m_SizeDelta.x
@@ -313,9 +325,21 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 4352077615403391462}
     m_Modifications:
+    - target: {fileID: 2839698744226255889, guid: 52bf56b7c6c354142a2e21ff7f3e4082, type: 3}
+      propertyPath: m_TextStyleHashCode
+      value: -1183493901
+      objectReference: {fileID: 0}
     - target: {fileID: 3043561534345423433, guid: 52bf56b7c6c354142a2e21ff7f3e4082, type: 3}
       propertyPath: m_Name
       value: MeritCard
+      objectReference: {fileID: 0}
+    - target: {fileID: 3899088308939104833, guid: 52bf56b7c6c354142a2e21ff7f3e4082, type: 3}
+      propertyPath: m_TextStyleHashCode
+      value: -1183493901
+      objectReference: {fileID: 0}
+    - target: {fileID: 6180860914759545201, guid: 52bf56b7c6c354142a2e21ff7f3e4082, type: 3}
+      propertyPath: m_TextStyleHashCode
+      value: -1183493901
       objectReference: {fileID: 0}
     - target: {fileID: 7398674847173389538, guid: 52bf56b7c6c354142a2e21ff7f3e4082, type: 3}
       propertyPath: m_Pivot.x
@@ -327,19 +351,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7398674847173389538, guid: 52bf56b7c6c354142a2e21ff7f3e4082, type: 3}
       propertyPath: m_AnchorMax.x
-      value: 0.5
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7398674847173389538, guid: 52bf56b7c6c354142a2e21ff7f3e4082, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0.5
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7398674847173389538, guid: 52bf56b7c6c354142a2e21ff7f3e4082, type: 3}
       propertyPath: m_AnchorMin.x
-      value: 0.5
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7398674847173389538, guid: 52bf56b7c6c354142a2e21ff7f3e4082, type: 3}
       propertyPath: m_AnchorMin.y
-      value: 0.5
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7398674847173389538, guid: 52bf56b7c6c354142a2e21ff7f3e4082, type: 3}
       propertyPath: m_SizeDelta.x

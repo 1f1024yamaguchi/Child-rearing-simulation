@@ -1,8 +1,8 @@
 ---
 title: 食事システム
-updated: 2026-09-21
-status: 設計中
-related: [docs/design/rules-and-stats.md, docs/design/events.md]
+updated: 2026-10-07
+status: 基本実装済み
+related: [docs/design/rules-and-stats.md, docs/design/events.md, docs/design/effects.md]
 ---
 
 # 食事システム（リアル要素つき）
@@ -15,26 +15,27 @@ related: [docs/design/rules-and-stats.md, docs/design/events.md]
 
 ## 1. グレード別の効果（現在のたたき台）
 
-| グレード | 費用/月 | ストレス（**全員に同じ量**） | イベント発生率 |
+| グレード | 費用/月 | ストレス値（**全員に同じ量**） | イベント発生率（UI表示） |
 |---|---|---|---|
-| 最安値 | 30,000 | +5 | Badイベント **+5%** |
-| 普通 | 90,000 | −2 | ±0 |
-| 高級 | 150,000 | −5 | Goodイベント **+5%** |
+| 安価 | 30,000 | +5（赤色） | Badイベント **+5%**（赤色） |
+| 普通 | 90,000 | −2（緑色/回復） | イベント発生率　変化なし（通常色） |
+| 高価 | 150,000 | −5（緑色/回復） | Goodイベント **+5%**（緑色） |
 
 - ストレスは母親・父親・子どもがそれぞれ持つが、**食事は家族で同じものを食べるので全員に同じ量を適用する**（人によって増減量を変えない）。→ [../decisions/0005-per-person-stress.md](../decisions/0005-per-person-stress.md)
-- 高級の効果は「Badイベントが減る」ではなく「**Goodイベントが増える**」とする。得をする方向に振ったほうが、お金を使う判断が前向きになるため。
-- 選択のタイミングは月1回（[rules-and-stats.md](rules-and-stats.md) 1章の月次処理）。
+- 高価の効果は「Badイベントが減る」ではなく「**Goodイベントが増える**」とする。得をする方向に振ったほうが、お金を使う判断が前向きになるため。
+- 選択のタイミングは月1回（毎月1日。ゲーム開始時にも初回選択）。
 - **選択画面を開いている間はゲーム内時間を止める**（[../decisions/0004-pause-during-decisions.md](../decisions/0004-pause-during-decisions.md)）。
-- 費用が収入に対して重いのは意図的。安易に高級を選び続けられないほうが判断が生まれる。
+- **食事の費用（コスト）は、選択したプランの月額費用をその月の日数で日割りした金額が、一日ごとに所持金から引き落とされる。**（毎月1日のダイアログでは最新の所持金を確認して今月のプランを選択する）
+- 費用が収入に対して重いのは意図的。安易に高価を選び続けられないほうが判断が生まれる。
 
 ### 効果の持ち方（重要）
 
 **この表の数値をコードに直接書かないこと。** グレードは `List<Effect>` を持つデータとして定義し、適用は共通の `EffectApplier` に任せる。→ [effects.md](effects.md)
 
 ```
-最安値 : [ Stress +5 → Everyone, Money -30000, BadEventRate +5% (ThisMonth) ]
-普通   : [ Stress -2 → Everyone, Money -90000 ]
-高級   : [ Stress -5 → Everyone, Money -150000, GoodEventRate +5% (ThisMonth) ]
+安価 : [ Stress +5 → Everyone, BadEventRate +5% (ThisMonth) ]（月額 30,000円 を当月日数で日割りし毎日引き落とし）
+普通 : [ Stress -2 → Everyone ]（月額 90,000円 を当月日数で日割りし毎日引き落とし）
+高価 : [ Stress -5 → Everyone, GoodEventRate +5% (ThisMonth) ]（月額 150,000円 を当月日数で日割りし毎日引き落とし）
 ```
 
 こうしておけば、下の2章・3章にある「体調」「成績」「虫歯」といった効果を**後から足すときに、食事側のコードを触らずに済む**。数値も効果の種類も今後変わる前提なので、ここは必ず守ること。
@@ -77,3 +78,14 @@ related: [docs/design/rules-and-stats.md, docs/design/events.md]
 ## 5. 出典（食と健康・学力・免疫の裏付け、2026時点）
 - 朝食摂取と学力・集中力の関係：農林水産省 食育白書／文部科学省 全国学力・学習状況調査 関連資料、明治「食育」ほか
 - 栄養バランスと免疫力・感染症予防：健康長寿ネット、大塚製薬「免疫Navi」ほか
+
+---
+
+## 6. 実装構成（Assets/Arisaka/）
+
+- **`MealPlan.cs`**：食事プランのデータモデル。安価・普通・高価の3プランを定義。月始めの選択時効果（ストレス・イベント率）と、一日ごとの日割り引き落とし用費用効果を管理。
+- **`MealCardUI.cs`**：カード1枚の表示（添付写真に忠実な器と湯気の線画スプライトアイコン、金額、効果、ボタン）と選択ハイライト制御。
+- **`MealSelectionDialogUI.cs`**：ダイアログ全体制御。上部に最新の所持金を表示し、カレンダー画面に近い程よいサイズ感（720x460）で描画。表示時に `GameClock.I.PushPause()`、非表示時に `PopPause()` を呼び出す。
+- **`MealSystemManager.cs`**：`MonthTicker` / `DayTicker` を監視し、毎月1日に食事選択ダイアログを表示するとともに、選択された食事プランの費用を当月日数で日割りして一日ごとに所持金から引き落とすマネージャー（`RuntimeInitializeOnLoadMethod` で自動常駐）。
+
+

@@ -1889,6 +1889,7 @@ GameObject:
   - component: {fileID: 2132171539}
   - component: {fileID: 2132171541}
   - component: {fileID: 2132171540}
+  - component: {fileID: 2132171542}
   m_Layer: 5
   m_Name: money
   m_TagString: Untagged
@@ -2027,8 +2028,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3f5a417f3b9545ff9b8a61f5d80963f2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MoneyUI
-  label: Money:
-  currencyPrefix: ¥
+  label: 
+  currencyPrefix: "\xA5"
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
