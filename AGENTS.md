@@ -64,6 +64,7 @@ Unity 製の子育てシミュレーションゲーム。**このファイルは
 | [ui-main-test-hud.md](docs/code/ui-main-test-hud.md) | Main_test シーンの HUD 構成と `MainTestHUD` の動作方式 | HUD を触る |
 | [ui-scroll-patterns.md](docs/code/ui-scroll-patterns.md) | uGUI スクロールの作り方、ステータス行プレハブ、TMP のハマりどころ | 一覧・スクロール UI を作る |
 | [ui-support-card.md](docs/code/ui-support-card.md) | 制度カード（SupportCard）の階層・状態ごとの表示・使い方 | サポート画面やカレンダーで制度の情報を表示する |
+| [how-to-add-support-scheme.md](docs/code/how-to-add-support-scheme.md) | 支援制度（カード）の足し方と、制度アセットの各項目（年齢の日付・期限・支給表・条件）の意味 | 制度を追加・調整する |
 
 ### チーム — `docs/team/`
 
