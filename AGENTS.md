@@ -55,6 +55,8 @@ Unity 製の子育てシミュレーションゲーム。**このファイルは
 | [support-systems.md](docs/design/support-systems.md) | 子育て支援制度のカテゴリ、メリットとデメリットの型、制度一覧画面の設計 | 制度データを扱う（草尾・丸山の共通の土台） |
 | [support-apply.md](docs/design/support-apply.md) | 制度の申請→状態管理→効果の反映、申請前後のカード表示（期限・受給状況） | サポート画面の申請・制度の状態を実装する |
 | [expenses.md](docs/design/expenses.md) | 毎月の支出（固定費・保育料・学費・塾）、無償化の肩代わり、家計簿 | お金の出入りに関わる機能を実装する |
+| [company-support.md](docs/design/company-support.md) | 会社の制度（育休・時短）。親の働き方の状態と給料連動の支給、段階的な作り方 | 会社タブの制度や親の働き方を実装する |
+| [save-system.md](docs/design/save-system.md) | セーブ（保存するもの一覧・参加者の仕組み・ロードの順番） | セーブに関わる値を持つ機能を作る |
 
 ### 実装メモ — `docs/code/`
 
@@ -64,6 +66,7 @@ Unity 製の子育てシミュレーションゲーム。**このファイルは
 | [ui-main-test-hud.md](docs/code/ui-main-test-hud.md) | Main_test シーンの HUD 構成と `MainTestHUD` の動作方式 | HUD を触る |
 | [ui-scroll-patterns.md](docs/code/ui-scroll-patterns.md) | uGUI スクロールの作り方、ステータス行プレハブ、TMP のハマりどころ | 一覧・スクロール UI を作る |
 | [ui-support-card.md](docs/code/ui-support-card.md) | 制度カード（SupportCard）の階層・状態ごとの表示・使い方 | サポート画面やカレンダーで制度の情報を表示する |
+| [ui-support-toast.md](docs/code/ui-support-toast.md) | 通知（SupportToast）が何をきっかけに何を出すか、仕組みと判断 | 申請・期限切れの通知を触る／通知を足す |
 | [how-to-add-support-scheme.md](docs/code/how-to-add-support-scheme.md) | 支援制度（カード）の足し方と、制度アセットの各項目（年齢の日付・期限・支給表・条件）の意味 | 制度を追加・調整する |
 
 ### チーム — `docs/team/`

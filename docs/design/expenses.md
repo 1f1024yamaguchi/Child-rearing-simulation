@@ -12,6 +12,8 @@ related: [docs/design/support-apply.md, docs/design/food-system.md, docs/design/
 
 ---
 
+> **2026-10-09**：どんな費目（電気代・税金など）を入れるかは、他のメンバーに現実の支出を調べてもらってから決めて実装する。6章の表はそれまでのたたき台。
+
 ## 1. 何が変わるか
 
 今のお金の動き：給料（月1回）＋ 食事・イベント・制度の Effect。

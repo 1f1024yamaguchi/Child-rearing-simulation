@@ -23,6 +23,9 @@ public class DayTicker : MonoBehaviour
         if (GameState.I != null) GameState.I.OnAgeChanged -= HandleAgeChanged;
     }
 
+    /// ロード用。「今日はこの日」と教えるだけで、通知は出さない。
+    public void Resync(int ageDays) { lastDay = ageDays; }
+
     private void HandleAgeChanged(float ageDays)
     {
         int day = Mathf.FloorToInt(ageDays);

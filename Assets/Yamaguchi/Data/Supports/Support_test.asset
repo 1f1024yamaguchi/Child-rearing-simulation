@@ -23,9 +23,7 @@ MonoBehaviour:
   - "\u6BCE\u5E74\u7533\u8ACB\u3057\u76F4\u3057\u304C\u5FC5\u8981"
   effectTiming: 1
   effects: []
-  applyRequirements:
-  - {fileID: 11400000, guid: 8b0da0221726c60469939c0a22b8bd31, type: 2}
-  - {fileID: 11400000, guid: 78bb53ebee4d2d246a530f540b484a36, type: 2}
+  applyRequirements: []
   monthlyTiers:
   - label: "\u9AD8\u6821\u751F\u307E\u3067"
     fromAge:
@@ -44,8 +42,8 @@ MonoBehaviour:
       days: 0
     requirements: []
   start:
-    year: 1
-    month: 4
+    year: 0
+    month: 1
     day: 1
   deadlineType: 0
   deadline:

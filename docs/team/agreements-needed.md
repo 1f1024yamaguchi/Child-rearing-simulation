@@ -1,6 +1,6 @@
 ---
 title: 他のメンバーの合意が必要な項目（支援制度・カレンダー・支出）
-updated: 2026-10-07
+updated: 2026-10-09
 status: 合意待ち
 related: [docs/design/support-apply.md, docs/design/calendar-system.md, docs/design/expenses.md]
 ---
@@ -21,6 +21,7 @@ related: [docs/design/support-apply.md, docs/design/calendar-system.md, docs/des
 | K3 | **制度の締め切りをカレンダーに自動で載せない**（書いた予定だけ載せる）。9/23 の決定 0010 を変える | 自動表示を作らなくてよくなる | 決定 0016 | |
 | K4 | 予定の書き込み（2.2）・リマインダー（2.4）を必須の作業として追加。完了チェック・サポート画面への移動（2.5）は時間があれば | **作業が増える** | calendar-system.md 2.2〜2.5、8章 | |
 | K5 | 制度カードの［カレンダーに追加］から呼ぶ `CalendarUI.OpenAddPlan(schemeId, ageDays, kind)` を用意してもらう | 公開メソッドを1つ作る | calendar-system.md 2.3 | |
+| K7 | メモ・予定のセーブは `ISaveParticipant` を実装して自分で保存・復元してもらう（save-system.md 2.1）。SaveSystem は山口が作る | 自分の分の Capture/Restore を書く | save-system.md 1.2・2.1 | |
 | K6 | リマインダーのポップアップから山口の `SupportPanelController.Open(schemeId)` を呼ぶ。判断画面が開いているかは `GameClock.IsPauseRequested`（山口が追加）で判定する | 山口側の窓口を使う | calendar-system.md 2.4 | |
 
 ---
@@ -42,6 +43,7 @@ related: [docs/design/support-apply.md, docs/design/calendar-system.md, docs/des
 | # | お願い・確認したいこと | 有坂さんへの影響 | 詳しくは | 合意日 |
 |---|---|---|---|---|
 | A1 | 食費でお金を減らすときは `EffectApplier.Apply(effects, new LedgerSource("食費（普通）", ExpenseCategory.食費))` の形で呼ぶ（家計簿に「食費」として載るように） | 呼び方を合わせる | expenses.md 5.6 | |
+| A3 | 食事の状態（ランク・最後に食費を引いた日・今月の額など）を `ISaveParticipant` で保存・復元してもらう | 自分の分の Capture/Restore を書く | save-system.md 1.2 | |
 | A2 | **お金がマイナスになるようになる**（0円止めを外す）。`MoneyUI` でマイナスを表示できるようにする（赤字表示など） | `MoneyUI.cs` の確認 | expenses.md 5.7 | |
 
 ---

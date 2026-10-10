@@ -1,6 +1,6 @@
 ---
 title: 支援制度の申請と効果の反映
-updated: 2026-10-07
+updated: 2026-10-08
 status: 確定（他メンバーの合意待ちの項目は docs/team/agreements-needed.md）
 related: [docs/design/expenses.md, docs/design/support-systems.md, docs/design/calendar-system.md, docs/design/effects.md, docs/code/architecture.md, docs/decisions/0014-support-state-in-manager.md]
 ---
@@ -125,6 +125,24 @@ public enum SupportState
 - 月の番号を `monthIndex = 歳 * 12 + (月 - 1)` で表す（`GameDate.FromAgeDays` から計算）。
 - 申請したときの `monthIndex` を `appliedMonthIndex` に覚え、`OnMonthChanged` で「今の monthIndex > appliedMonthIndex」なら払う。
 - → 0歳6月に申請すると7月分から。**遅れた分はさかのぼらない**（児童手当と同じ）。
+
+### 2.3 毎年の手続きの1回目の期限（2026-10-08 決定：案C）
+
+Yearly の制度を申請（または支給停止から再開）したとき、最初の期限をどの歳の○月○日にするか。
+
+- **その歳の期限まで `renewWindowDays`（既定31日）より長く残っていれば → その歳の期限が最初。**
+- 残りが31日以下、またはその歳の期限をもう過ぎていれば → 次の歳の期限が最初。
+
+| 毎年8月31日の制度を申請した日 | 最初の期限 |
+|---|---|
+| 0歳1月10日 | 0歳8月31日 |
+| 0歳7月20日 | 0歳8月31日 |
+| 0歳8月20日（残り11日） | 1歳8月31日 |
+| 0歳9月5日（過ぎている） | 1歳8月31日 |
+
+- 現実（受給が決まった年も8月に現況届が要る）に近く、申請した直後にすぐ手続きを求められることもない。
+- 検討した他の案：A 必ず次の歳（申請時期で次の期限まで12〜20か月とばらつく）／B 現実どおりその歳（直前に申請すると数日後にまた手続き）。
+- 実装：`SupportManager.FirstRenewedYear`。
 
 ---
 
@@ -462,5 +480,8 @@ public class SupportSchemeRuntime   // そのまま SaveData に入れられる�
 | ゲーム用の期限の長さ（妊婦の支援給付 0歳3月31日 など） | **様子見**。動かしてから調整する |
 | 申請条件とイベントの発生条件 | **別々のまま**（`RequirementSO` と丸山さんの `EventConditionSO` はまとめない） |
 | 金額 | 現実の2026年度の値（9章） |
+| 毎年の手続きの1回目の期限 | 案C（2.3）。2026-10-08 |
+| タブの「申請できる」数（政府（3）） | **残す**（2026-10-08）。今のプログラムのまま |
+| 会社の制度（育休・時短） | 段階的に作る → [company-support.md](company-support.md) |
 
 **他のメンバーの合意が必要な項目**は [../team/agreements-needed.md](../team/agreements-needed.md) にまとめた。合意が取れたらそちらに日付を書き、関係する文書を直す。

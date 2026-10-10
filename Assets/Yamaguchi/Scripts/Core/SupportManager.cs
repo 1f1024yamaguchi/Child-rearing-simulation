@@ -9,9 +9,15 @@ using UnityEngine;
 /// - MonthTicker.OnMonthChanged：受給中の制度に「今の年齢の支給額」を払う
 /// 効果の適用は必ず EffectApplier.Apply(...)。GameState を直接触らない。
 /// </summary>
-public class SupportManager : MonoBehaviour
+public class SupportManager : MonoBehaviour, ISaveParticipant
 {
     public static SupportManager I { get; private set; }
+
+    public string SaveKey => "support";
+    public int RestoreOrder => 30;
+
+    private void OnEnable() => SaveSystem.Register(this);
+    private void OnDisable() => SaveSystem.Unregister(this);
 
     [Header("制度の一覧（並び順＝表示順）")]
     [SerializeField] private List<SupportScheme> schemes = new List<SupportScheme>();
@@ -204,7 +210,7 @@ public class SupportManager : MonoBehaviour
         int today = Today();
         rt.appliedAgeDays = today;
         rt.appliedMonthIndex = MonthIndexOf(today);
-        rt.renewedYear = YearOf(today);
+        rt.renewedYear = FirstRenewedYear(s, today);   // 毎年の手続きの1回目の期限（案C）
 
         // 申請したときに1回だけ起きること（OnApply の本体／Monthly の手間のストレスなど）
         int money = MoneyOf(s.effects);
@@ -251,7 +257,7 @@ public class SupportManager : MonoBehaviour
             EffectApplier.Apply(tier.monthlyEffects);
         }
         rt.owedTierIndexes.Clear();
-        rt.renewedYear = YearOf(Today());
+        rt.renewedYear = FirstRenewedYear(s, Today());
         rt.suspendedAgeDays = -1;
         SetState(s, rt, SupportState.Active);
         Debug.Log($"[SupportManager] {s.title}：再開しました。止まっていた {owedCount} か月分をまとめて適用 {FormatMoney(owedMoney)}");
@@ -291,6 +297,28 @@ public class SupportManager : MonoBehaviour
             var rt = GetRuntime(s);   // 無ければここで計算して作られる
             OnStateChanged?.Invoke(s, rt.state);
         }
+    }
+
+    [Serializable]
+    private class SupportSaveData
+    {
+        public List<SupportSchemeRuntime> runtimes = new List<SupportSchemeRuntime>();
+    }
+
+    public string Capture()
+    {
+        var data = new SupportSaveData
+        {
+            runtimes = ToSave()
+        };
+        return JsonUtility.ToJson(data);
+    }
+
+    public void Restore(string json)
+    {
+        if (string.IsNullOrEmpty(json)) return;
+        var data = JsonUtility.FromJson<SupportSaveData>(json);
+        Restore(data?.runtimes);
     }
 
     // ------------------------------------------------------------
@@ -469,6 +497,19 @@ public class SupportManager : MonoBehaviour
             if (t != null) last = Mathf.Max(last, t.toAge.ToAgeDays());
         }
         return last >= 0 && today > last;
+    }
+
+    /// <summary>
+    /// 申請・再開したときに「どの歳まで手続き済み」とみなすか（support-apply.md 2.3・案C）。
+    /// その歳の期限まで renewWindowDays より長く残っていれば、その歳の期限を最初の期限にする（＝前の歳まで済み）。
+    /// 残りが短い・もう過ぎているなら、その歳は済みとして次の歳の期限を最初にする。
+    /// </summary>
+    private static int FirstRenewedYear(SupportScheme s, int today)
+    {
+        int year = YearOf(today);
+        if (s.deadlineType != DeadlineType.Yearly) return year;
+        int thisYearDeadline = YearlyDeadline(s, year);
+        return (thisYearDeadline - today > s.renewWindowDays) ? year - 1 : year;
     }
 
     private static int YearlyDeadline(SupportScheme s, int year)

@@ -20,7 +20,7 @@ MonoBehaviour:
   merits:
   - "50\u4E07\u5186\u3082\u3089\u3048\u308B"
   demerits:
-  - "\u51FA\u7523\u8CBB\u7528\u304C\u4E0A\u56DE\u308B\u3068\u5DEE\u984D\u306F\u81EA\u5DF1\u8CA0\u62C5"
+  - "\u306A\u3057"
   effectTiming: 0
   effects:
   - kind: 0

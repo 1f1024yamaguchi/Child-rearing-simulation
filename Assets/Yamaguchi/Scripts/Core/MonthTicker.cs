@@ -23,6 +23,13 @@ public class MonthTicker : MonoBehaviour
         if (GameState.I != null) GameState.I.OnAgeChanged -= HandleAgeChanged;
     }
 
+    /// ロード用。今の年・月を合わせるだけで、通知は出さない。
+    public void Resync(float ageDays)
+    {
+        int d;
+        GameDate.FromAgeDays(ageDays, out lastYear, out lastMonth, out d);
+    }
+
     private void HandleAgeChanged(float ageDays)
     {
         int y, m, d;

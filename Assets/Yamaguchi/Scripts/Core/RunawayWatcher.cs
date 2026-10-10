@@ -3,7 +3,7 @@ using UnityEngine;
 
 /// 子どものストレスが限界（91以上）のまま規定日数続いたら家出（ゲームオーバー）にする。
 /// child-status.md 4章「家出（ゲームオーバー）」の仕様を実装。
-public class RunawayWatcher : MonoBehaviour
+public class RunawayWatcher : MonoBehaviour, ISaveParticipant
 {
     [Header("参照")]
     [Tooltip("監視する子どものステータス（Household.Child から自動取得）")]
@@ -21,6 +21,13 @@ public class RunawayWatcher : MonoBehaviour
     private int dangerDayCount = 0;
     private bool hasRunAway = false;
 
+    // ─── セーブ参加者 ──────────────────────────────────────────
+    public string SaveKey => "runaway";
+    public int RestoreOrder => 40;
+
+    private void OnEnable() => SaveSystem.Register(this);
+    private void OnDisable() => SaveSystem.Unregister(this);
+
     // ─── 公開イベント ──────────────────────────────────────────
     /// 家出が発生したときに通知される。
     public event Action OnRunaway;
@@ -36,6 +43,18 @@ public class RunawayWatcher : MonoBehaviour
 
     /// 家出が発生済みかどうか。発生後は判定を行わない。
     public bool HasRunAway => hasRunAway;
+
+    // ─── セーブ復元窓口 ─────────────────────────────────────
+    public void RestoreDangerDays(int days)
+    {
+        dangerDayCount = Mathf.Max(0, days);
+        OnDangerDaysChanged?.Invoke(dangerDayCount);
+    }
+
+    public void RestoreHasRunAway(bool value)
+    {
+        hasRunAway = value;
+    }
 
     private void Start()
     {
@@ -94,5 +113,32 @@ public class RunawayWatcher : MonoBehaviour
                 OnDangerDaysChanged?.Invoke(dangerDayCount);
             }
         }
+    }
+
+    // ─── セーブ・ロード（ISaveParticipant）───────────────────
+    [Serializable]
+    private class RunawaySaveData
+    {
+        public int dangerDays;
+        public bool hasRunAway;
+    }
+
+    public string Capture()
+    {
+        var data = new RunawaySaveData
+        {
+            dangerDays = dangerDayCount,
+            hasRunAway = hasRunAway
+        };
+        return JsonUtility.ToJson(data);
+    }
+
+    public void Restore(string json)
+    {
+        if (string.IsNullOrEmpty(json)) return;
+        var data = JsonUtility.FromJson<RunawaySaveData>(json);
+        if (data == null) return;
+        RestoreDangerDays(data.dangerDays);
+        RestoreHasRunAway(data.hasRunAway);
     }
 }

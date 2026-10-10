@@ -53,6 +53,9 @@ public class ChildStatus : PersonStatus
     /// 趣味の習熟レベル（hobbyExp ÷ expPerLevel の整数部分）。
     public int HobbyLevel => Mathf.FloorToInt(hobbyExp / Mathf.Max(expPerLevel, 1f));
 
+    /// 趣味の累積経験値。
+    public float HobbyExp => hobbyExp;
+
     /// 合格ライン（0〜100）。
     public float PassLine => passLine;
 
@@ -134,6 +137,24 @@ public class ChildStatus : PersonStatus
     public void SetHobby(HobbyKind newHobby)
     {
         hobby = newHobby;
+        OnHobbyChanged?.Invoke(hobby, HobbyLevel);
+    }
+
+    /// <summary>
+    /// セーブ復元用。成績・体調・バランス・趣味・経験値をまとめて戻す。
+    /// 上限・下限は現在の Clamp に合わせる。
+    /// </summary>
+    public void RestoreValues(float newGrade, float newHealth, float newStudyPlayBalance, HobbyKind newHobby, float newHobbyExp)
+    {
+        grade = Mathf.Clamp(newGrade, 0f, 100f);
+        health = Mathf.Clamp(newHealth, 0f, 100f);
+        studyPlayBalance = Mathf.Clamp01(newStudyPlayBalance);
+        hobby = newHobby;
+        hobbyExp = Mathf.Max(0f, newHobbyExp);
+
+        OnGradeChanged?.Invoke(Grade);
+        OnHealthChanged?.Invoke(Health);
+        OnStudyPlayBalanceChanged?.Invoke(studyPlayBalance);
         OnHobbyChanged?.Invoke(hobby, HobbyLevel);
     }
 

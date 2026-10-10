@@ -26,6 +26,7 @@ public class ParentStatus : PersonStatus
     public event Action<float> OnBalanceChanged;
 
     public float WorkLifeBalance => workLifeBalance;
+    public JobRank Rank => rank;
 
     public const int WageDaysPerMonth = 30;   // 日給の計算基準
 
@@ -45,7 +46,9 @@ public class ParentStatus : PersonStatus
     {
         get
         {
-            float base_ = MonthlySalary / (float)WageDaysPerMonth * BalanceMultiplier(workLifeBalance);
+            float mult = BalanceMultiplier(workLifeBalance);
+            if (mult <= 0f) return 0;   // 休み：特性・状態の補正も含めて給料なし
+            float base_ = MonthlySalary / (float)WageDaysPerMonth * mult;
             var (addSum, mulSum) = CollectModifier(EffectKind.Money);
             return Mathf.RoundToInt((base_ + addSum) * (1f + mulSum));
         }
@@ -54,9 +57,11 @@ public class ParentStatus : PersonStatus
     public float PendingWage => pendingWage;
 
     /// rules-and-stats.md の表（ライフ寄り0.8倍 〜 ワーク寄り1.5倍）
+    /// 一番ライフ寄り（0）は「休み」で給料なし（company-support.md 6章・2026-10-09 決定）
     public static float BalanceMultiplier(float balance01)
     {
         int pos = Mathf.RoundToInt(balance01 * 100f);
+        if (pos <= 0) return 0f;      // 休み：給料なし
         if (pos <= 20) return 0.8f;
         if (pos <= 40) return 0.9f;
         if (pos <= 60) return 1.0f;
@@ -85,6 +90,13 @@ public class ParentStatus : PersonStatus
         pendingWage = 0f;
         OnPendingWageChanged?.Invoke(pendingWage);
         return paid;
+    }
+
+    /// <summary>セーブ復元用。積み立て中の給料を戻す。</summary>
+    public void RestorePendingWage(float wage)
+    {
+        pendingWage = Mathf.Max(0f, wage);
+        OnPendingWageChanged?.Invoke(pendingWage);
     }
 
     public void SetRank(JobRank newRank)

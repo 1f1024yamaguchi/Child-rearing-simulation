@@ -1,7 +1,7 @@
 ---
 title: 制度カード（SupportCard）とサポート画面の実装
-updated: 2026-10-07
-status: 実装済み（ステップ2・ステップ3前半）
+updated: 2026-10-09
+status: 実装済み（ステップ2・ステップ3）
 related: [docs/design/support-apply.md, docs/code/ui-scroll-patterns.md, docs/team/antigravity-support-apply.md]
 ---
 
@@ -9,7 +9,7 @@ related: [docs/design/support-apply.md, docs/code/ui-scroll-patterns.md, docs/te
 
 > サポート画面に並ぶ **制度カード1枚** の作りと使い方の記録。支援制度の申請（[support-apply.md](../design/support-apply.md)）のステップ2にあたる。
 > このファイルは「仕様（なぜそうするか）」ではなく **「実際にどう作ったか・どう使うか」** を書く。仕様は support-apply.md 7章が正。
-> カードを並べる・タブ切替・時間停止（ステップ3前半）は 8章。確認ダイアログと通知（ステップ3後半）は未実装。
+> カードを並べる・タブ切替・時間停止（ステップ3前半）は 8章。確認ダイアログ・通知・ボタンのバッジ（ステップ3後半）は 9章。
 
 ---
 
@@ -135,8 +135,8 @@ Play 中に `SupportManager` の4制度でカードを作って確認した。
 | 内容 | いつ |
 |---|---|
 | ~~カードを制度アセットから並べる・タブ切替・仮カードの削除~~ | **完了（8章）** |
-| サポートボタン（画面下）に「申請できる」数のバッジ | ステップ3後半 |
-| 確認ダイアログ（`OnPrimaryClicked` を購読） | ステップ3 |
+| ~~サポートボタン（画面下）に「申請できる」数のバッジ~~ | **完了（9章）** |
+| ~~確認ダイアログ（`OnPrimaryClicked` を購読）~~ | **完了（9章）** |
 | ［カレンダーに追加］を `CalendarUI.OpenAddPlan` につなぐ | ステップ5（草尾さん K5） |
 | 効果チップのお金に桁区切りが無い（「+500000」）。`EffectChipUI` は丸山さんのファイルなので、直すなら丸山さんに依頼 | 相談 |
 | 制度アイコンの画像 | 素材ができたら `SupportScheme.icon` に入れるだけ |
@@ -196,3 +196,26 @@ panel.Open("child_allowance");              // その制度のタブを開き、
 4. `Open("child_allowance")` → 児童手当のカードまでスクロール。
 5. ×で閉じる → 時間が戻る（停止数 0）。［サポート］で開く → 止まる（停止数 1）、カードが並び直る。
 6. Console にエラー・警告なし。
+
+---
+
+## 9. 確認ダイアログ・通知・バッジ（ステップ3後半）
+
+| ファイル | 役割 |
+|---|---|
+| `Scripts/UI/SupportApplyDialog.cs` ＋ `Prefabs/UI/SupportApplyDialog.prefab` | 申請・更新・手続きの確認。OK で `SupportManager.Apply / Renew / Resume` を呼ぶだけ |
+| `Scripts/UI/SupportToast.cs` | 画面上部の2秒の通知（順番待ち）。Canvas の直下 |
+| `Scripts/UI/SupportButtonBadge.cs` | ［サポート］ボタンの「申請できる」数（`GetState == Available`）。0 なら非表示 |
+| `Scripts/Editor/SupportUIBuilder.cs` | 上の3つの UI をメニュー「子育て/サポートUI」から作る道具 |
+
+- **ダイアログ**：`SupportPanelController` が各カードの `OnPrimaryClicked` を購読して `Open(scheme, action)` を呼ぶ（`dialog` か `dialogPrefab` が設定されているときだけ。無ければ従来どおりカードが直接呼ぶ）。`supports` の子の一番手前に置く。時間は `supports` が止めているので `PushPause` しない。画面が閉じたらダイアログも閉じる。効果の文は `EffectChipUI` を変更せずに使い、プラス／マイナスの分け方は `EffectChipUI` と同じ（ストレスは増えるとマイナス、他は減るとマイナス）。Renew / Resume は新しく起きる効果が無いので、効果欄は出さず名前・支給表・注意だけ出す。
+- **通知**：`SupportManager` に「申請した」イベントが無いので、`OnStateChanged` で「Available から Received / Active に変わった」を申請とみなす。セーブ読み込み（`Restore`）で誤って出ないよう、申請日が今日のときだけ出す。`OnPaid`（毎月の支給）では出さない（support-apply.md 10章）。待ち時間は実時間（時間が止まっていても消える）。
+- **バッジ**：数は `SupportManager.Schemes` から数える。`OnStateChanged` で更新。
+
+### 確認すること
+
+1. ［申請する］→ ダイアログ →［やめる］で何も起きない。
+2. 一時金を［申請する］→［申請する］→ お金 +500,000、通知「出産育児一時金を受け取りました　お金 +500,000」。
+3. 児童手当を申請 → 通知「来月から毎月 +15,000」。
+4. 支援給付を放置して 0歳4月1日 → サポート画面を閉じていても「申請期限が過ぎました」。
+5. ［サポート］ボタンのバッジが申請できる制度の数と合い、申請すると減る。

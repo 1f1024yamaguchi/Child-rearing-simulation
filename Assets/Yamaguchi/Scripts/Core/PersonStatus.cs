@@ -160,6 +160,32 @@ public abstract class PersonStatus : MonoBehaviour
             OnStressChanged?.Invoke(Stress);
     }
 
+    /// <summary>セーブ復元用。特性リストを丸ごと入れ直す。</summary>
+    public void RestoreTraits(System.Collections.Generic.List<TraitDefinition> newTraits)
+    {
+        traits.RemoveAll();
+        if (newTraits != null)
+        {
+            foreach (var t in newTraits)
+            {
+                if (t != null) traits.Add(t);
+            }
+        }
+    }
+
+    /// <summary>セーブ復元用。状態リストを丸ごと入れ直す。</summary>
+    public void RestoreConditions(System.Collections.Generic.List<(ConditionDefinition def, int remainingDays)> newConditions)
+    {
+        conditions.RemoveAll();
+        if (newConditions != null)
+        {
+            foreach (var item in newConditions)
+            {
+                if (item.def != null) conditions.Add(item.def, item.remainingDays);
+            }
+        }
+    }
+
     // ─── テスト用（Inspector 右クリックメニュー）────────────
     /// 再生中でなければ何もせず警告ログを出す（停止中に付けるとシーンに保存されてしまうため）。
     [ContextMenu("テスト：特性を付ける")]

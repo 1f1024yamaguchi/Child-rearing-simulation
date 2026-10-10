@@ -81,18 +81,48 @@ docs/design/support-apply.md 7.1〜7.2章のとおり、制度カードを作っ
 
 ---
 
-## ステップ3：申請ボタン・確認ダイアログ・通知・タブ
+## ステップ3：後半（確認ダイアログ・通知・サポートボタンのバッジ）
+
+> 前半（カードを並べる・タブ・時間停止）は完了済み（`SupportPanelController`、→ docs/code/ui-support-card.md 8章）。
 
 ```
-docs/design/support-apply.md 7.3〜7.6章のとおりに作ってください。
+AGENTS.md と .agents/rules/、docs/design/support-apply.md 7.3〜7.5章、docs/code/ui-support-card.md を読んでから作業してください。
+ステップ3の後半として、次の3つを作ってください。既にある SupportSchemeCard / SupportPanelController / SupportManager の作りは変えず、足す形にしてください。
 
-- SupportPanelController.cs：タブ（政府／地方自治体／会社）を押したら GetByCategory で Content のカードを作り直す。タブと下部のサポートボタンに「申請できる」数のバッジ。OnEnable で GameClock.I.PushPause()、OnDisable で PopPause()。Open(string schemeId) で、その制度のタブを開いてカードまでスクロールする窓口も作る（カレンダーから呼ぶ）。
-- SupportApplyDialog.cs：［申請する］で確認を出し、OK なら SupportManager.Apply。Yearly の更新は Renew、支給停止は Resume。もらえるもの／かかるもの／注意（demerits）を分けて表示。
-- SupportToast.cs：申請直後（7.4）と期限切れ（OnExpired・1回だけ）の短い通知。毎月の支給は通知しない（10章）。
-- GameClock.SetRunning は画面の開閉に使わない（AGENTS.md ルール8）。
+1. SupportApplyDialog.cs（Assets/Yamaguchi/Scripts/UI/）
+   - SupportPanelController が、並べた各カードの OnPrimaryClicked を購読し、このダイアログを開く。
+     （購読者がいるとカードは SupportManager を直接呼ばなくなる。ui-support-card.md 4章）
+   - ダイアログには「制度名」「もらえるもの（プラスの効果）」「かかるもの（マイナスの効果・手間のストレス）」「注意（demerits）」と、Monthly なら「（来月から）」、OnApply なら「（今すぐ）」を出す。
+     効果の文は丸山さんの EffectChipUI を変更せずに使ってよい。支給表がある制度は SupportScheduleText.TierLine の文も出す。
+   - ボタンは［やめる］［申請する］。PrimaryAction が Renew なら［更新する］、Resume なら［手続きする］にして、OK でそれぞれ SupportManager.Apply / Renew / Resume を呼ぶ。
+   - ダイアログは supports（サポート画面）の子として置く。サポート画面が開いている間は時間が止まっているので、ダイアログで PushPause はしない。
+   - プレハブ化：Assets/Yamaguchi/Prefabs/UI/SupportApplyDialog.prefab
+
+2. SupportToast.cs（Assets/Yamaguchi/Scripts/UI/）
+   - 画面上部に2秒ほど短い通知を出す（重なったら順番に出す）。
+   - 申請した直後：OnApply「○○を受け取りました　お金 +500,000」／Monthly「○○を申請しました　来月から毎月 +15,000」。
+   - SupportManager.OnExpired（期限切れ）：「○○の申請期限が過ぎました」（1回だけ。SupportManager 側で1回に絞ってある）。
+   - 毎月の支給（OnPaid）では出さない（support-apply.md 10章）。
+   - サポート画面を閉じていても出るよう、Canvas の直下に置く。
+
+3. 下部の［サポート］ボタン（Canvas/Buttons/suport）に「申請できる」制度の数のバッジ
+   - 数は SupportManager の全制度のうち GetState == Available の数。0 なら非表示。
+   - SupportManager.OnStateChanged で更新。小さな SupportButtonBadge.cs を作ってボタンに付ける。
+
+守ること：
+- お金は EffectApplier 経由（SupportManager を呼ぶだけでよい。自分で GameState を触らない）。
+- TextMeshPro は JPFont、Overflow を Ellipsis にしない。絵文字は使わない。
+- onClick は実行時に AddListener で配線する。
+- 他のメンバーのフォルダのファイルは変更しない。
+- Unity の MCP ツール（unityMCP）は使わないでください。コードを書き終えたら、Unity で確認してほしいこと（Console のエラー、Play での確認手順）と、Inspector で割り当てが必要な項目を箇条書きで教えてください。確認は私が Unity で行います。
 ```
 
-**確認**：support-apply.md 9.4 のテスト手順 1・2・3・5（4 は無償化なのでステップ6）。お金の表示（HUD）が申請や毎月の支給で増えるか。
+**確認**：
+1. ［申請する］→ ダイアログが出る → ［やめる］で何も起きない。
+2. ［申請する］→［申請する］→ お金が増え、通知「出産育児一時金を受け取りました　お金 +500,000」。
+3. 児童手当を申請 → 通知「来月から毎月 +15,000」。
+4. 妊婦のための支援給付を放置して 0歳4月1日 → サポート画面を閉じていても「申請期限が過ぎました」。
+5. ［サポート］ボタンのバッジが、申請できる制度の数と合っている（申請すると減る）。
 
 ---
 

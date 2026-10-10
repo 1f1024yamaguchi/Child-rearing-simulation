@@ -98,4 +98,13 @@ public class GameState : MonoBehaviour
         OnAgeChanged?.Invoke(ageDays);
         OnBalanceChanged?.Invoke(workLifeBalance);
     }
+
+    /// <summary>
+    /// セーブ復元用。ゲームオーバー済みかどうかも戻す。
+    /// </summary>
+    public void LoadValues(int newMoney, int newStress, float newAgeDays, float newBalance, bool newIsGameOver)
+    {
+        LoadValues(newMoney, newStress, newAgeDays, newBalance);
+        IsGameOver = newIsGameOver;
+    }
 }

@@ -34,6 +34,10 @@ public class SupportPanelController : MonoBehaviour
     [SerializeField] private Color tabSelectedColor = new Color(1.00f, 0.85f, 0.55f);
     [SerializeField] private Color tabNormalColor   = Color.white;
 
+    [Header("確認ダイアログ（どちらか。未設定なら従来どおりカードが直接申請する）")]
+    [SerializeField] private SupportApplyDialog dialog;         // シーンに置いたもの
+    [SerializeField] private SupportApplyDialog dialogPrefab;   // Assets/Yamaguchi/Prefabs/UI/SupportApplyDialog.prefab（実行時にこの画面の子として作る）
+
     private readonly List<SupportSchemeCard> cards = new List<SupportSchemeCard>();
     private SupportCategory current;
     private bool pausing;      // 自分が PushPause したか（PopPause をペアで呼ぶため）
@@ -130,13 +134,30 @@ public class SupportPanelController : MonoBehaviour
         }
         cards.Clear();
 
+        EnsureDialog();
+
         foreach (var s in SupportManager.I.GetByCategory(current))
         {
             var card = Instantiate(cardPrefab, content);
             card.name = "card_" + s.id;
             card.Bind(s);
+            // 購読者がいるとカードは SupportManager を直接呼ばなくなる（ui-support-card.md 4章）
+            if (dialog != null) card.OnPrimaryClicked += HandlePrimaryClicked;
             cards.Add(card);
         }
+    }
+
+    /// <summary>ダイアログをこの画面の子として用意する（一番手前に置く）。</summary>
+    private void EnsureDialog()
+    {
+        if (dialog == null && dialogPrefab != null)
+            dialog = Instantiate(dialogPrefab, transform, false);
+        if (dialog != null) dialog.transform.SetAsLastSibling();
+    }
+
+    private void HandlePrimaryClicked(SupportScheme s, SupportSchemeCard.PrimaryAction action)
+    {
+        if (dialog != null) dialog.Open(s, action);
     }
 
     private void ScrollTo(SupportScheme scheme)
@@ -184,8 +205,8 @@ public class SupportPanelController : MonoBehaviour
                 if (SupportManager.I.GetState(s) == SupportState.Available) available++;
 
             if (t.label != null)
-                // t.label.text = available > 0 ? $"{t.baseText}（{available}）" : t.baseText;
-                t.label.text = t.baseText;
+                t.label.text = available > 0 ? $"{t.baseText}（{available}）" : t.baseText; //括弧を付ける場合はこっち(申請できる制度の数が出る)
+                //t.label.text = t.baseText; # 括弧を付けない場合はこっち
 
             if (t.button != null && t.button.targetGraphic != null)
                 t.button.targetGraphic.color = t.category == current ? tabSelectedColor : tabNormalColor;
