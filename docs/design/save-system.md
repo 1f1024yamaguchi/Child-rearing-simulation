@@ -1,8 +1,8 @@
 ---
 title: セーブ機能（続きから遊べるようにする）
-updated: 2026-10-13
+updated: 2026-10-14
 status: 設計中
-related: [docs/team/antigravity-save-system.md, docs/code/architecture.md, docs/design/support-apply.md, docs/design/calendar-system.md, docs/design/food-system.md, docs/team/agreements-needed.md]
+related: [docs/team/antigravity-save-system.md, docs/design/title-screen.md, docs/decisions/0019-two-save-slots.md, docs/code/architecture.md, docs/design/support-apply.md, docs/design/calendar-system.md, docs/design/food-system.md, docs/team/agreements-needed.md]
 ---
 
 # セーブ機能（続きから遊べるようにする）
@@ -77,8 +77,8 @@ public class SaveData
 public class SaveSection { public string key; public string json; }
 ```
 
-- 1つのファイル（`Application.persistentDataPath/save.json`）に保存する。今の PlayerPrefs より中身を開いて確かめやすい。
-- セーブ枠は **1つ**（たたき台）。
+- 1枠につき1つのファイル（`Application.persistentDataPath` の下）に保存する。今の PlayerPrefs より中身を開いて確かめやすい。
+- セーブ枠は **オート（`save_auto.json`）と手動（`save.json`）の2つ**（2026-10-14 変更。[ADR 0019](../decisions/0019-two-save-slots.md)）。
 
 ### 2.3 特性・状態は id で保存する
 
@@ -105,11 +105,11 @@ public class SaveSection { public string key; public string json; }
 
 | 場面 | 決定 |
 |---|---|
-| 自動セーブ | **月が変わったとき**（給料・支給・食事が全部終わったあと）。メモを書いたときも保存（calendar-system.md 8.3） |
-| 手動セーブ | 画面下の［セーブ］ボタンで保存し、「セーブしました」の通知を出す |
-| 続きから／はじめから | **今後作るタイトル画面に置く**。タイトル画面ができるまでは、確認用に `SaveSystem` の右クリックメニュー（または Inspector のボタン）から「ロード」「セーブを消す」を呼べるようにしておく |
-| セーブ枠 | **1つ** |
-| ゲームオーバー・クリア | セーブを消す（はじめからになる） |
+| 自動セーブ | **月が変わったとき**（給料・支給・食事が全部終わったあと）。メモを書いたときも保存（calendar-system.md 8.3）。どちらも **オート枠** |
+| 手動セーブ | 画面下の［セーブ］ボタンで保存し、「セーブしました」の通知を出す。**手動枠** |
+| 続きから／はじめから | タイトル画面（[title-screen.md](title-screen.md)）。続きからでオート／手動のどちらから再開するか選ぶ。はじめからではセーブを消さない（2026-10-14） |
+| セーブ枠 | ~~1つ~~ → **オートと手動の2つ**（2026-10-14 変更。[ADR 0019](../decisions/0019-two-save-slots.md)） |
+| ゲームオーバー・クリア | セーブを消す（**2枠とも**。はじめからになる）。終わった育成は育成記録に残す（title-screen.md 6章・本編後） |
 | ロードしたときの食事画面 | **今月まだ選んでいないときだけ出し直す**（2026-10-13 決定。理由と作り方は [../team/request-arisaka-meal-save.md](../team/request-arisaka-meal-save.md) 3章） |
 
 ---
@@ -137,4 +137,4 @@ public class SaveSection { public string key; public string json; }
 ## 5. 決めること
 
 - ~~自動セーブ・続きからの画面・セーブ枠~~ → 3章で決定（2026-10-09）。
-- タイトル画面の作り（別に設計する）。
+- ~~タイトル画面の作り~~ → [title-screen.md](title-screen.md)（2026-10-14）。
