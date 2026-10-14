@@ -12,7 +12,7 @@ namespace Arisaka
     /// 選択された食事プランの月額費用をその月の日数で日割りした金額を一日ごとに所持金から引き落とす。
     /// （docs/design/food-system.md 準拠）
     /// </summary>
-    public class MealSystemManager : MonoBehaviour
+    public class MealSystemManager : MonoBehaviour, ISaveParticipant
     {
         public static MealSystemManager Instance { get; private set; }
 
@@ -28,10 +28,18 @@ namespace Arisaka
         private int currentMonthKey = -1;     // 年*100 + 月
         private int paidThisMonth = 0;        // 今月引き落とした累計食費額
 
+        private bool selectionPending = false; // 今月の食事画面を出したが、まだ選ばれていない
+
         private List<MealPlan> plans;
 
         public MealGrade CurrentGrade => currentGrade;
         public MealGrade? LastChosenGrade => lastChosenGrade;
+
+        public string SaveKey => "meal";
+        public int RestoreOrder => 100;          // 山口の分（10〜40）より後
+
+        private void OnEnable()  => SaveSystem.Register(this);
+        private void OnDisable() => SaveSystem.Unregister(this);
 
         private void Awake()
         {
@@ -91,6 +99,7 @@ namespace Arisaka
                 {
                     hasTriggeredInitial = true;
                     lastTriggeredMonthKey = $"{y}_{m}";
+                    selectionPending = true;
                     StartCoroutine(ProcessMonthlyRoutine(y, m, isInitial: true));
                 }
             }
@@ -140,6 +149,7 @@ namespace Arisaka
             }
 
             lastTriggeredMonthKey = monthKey;
+            selectionPending = true;
             StartCoroutine(ProcessMonthlyRoutine(year, month, isInitial: false));
         }
 
@@ -195,6 +205,7 @@ namespace Arisaka
 
         private void OnPlanSelected(MealPlan plan)
         {
+            selectionPending = false;
             currentGrade = plan.grade;
             lastChosenGrade = plan.grade;
             Debug.Log($"[MealSystemManager] 今月の食事プランが '{plan.title}' に決定されました。（費用はその月の日数で日割りされ、翌日以降に一日ごとに引き落とされます）");
@@ -208,6 +219,66 @@ namespace Arisaka
             }
 
             return plans.Find(p => p.grade == currentGrade) ?? plans[1]; // 既定は「普通」
+        }
+
+        // ─── セーブ・ロード（ISaveParticipant）───────────────────
+
+        [System.Serializable]
+        private class MealSaveData
+        {
+            public int    currentGrade;
+            public int    lastChosenGrade = -1;      // -1 = null（まだ一度も選んでいない）
+            public string lastTriggeredMonthKey = "";
+            public bool   hasTriggeredInitial;
+            public int    lastDeductedAgeDay = -1;
+            public int    currentMonthKey = -1;
+            public int    paidThisMonth;
+            public bool   selectionPending;
+        }
+
+        public string Capture()
+        {
+            var d = new MealSaveData
+            {
+                currentGrade          = (int)currentGrade,
+                lastChosenGrade       = lastChosenGrade.HasValue ? (int)lastChosenGrade.Value : -1,
+                lastTriggeredMonthKey = lastTriggeredMonthKey,
+                hasTriggeredInitial   = hasTriggeredInitial,
+                lastDeductedAgeDay    = lastDeductedAgeDay,
+                currentMonthKey       = currentMonthKey,
+                paidThisMonth         = paidThisMonth,
+                selectionPending      = selectionPending
+            };
+            return JsonUtility.ToJson(d);
+        }
+
+        public void Restore(string json)
+        {
+            if (string.IsNullOrEmpty(json)) return;
+            var d = JsonUtility.FromJson<MealSaveData>(json);
+            if (d == null) return;
+
+            // ① Play 直後に予約・表示された食事画面を止めて閉じる（閉じると時間停止も解除される）
+            StopAllCoroutines();
+            var open = FindObjectOfType<MealSelectionDialogUI>();   // 表示中のものだけ見つかる
+            if (open != null) open.gameObject.SetActive(false);
+
+            // ② 値を戻す
+            currentGrade          = (MealGrade)d.currentGrade;
+            lastChosenGrade       = d.lastChosenGrade >= 0 ? (MealGrade?)d.lastChosenGrade : null;
+            lastTriggeredMonthKey = d.lastTriggeredMonthKey ?? "";
+            hasTriggeredInitial   = d.hasTriggeredInitial;
+            lastDeductedAgeDay    = d.lastDeductedAgeDay;
+            currentMonthKey       = d.currentMonthKey;
+            paidThisMonth         = d.paidThisMonth;
+            selectionPending      = d.selectionPending;
+
+            // ③ 今月の選択がまだなら、画面を出し直す（3章の決定）
+            if (selectionPending && GameState.I != null)
+            {
+                GameDate.FromAgeDays(GameState.I.AgeDays, out int y, out int m, out int _);
+                StartCoroutine(ProcessMonthlyRoutine(y, m, isInitial: false));   // lastChosenGrade が null なら青枠なし
+            }
         }
 
         // ---------------- 自動常駐（どのシーンでも動作するよう設定） ----------------
