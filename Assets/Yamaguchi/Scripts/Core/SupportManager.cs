@@ -33,6 +33,13 @@ public class SupportManager : MonoBehaviour, ISaveParticipant
 
     public IReadOnlyList<SupportScheme> Schemes => schemes;
 
+    /// <summary>id から制度を取得する。見つからなければ null。</summary>
+    public SupportScheme GetScheme(string id)
+    {
+        if (string.IsNullOrEmpty(id) || schemes == null) return null;
+        return schemes.Find(s => s != null && s.id == id);
+    }
+
     // ------------------------------------------------------------
     // ライフサイクル
     // ------------------------------------------------------------

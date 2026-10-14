@@ -170,7 +170,16 @@ public class SupportSchemeCard : MonoBehaviour
         // カレンダーに予定を入れられるのは、まだこれから申請・手続きする制度だけ
         bool plannable = state == SupportState.Locked || state == SupportState.Available
                          || state == SupportState.Active || state == SupportState.Suspended;
-        if (calendarButton != null) calendarButton.gameObject.SetActive(plannable);
+        if (calendarButton != null)
+        {
+            calendarButton.gameObject.SetActive(plannable);
+            var calLabel = calendarButton.GetComponentInChildren<TMP_Text>();
+            if (calLabel != null)
+            {
+                bool isAdded = CalendarManager.I != null && CalendarManager.I.HasPlanForScheme(Scheme.id);
+                calLabel.text = isAdded ? "追加済み ✓" : "カレンダーに追加";
+            }
+        }
     }
 
     private Color BadgeColor(SupportState state)
@@ -263,7 +272,37 @@ public class SupportSchemeCard : MonoBehaviour
 
     private void HandleCalendarClicked()
     {
-        // ステップ5で CalendarUI.OpenAddPlan(schemeId, ageDays, kind) を呼ぶ。それまではログだけ
-        Debug.Log($"[SupportSchemeCard] カレンダーに追加：{(Scheme != null ? Scheme.id : "(未設定)")}");
+        if (Scheme == null) return;
+
+        var mgr = SupportManager.I;
+        int deadline = (mgr != null) ? mgr.NextDeadlineAgeDays(Scheme) : -1;
+        if (deadline < 0)
+        {
+            if (Scheme.deadlineType == DeadlineType.Once)
+            {
+                deadline = Scheme.DeadlineAgeDays;
+            }
+            else
+            {
+                int today = (GameState.I != null) ? Mathf.FloorToInt(GameState.I.AgeDays) : 0;
+                deadline = Mathf.Max(Scheme.StartAgeDays, today);
+            }
+        }
+
+        var kind = Scheme.deadlineType == DeadlineType.Yearly ? PlanKind.Renew : PlanKind.Apply;
+        CalendarUI.AddPlanFromScheme(Scheme, deadline, kind);
+
+        // トースト通知（あれば）
+        var toast = FindObjectOfType<SupportToast>();
+        if (toast != null)
+        {
+            toast.Show($"カレンダーに「{Scheme.title}」の期限を追加しました");
+        }
+        else
+        {
+            Debug.Log($"[SupportSchemeCard] カレンダーに追加：{Scheme.title} (期限: {GameDate.Format(deadline)})");
+        }
+
+        Refresh();
     }
 }
