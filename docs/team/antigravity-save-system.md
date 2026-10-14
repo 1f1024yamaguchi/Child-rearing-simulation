@@ -1,6 +1,6 @@
 ---
 title: セーブ機能の実装法と Antigravity への依頼文
-updated: 2026-10-13
+updated: 2026-10-14
 status: 確定（実装前）
 related: [docs/design/save-system.md, docs/design/support-apply.md, docs/team/agreements-needed.md]
 ---
@@ -249,5 +249,5 @@ public class MealSaveParticipant : MonoBehaviour, ISaveParticipant
 |---|---|---|
 | 1 | 仕組み・お金・年齢・Resync・確認用メニュー | 完了 |
 | 2 | 家族・特性と状態・年収・支援制度・家出の数え | 完了（2026-10-13 確認。GameState のストレス・バランスの保存漏れを追加） |
-| 3 | ［セーブ］ボタン・自動セーブ・終了時の削除 | 未着手 |
+| 3 | ［セーブ］ボタン・自動セーブ・終了時の削除 | 完了（2026-10-14 確認。家出は GameState.OnGameOver を出さないので、AutoSaver が RunawayWatcher.OnRunaway も購読してセーブを消すよう追加） |
 | メンバー | 食事（有坂さん）・カレンダー（草尾さん） | 食事は [request-arisaka-meal-save.md](request-arisaka-meal-save.md) で依頼予定（未対応の間はロード後に食費が二重に引かれる）。カレンダーは未依頼 |
