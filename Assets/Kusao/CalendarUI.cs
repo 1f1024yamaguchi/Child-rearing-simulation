@@ -9,6 +9,8 @@ using TMPro;
 /// Qiita記事「【Unity】カレンダーの作成」(hire1105) の42マス (7列×6行) グリッド方式を採用。
 /// 日付計算は GameDate（ゲーム内通算日数）に連動。
 /// カレンダー開閉時に GameClock の PushPause() / PopPause() を呼び出し、時間の進行を一時停止・再開する。
+/// サポート画面から追加された制度の申請期限や予定を各マスに簡易表示し、
+/// カーソルを合わせるとポップアップで大きく詳細を表示する。
 /// </summary>
 public class CalendarUI : MonoBehaviour
 {
@@ -23,8 +25,8 @@ public class CalendarUI : MonoBehaviour
     [SerializeField] private Transform gridParent;
 
     [Header("サイズ設定")]
-    [SerializeField] private Vector2 windowSize = new Vector2(560f, 440f);
-    [SerializeField] private Vector2 cellSize = new Vector2(68f, 52f);
+    [SerializeField] private Vector2 windowSize = new Vector2(580f, 460f);
+    [SerializeField] private Vector2 cellSize = new Vector2(72f, 56f);
     [SerializeField] private Vector2 cellSpacing = new Vector2(6f, 6f);
     [SerializeField] private float headerHeight = 56f;
 
@@ -38,12 +40,22 @@ public class CalendarUI : MonoBehaviour
     [SerializeField] private Color todayHighlightBg = new Color(1f, 0.85f, 0.35f, 1f);
     [SerializeField] private Color selectedCellBg = new Color(0.7f, 0.92f, 1f, 1f);
 
+    [Header("予定バッジ色")]
+    [SerializeField] private Color planBadgeApplyColor = new Color(0.12f, 0.65f, 0.85f, 0.95f); // シアン系
+    [SerializeField] private Color planBadgeRenewColor = new Color(0.95f, 0.55f, 0.2f, 0.95f);  // オレンジ系
+
     /// <summary>日付マスがタップされたイベント。引数は通算日数 (ageDays)</summary>
     public event Action<int> OnDaySelected;
 
     private readonly List<Button> cells = new List<Button>();
     private readonly List<TextMeshProUGUI> cellLabels = new List<TextMeshProUGUI>();
     private readonly List<Image> cellImages = new List<Image>();
+    private readonly List<GameObject> cellBadgeObjects = new List<GameObject>();
+    private readonly List<TextMeshProUGUI> cellBadgeLabels = new List<TextMeshProUGUI>();
+    private readonly List<Image> cellBadgeImages = new List<Image>();
+    private readonly List<CalendarPlanHoverTrigger> cellHoverTriggers = new List<CalendarPlanHoverTrigger>();
+
+    private CalendarDetailPopup detailPopup;
 
     private int viewYear;
     private int viewMonth;
@@ -95,8 +107,31 @@ public class CalendarUI : MonoBehaviour
     }
 
     /// <summary>
+    /// 制度カード等から予定を追加する窓口（calendar-system.md 2.3）。
+    /// </summary>
+    public static void AddPlanFromScheme(SupportScheme scheme, int ageDays, PlanKind kind = PlanKind.Apply)
+    {
+        if (scheme == null) return;
+        if (CalendarManager.I != null)
+        {
+            CalendarManager.I.AddPlanFromScheme(scheme, ageDays, kind);
+        }
+    }
+
+    /// <summary>
+    /// calendar-system.md 2.3 の窓口メソッド。
+    /// </summary>
+    public static void OpenAddPlan(string schemeId, int ageDays, PlanKind kind)
+    {
+        var scheme = (SupportManager.I != null) ? SupportManager.I.GetScheme(schemeId) : null;
+        if (scheme != null)
+        {
+            AddPlanFromScheme(scheme, ageDays, kind);
+        }
+    }
+
+    /// <summary>
     /// シーンロード時に自動でシーン内の「カレンダー」ボタンを検索し、クリック時にカレンダーが開くよう紐付ける。
-    /// これにより Main_test, Main_test2 等どのシーンでも配置済みのカレンダーボタンが動作する。
     /// </summary>
     [UnityEngine.Scripting.Preserve]
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
@@ -145,6 +180,12 @@ public class CalendarUI : MonoBehaviour
             isPausedBySelf = true;
         }
 
+        // 予定変更イベントの購読
+        if (CalendarManager.I != null)
+        {
+            CalendarManager.I.OnPlansChanged += Refresh;
+        }
+
         // 今日の年月を取得して表示
         if (GameState.I != null)
         {
@@ -176,6 +217,16 @@ public class CalendarUI : MonoBehaviour
             }
             isPausedBySelf = false;
         }
+
+        if (CalendarManager.I != null)
+        {
+            CalendarManager.I.OnPlansChanged -= Refresh;
+        }
+
+        if (detailPopup != null)
+        {
+            detailPopup.Hide();
+        }
     }
 
     public void Close()
@@ -203,6 +254,8 @@ public class CalendarUI : MonoBehaviour
             viewMonth = 1;
             viewYear++;
         }
+
+        if (detailPopup != null) detailPopup.Hide();
         Refresh();
     }
 
@@ -220,7 +273,6 @@ public class CalendarUI : MonoBehaviour
 
         int firstAgeDays = GameDate.ToAgeDays(viewYear, viewMonth, 1);
         int monthEndDays = GameDate.DaysInMonth(viewMonth);
-
         int todayAgeDays = (GameState.I != null) ? Mathf.FloorToInt(GameState.I.AgeDays) : 0;
 
         for (int i = 0; i < CellCount; i++)
@@ -230,6 +282,10 @@ public class CalendarUI : MonoBehaviour
             Button cell = cells[i];
             TextMeshProUGUI label = cellLabels[i];
             Image img = cellImages[i];
+            GameObject badgeGO = cellBadgeObjects[i];
+            TextMeshProUGUI badgeLabel = cellBadgeLabels[i];
+            Image badgeImg = cellBadgeImages[i];
+            CalendarPlanHoverTrigger trigger = cellHoverTriggers[i];
 
             cell.onClick.RemoveAllListeners();
 
@@ -243,6 +299,9 @@ public class CalendarUI : MonoBehaviour
                 label.color = otherMonthText;
                 img.color = boxGray;
                 cell.interactable = false;
+
+                badgeGO.SetActive(false);
+                trigger.Bind(-1);
             }
             else
             {
@@ -266,12 +325,40 @@ public class CalendarUI : MonoBehaviour
                     img.color = cellBg;
                 }
 
+                // 予定の簡易表示（バッジ）
+                var plans = (CalendarManager.I != null) ? CalendarManager.I.GetPlansForDay(currentAgeDays) : null;
+                if (plans != null && plans.Count > 0)
+                {
+                    badgeGO.SetActive(true);
+                    var p = plans[0];
+                    string badgeText = p.title;
+                    if (plans.Count > 1)
+                    {
+                        badgeText = $"{badgeText} (+{plans.Count - 1})";
+                    }
+                    badgeLabel.text = badgeText;
+                    badgeImg.color = p.kind == PlanKind.Renew ? planBadgeRenewColor : planBadgeApplyColor;
+
+                    trigger.Bind(currentAgeDays);
+                }
+                else
+                {
+                    badgeGO.SetActive(false);
+                    trigger.Bind(-1);
+                }
+
                 int capturedAgeDays = currentAgeDays;
                 cell.onClick.AddListener(() =>
                 {
                     selectedAgeDays = capturedAgeDays;
                     OnDaySelected?.Invoke(capturedAgeDays);
                     Refresh();
+
+                    // クリック時にも予定があれば詳細ポップアップを表示
+                    if (plans != null && plans.Count > 0 && detailPopup != null)
+                    {
+                        detailPopup.Show(plans, cell.transform.position);
+                    }
                 });
             }
         }
@@ -281,12 +368,15 @@ public class CalendarUI : MonoBehaviour
 
     private void EnsureUIBuilt()
     {
-        if (cells.Count >= CellCount && monthLabel != null) return;
+        if (cells.Count >= CellCount && monthLabel != null && detailPopup != null) return;
 
-        // UIコンポーネントがアタッチされていない場合は動的に作成
         cells.Clear();
         cellLabels.Clear();
         cellImages.Clear();
+        cellBadgeObjects.Clear();
+        cellBadgeLabels.Clear();
+        cellBadgeImages.Clear();
+        cellHoverTriggers.Clear();
 
         // 1. パネル背景
         var rootRT = GetComponent<RectTransform>();
@@ -388,20 +478,63 @@ public class CalendarUI : MonoBehaviour
             var btn = cellGO.GetComponent<Button>();
             btn.targetGraphic = img;
 
+            // 日付数値ラベル（上部）
             var txtGO = new GameObject("Label", typeof(RectTransform));
             txtGO.transform.SetParent(cellGO.transform, false);
 
             var txt = txtGO.AddComponent<TextMeshProUGUI>();
             txt.text = (i + 1).ToString();
-            txt.fontSize = 18;
+            txt.fontSize = 15;
+            txt.fontStyle = FontStyles.Bold;
             txt.alignment = TextAlignmentOptions.Center;
             txt.color = darkText;
-            SetStretchFull(txt.rectTransform, 0, 0);
+
+            var txtRT = txt.rectTransform;
+            txtRT.anchorMin = new Vector2(0f, 0.44f);
+            txtRT.anchorMax = new Vector2(1f, 1f);
+            txtRT.offsetMin = Vector2.zero;
+            txtRT.offsetMax = Vector2.zero;
+
+            // 簡易予定バッジ（下部）
+            var badgeGO = new GameObject("PlanBadge", typeof(RectTransform), typeof(Image));
+            badgeGO.transform.SetParent(cellGO.transform, false);
+            var badgeImg = badgeGO.GetComponent<Image>();
+            badgeImg.color = planBadgeApplyColor;
+
+            var badgeRT = badgeGO.GetComponent<RectTransform>();
+            badgeRT.anchorMin = new Vector2(0.04f, 0.06f);
+            badgeRT.anchorMax = new Vector2(0.96f, 0.44f);
+            badgeRT.offsetMin = Vector2.zero;
+            badgeRT.offsetMax = Vector2.zero;
+
+            var badgeTxtGO = new GameObject("BadgeText", typeof(RectTransform));
+            badgeTxtGO.transform.SetParent(badgeGO.transform, false);
+            var badgeTxt = badgeTxtGO.AddComponent<TextMeshProUGUI>();
+            badgeTxt.text = "制度";
+            badgeTxt.fontSize = 10;
+            badgeTxt.fontStyle = FontStyles.Bold;
+            badgeTxt.alignment = TextAlignmentOptions.Center;
+            badgeTxt.color = Color.white;
+            badgeTxt.enableWordWrapping = false;
+            badgeTxt.overflowMode = TextOverflowModes.Ellipsis;
+            SetStretchFull(badgeTxt.rectTransform, 1, 0);
+
+            badgeGO.SetActive(false);
+
+            // ホバートリガー（カーソルを合わせたとき用）
+            var trigger = cellGO.AddComponent<CalendarPlanHoverTrigger>();
 
             cells.Add(btn);
             cellLabels.Add(txt);
             cellImages.Add(img);
+            cellBadgeObjects.Add(badgeGO);
+            cellBadgeLabels.Add(badgeTxt);
+            cellBadgeImages.Add(badgeImg);
+            cellHoverTriggers.Add(trigger);
         }
+
+        // 6. 詳細ポップアップの作成
+        detailPopup = CalendarDetailPopup.GetOrCreate(containerPanel);
     }
 
     private Button CreateHeaderButton(Transform parent, string name, string label, Vector2 pos, Vector2 size, float fontSize = 20f, Vector2 anchorMin = default, Vector2 anchorMax = default)

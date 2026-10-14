@@ -1,13 +1,13 @@
 ---
 title: カレンダー機能
-updated: 2026-10-06
-status: 実装中（画面・時間停止は実装済み／主要な仕様は決定済み）
+updated: 2026-10-11
+status: 実装中（画面・時間停止・制度カード連携・ホバー詳細ポップアップ実装済み）
 related: [docs/design/support-systems.md, docs/design/support-apply.md, docs/design/events.md, docs/code/architecture.md, docs/code/ui-main-test-hud.md]
 ---
 
 # カレンダー機能
 
-> **主要な仕様は 2026-09-23 に決定済み**（[../decisions/0010-calendar-follows-reality.md](../decisions/0010-calendar-follows-reality.md) ほか）。「たたき台」と書いてある箇所（状態の色、画面の数値など）だけがまだ仮。担当は草尾。
+> **主要な仕様は 2026-09-23 に決定済み**（[../decisions/0010-calendar-follows-reality.md](../decisions/0010-calendar-follows-reality.md) ほか）。2026-10-11 に制度カード連携・簡易表示・ホバー詳細ポップアップを実装（[../decisions/0018-calendar-plan-display-and-hover-popup.md](../decisions/0018-calendar-plan-display-and-hover-popup.md)）。担当は草尾。
 > 位置づけ：[support-systems.md](support-systems.md) 2.5章で整理した現実のデメリット（**①申請の手間 / ⑦手続きの継続**）を、プレイヤーが操作できる形にしたもの。
 
 ---
@@ -504,10 +504,10 @@ public class CalendarView : MonoBehaviour
 |---|---|---|---|
 | 1 | `GameDate` に日付計算の関数を足す（`DaysInMonth` / `ToAgeDays`） | **実装済み** | 8.1 |
 | 2 | 時間を止める仕組み（`PushPause` / `PopPause`） | **実装済み** | 8.2 |
-| 3 | メモと制度の状態のセーブ | 未着手 | 5章、8.3 |
+| 3 | メモと予定・制度の状態のセーブ（`ISaveParticipant`） | **予定・制度は実装済み**（メモは画面と一緒） | 5章、8.3 |
 | 4 | 日付を押してメモを付ける画面 | 未着手（日付を押すと選択されるところまでは実装済み） | 2.1 |
-| 5 | 予定の書き込み（制度を選んで登録・編集・削除）と保存 | 未着手・**必須** | 2.2 |
-| 6 | 制度カードから追加する窓口 `CalendarUI.OpenAddPlan` | 未着手・**必須** | 2.3 |
+| 5 | 予定の管理・カレンダー簡易表示・ホバー詳細ポップアップ | **実装済み** | 2.2、0018 |
+| 6 | 制度カードから追加する窓口 `CalendarUI.OpenAddPlan` / `AddPlanFromScheme` | **実装済み** | 2.3 |
 | 7 | 通知（リマインダー） | 未着手・**必須** | 2.4 |
 | 8 | 完了チェック・サポート画面への移動 | 未着手・時間があれば | 2.5 |
 
