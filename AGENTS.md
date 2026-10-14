@@ -19,7 +19,7 @@ Unity 製の子育てシミュレーションゲーム。**このファイルは
 7. **設計判断をしたら `docs/decisions/` に 1 ファイル追加する。**（テンプレート：`docs/decisions/_template.md`）
 8. **判断画面を作るときは時間を止める。** 画面の `OnEnable` で `GameClock.I.PushPause()`、`OnDisable` で `PopPause()` を呼ぶ（`CalendarUI` と同じ形）。`GameClock.SetRunning` は画面の開閉に使わない。→ [docs/decisions/0004-pause-during-decisions.md](docs/decisions/0004-pause-during-decisions.md)
 9. **コーディング規約は `.agents/rules/` を読む。** 特に Unity / TextMeshPro 固有のハマりどころが書いてある。
-10. **「シュミレーション」は誤記。** 文中の表記は「シミュレーション」に統一する（既存の固有名詞はそのまま）。
+10. **「シュミレーション」は誤記。** 表記は「シミュレーション」に統一する（Figma のファイル名・タイトルロゴの文字も含む）。
 
 ---
 
@@ -56,7 +56,8 @@ Unity 製の子育てシミュレーションゲーム。**このファイルは
 | [support-apply.md](docs/design/support-apply.md) | 制度の申請→状態管理→効果の反映、申請前後のカード表示（期限・受給状況） | サポート画面の申請・制度の状態を実装する |
 | [expenses.md](docs/design/expenses.md) | 毎月の支出（固定費・保育料・学費・塾）、無償化の肩代わり、家計簿 | お金の出入りに関わる機能を実装する |
 | [company-support.md](docs/design/company-support.md) | 会社の制度（育休・時短）。親の働き方の状態と給料連動の支給、段階的な作り方 | 会社タブの制度や親の働き方を実装する |
-| [save-system.md](docs/design/save-system.md) | セーブ（保存するもの一覧・参加者の仕組み・ロードの順番） | セーブに関わる値を持つ機能を作る |
+| [save-system.md](docs/design/save-system.md) | セーブ（保存するもの一覧・参加者の仕組み・ロードの順番・オート／手動の2枠） | セーブに関わる値を持つ機能を作る |
+| [title-screen.md](docs/design/title-screen.md) | タイトル画面（続きから／最初から／セーブ選択／育成記録） | タイトル画面・育成記録を作る |
 
 ### 実装メモ — `docs/code/`
 
@@ -67,6 +68,7 @@ Unity 製の子育てシミュレーションゲーム。**このファイルは
 | [ui-scroll-patterns.md](docs/code/ui-scroll-patterns.md) | uGUI スクロールの作り方、ステータス行プレハブ、TMP のハマりどころ | 一覧・スクロール UI を作る |
 | [ui-support-card.md](docs/code/ui-support-card.md) | 制度カード（SupportCard）の階層・状態ごとの表示・使い方 | サポート画面やカレンダーで制度の情報を表示する |
 | [ui-support-toast.md](docs/code/ui-support-toast.md) | 通知（SupportToast）が何をきっかけに何を出すか、仕組みと判断 | 申請・期限切れの通知を触る／通知を足す |
+| [ui-start-scene.md](docs/code/ui-start-scene.md) | スタート画面（Start_scene）の GameObject 階層、OnClick 配線、設定手順 | スタート画面を構築・確認する |
 | [how-to-add-support-scheme.md](docs/code/how-to-add-support-scheme.md) | 支援制度（カード）の足し方と、制度アセットの各項目（年齢の日付・期限・支給表・条件）の意味 | 制度を追加・調整する |
 
 ### チーム — `docs/team/`
@@ -75,6 +77,7 @@ Unity 製の子育てシミュレーションゲーム。**このファイルは
 |---|---|
 | [handout.md](docs/team/handout.md) | 3機能の実装ハンドアウト（担当・サンプルコード・組み込み手順） |
 | [antigravity-child-status.md](docs/team/antigravity-child-status.md) | 子どもステータス・特性・状態を AI に実装依頼するための段階別プロンプト |
+| [antigravity-title-screen.md](docs/team/antigravity-title-screen.md) | タイトル画面とセーブ2枠を AI に実装依頼するためのプロンプト |
 
 ### 設計判断の履歴 — `docs/decisions/`
 
@@ -85,6 +88,7 @@ Unity 製の子育てシミュレーションゲーム。**このファイルは
 - [0007-traits-and-conditions.md](docs/decisions/0007-traits-and-conditions.md) — 特殊能力を「永続の特性」と「一時の状態」に分けた理由
 - [0004-pause-during-decisions.md](docs/decisions/0004-pause-during-decisions.md) — 判断画面で時間を止める方法（`OnEnable` / `OnDisable` で `PushPause` / `PopPause`）
 - [0013-child-stress-per-day-and-badge-removal.md](docs/decisions/0013-child-stress-per-day-and-badge-removal.md) — 子どものストレス計算を1日あたりに変更し、カードのストレス段階バッジを廃止した理由
+- [0019-two-save-slots.md](docs/decisions/0019-two-save-slots.md) — セーブをオートと手動の2枠にし、「最初から」ではセーブを消さない理由
 
 ---
 

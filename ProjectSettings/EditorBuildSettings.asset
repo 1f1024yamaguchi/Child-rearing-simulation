@@ -6,6 +6,12 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/Yamaguchi/scenes/Start_scene.unity
+    guid: f304d48543fd9a84ba9a602ecdaade1e
+  - enabled: 1
+    path: Assets/Yamaguchi/scenes/Main_test2.unity
+    guid: 7017f04961ef92c42adc9d93ffe7ec00
+  - enabled: 1
     path: Assets/Scenes/SampleScene.unity
     guid: 8c9cfa26abfee488c85f1582747f6a02
   m_configObjects:

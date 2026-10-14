@@ -3210,6 +3210,7 @@ GameObject:
   - component: {fileID: 310201546}
   - component: {fileID: 310201548}
   - component: {fileID: 310201547}
+  - component: {fileID: 310201549}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -3303,6 +3304,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2887bea6b4b11d0429c734933a8ee06f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FamilySaveParticipant
+--- !u!114 &310201549
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 310201541}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2191c8f1c237a6b43b037e55edcd3a72, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GameStartup
 --- !u!1 &327041504
 GameObject:
   m_ObjectHideFlags: 0
@@ -7262,10 +7275,10 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 30
+  m_fontSize: 27.6
   m_fontSizeBase: 30
   m_fontWeight: 400
-  m_enableAutoSizing: 0
+  m_enableAutoSizing: 1
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 0
@@ -12808,10 +12821,10 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 30
+  m_fontSize: 34.5
   m_fontSizeBase: 30
   m_fontWeight: 400
-  m_enableAutoSizing: 0
+  m_enableAutoSizing: 1
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 0
