@@ -1,6 +1,6 @@
 ---
 title: セーブ機能（続きから遊べるようにする）
-updated: 2026-10-09
+updated: 2026-10-13
 status: 設計中
 related: [docs/team/antigravity-save-system.md, docs/code/architecture.md, docs/design/support-apply.md, docs/design/calendar-system.md, docs/design/food-system.md, docs/team/agreements-needed.md]
 ---
@@ -110,6 +110,7 @@ public class SaveSection { public string key; public string json; }
 | 続きから／はじめから | **今後作るタイトル画面に置く**。タイトル画面ができるまでは、確認用に `SaveSystem` の右クリックメニュー（または Inspector のボタン）から「ロード」「セーブを消す」を呼べるようにしておく |
 | セーブ枠 | **1つ** |
 | ゲームオーバー・クリア | セーブを消す（はじめからになる） |
+| ロードしたときの食事画面 | **今月まだ選んでいないときだけ出し直す**（2026-10-13 決定。理由と作り方は [../team/request-arisaka-meal-save.md](../team/request-arisaka-meal-save.md) 3章） |
 
 ---
 

@@ -1,6 +1,6 @@
 ---
 title: 他のメンバーの合意が必要な項目（支援制度・カレンダー・支出）
-updated: 2026-10-09
+updated: 2026-10-13
 status: 合意待ち
 related: [docs/design/support-apply.md, docs/design/calendar-system.md, docs/design/expenses.md]
 ---
@@ -43,7 +43,7 @@ related: [docs/design/support-apply.md, docs/design/calendar-system.md, docs/des
 | # | お願い・確認したいこと | 有坂さんへの影響 | 詳しくは | 合意日 |
 |---|---|---|---|---|
 | A1 | 食費でお金を減らすときは `EffectApplier.Apply(effects, new LedgerSource("食費（普通）", ExpenseCategory.食費))` の形で呼ぶ（家計簿に「食費」として載るように） | 呼び方を合わせる | expenses.md 5.6 | |
-| A3 | 食事の状態（ランク・最後に食費を引いた日・今月の額など）を `ISaveParticipant` で保存・復元してもらう | 自分の分の Capture/Restore を書く | save-system.md 1.2 | |
+| A3 | 食事の状態（ランク・最後に食費を引いた日・今月の額など）を `ISaveParticipant` で保存・復元してもらう | 自分の分の Capture/Restore を書く | save-system.md 1.2・[request-arisaka-meal-save.md](request-arisaka-meal-save.md) | |
 | A2 | **お金がマイナスになるようになる**（0円止めを外す）。`MoneyUI` でマイナスを表示できるようにする（赤字表示など） | `MoneyUI.cs` の確認 | expenses.md 5.7 | |
 
 ---

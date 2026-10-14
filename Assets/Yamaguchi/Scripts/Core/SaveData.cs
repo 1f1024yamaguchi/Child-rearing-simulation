@@ -11,5 +11,7 @@ public class SaveData
     public float  ageDays;         // 先に戻す必要がある（ロードの順番）
     public int    money;
     public bool   isGameOver;
+    public int    stress = -1;            // 画面のストレスゲージ（GameState.Stress）。-1 = 古いセーブで値なし
+    public float  workLifeBalance = -1f;  // GameState.WorkLifeBalance。-1 = 古いセーブで値なし
     public List<SaveSection> sections = new List<SaveSection>();
 }

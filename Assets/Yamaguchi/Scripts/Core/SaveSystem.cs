@@ -49,7 +49,9 @@ public static class SaveSystem
             savedAt = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
             ageDays = GameState.I.AgeDays,
             money = GameState.I.Money,
-            isGameOver = GameState.I.IsGameOver
+            isGameOver = GameState.I.IsGameOver,
+            stress = GameState.I.Stress,
+            workLifeBalance = GameState.I.WorkLifeBalance
         };
 
         foreach (var p in participants.ToArray())
@@ -115,7 +117,7 @@ public static class SaveSystem
 
     /// <summary>
     /// セーブがあれば復元して true を返す。順番は必ず：
-    /// 時間を止める → Ticker に今日を教える（通知なし）→ 年齢・お金を戻す → 参加者を RestoreOrder 順に戻す → 時間を戻す。
+    /// 時間を止める → Ticker に今日を教える（通知なし）→ 年齢・お金・ストレスを戻す → 参加者を RestoreOrder 順に戻す → 時間を戻す。
     /// </summary>
     public static bool Load()
     {
@@ -149,9 +151,10 @@ public static class SaveSystem
             DayTicker.I?.Resync(Mathf.FloorToInt(data.ageDays));   // ② 通知なしで「今日」を合わせる
             MonthTicker.I?.Resync(data.ageDays);
 
-            // ③ 年齢・お金（ストレス・バランスは今の値のまま。ストレスは参加者が戻す）
-            GameState.I.LoadValues(data.money, GameState.I.Stress, data.ageDays,
-                                   GameState.I.WorkLifeBalance, data.isGameOver);
+            // ③ 年齢・お金・ストレスゲージ・バランス（古いセーブで値が無いものは今の値のまま）
+            int   stress  = data.stress >= 0 ? data.stress : GameState.I.Stress;
+            float balance = data.workLifeBalance >= 0f ? data.workLifeBalance : GameState.I.WorkLifeBalance;
+            GameState.I.LoadValues(data.money, stress, data.ageDays, balance, data.isGameOver);
 
             // ④ 参加者を RestoreOrder の小さい順に
             var ordered = new List<ISaveParticipant>(participants);

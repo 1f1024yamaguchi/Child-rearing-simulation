@@ -1,6 +1,6 @@
 ---
 title: セーブ機能の実装法と Antigravity への依頼文
-updated: 2026-10-11
+updated: 2026-10-13
 status: 確定（実装前）
 related: [docs/design/save-system.md, docs/design/support-apply.md, docs/team/agreements-needed.md]
 ---
@@ -103,7 +103,7 @@ AGENTS.md と .agents/rules/、docs/design/save-system.md、docs/team/antigravit
    - Load()：2.3 の順番を必ず守る。
        ① GameClock.I.PushPause()
        ② DayTicker.I.Resync(ageDays) と MonthTicker.I.Resync(ageDays)
-       ③ GameState.I.LoadValues(money, 今のストレス, ageDays, 今のバランス)
+       ③ GameState.I.LoadValues(money, stress, ageDays, workLifeBalance, isGameOver)（画面のストレスゲージ・バランスも SaveData に保存する。古いセーブで値が -1 なら今の値のまま）
        ④ 参加者を RestoreOrder の小さい順に Restore（セーブにキーが無いものは飛ばす）
        ⑤ GameClock.I.PopPause()
      どこかで例外が出ても PopPause は必ず呼ぶ（try/finally）。
@@ -202,6 +202,8 @@ docs/design/save-system.md 3章と、docs/team/antigravity-save-system.md 2.5 �
 
 依頼1が終わったら、次の例を見せて「自分の分を参加者にしてほしい」と頼む（agreements-needed.md の A3・K7）。
 
+> **食事（有坂さん）は専用の依頼書を作った → [request-arisaka-meal-save.md](request-arisaka-meal-save.md)**。下のひな形は値が足りないので、食事にはそちらを使う。カレンダー（草尾さん）はこのひな形を参考に頼む。
+
 ```csharp
 // 例：食事（有坂さん）の場合のひな形
 public class MealSaveParticipant : MonoBehaviour, ISaveParticipant
@@ -246,6 +248,6 @@ public class MealSaveParticipant : MonoBehaviour, ISaveParticipant
 | 依頼 | 内容 | 状態 |
 |---|---|---|
 | 1 | 仕組み・お金・年齢・Resync・確認用メニュー | 完了 |
-| 2 | 家族・特性と状態・年収・支援制度・家出の数え | コード作成済み（Unity での確認待ち） |
+| 2 | 家族・特性と状態・年収・支援制度・家出の数え | 完了（2026-10-13 確認。GameState のストレス・バランスの保存漏れを追加） |
 | 3 | ［セーブ］ボタン・自動セーブ・終了時の削除 | 未着手 |
-| メンバー | 食事（有坂さん）・カレンダー（草尾さん） | 依頼1のあとで依頼 |
+| メンバー | 食事（有坂さん）・カレンダー（草尾さん） | 食事は [request-arisaka-meal-save.md](request-arisaka-meal-save.md) で依頼予定（未対応の間はロード後に食費が二重に引かれる）。カレンダーは未依頼 |
