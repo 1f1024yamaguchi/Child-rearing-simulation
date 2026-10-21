@@ -46,6 +46,7 @@ Unity 製の子育てシミュレーションゲーム。**このファイルは
 |---|---|---|
 | [concept.md](docs/design/concept.md) | コンセプト、親子UI、決まっていること／未決定の一覧 | 企画の全体像を掴みたい |
 | [rules-and-stats.md](docs/design/rules-and-stats.md) | 時間の流れ、ゴール／ゲームオーバー条件、全ステータス定義と数値 | ゲームロジックを実装する |
+| [ending.md](docs/design/ending.md) | 進路と巣立ちエンディング（テスト・受験の時期、進路ごとの合格ライン、奨学金・修学支援、職業の判定、将来の夢、リザルト） | 進路・受験・エンディング・リザルトを作る |
 | [food-system.md](docs/design/food-system.md) | 食事グレードの効果、安い／高い食事のリアルな影響 | 食事まわりを実装する（有坂） |
 | [events.md](docs/design/events.md) | メリット／デメリットイベントの一覧と発生条件 | イベントの発生を実装する（丸山） |
 | [calendar-system.md](docs/design/calendar-system.md) | カレンダー画面、申請期限の管理、予定の種類と状態 | カレンダー機能を実装する（草尾） |
@@ -58,6 +59,15 @@ Unity 製の子育てシミュレーションゲーム。**このファイルは
 | [company-support.md](docs/design/company-support.md) | 会社の制度（育休・時短）。親の働き方の状態と給料連動の支給、段階的な作り方 | 会社タブの制度や親の働き方を実装する |
 | [save-system.md](docs/design/save-system.md) | セーブ（保存するもの一覧・参加者の仕組み・ロードの順番・オート／手動の2枠） | セーブに関わる値を持つ機能を作る |
 | [title-screen.md](docs/design/title-screen.md) | タイトル画面（続きから／最初から／セーブ選択／育成記録） | タイトル画面・育成記録を作る |
+
+### 調査メモ — `docs/research/`（仕様ではない）
+
+メンバーが現実の制度・お金について調べたことを書き込む場所。**実装の根拠に使わない。** ゲームに入れる値は `docs/design/` に転記されたものだけが正。書き方は [docs/research/README.md](docs/research/README.md)。
+
+| ファイル | 内容 |
+|---|---|
+| [support-systems.md](docs/research/support-systems.md) | 支援制度・手当・助成の調査（国／自治体／会社／民間） |
+| [expenses.md](docs/research/expenses.md) | 子育てにかかるお金の調査（固定費／段階ごと／選択制／その時だけ） |
 
 ### 実装メモ — `docs/code/`
 
@@ -78,6 +88,7 @@ Unity 製の子育てシミュレーションゲーム。**このファイルは
 | [handout.md](docs/team/handout.md) | 3機能の実装ハンドアウト（担当・サンプルコード・組み込み手順） |
 | [antigravity-child-status.md](docs/team/antigravity-child-status.md) | 子どもステータス・特性・状態を AI に実装依頼するための段階別プロンプト |
 | [antigravity-title-screen.md](docs/team/antigravity-title-screen.md) | タイトル画面とセーブ2枠を AI に実装依頼するためのプロンプト |
+| [antigravity-ending.md](docs/team/antigravity-ending.md) | 進路・受験・職業の判定・リザルト・奨学金を AI に実装依頼するための段階別プロンプト |
 
 ### 設計判断の履歴 — `docs/decisions/`
 
@@ -89,6 +100,7 @@ Unity 製の子育てシミュレーションゲーム。**このファイルは
 - [0004-pause-during-decisions.md](docs/decisions/0004-pause-during-decisions.md) — 判断画面で時間を止める方法（`OnEnable` / `OnDisable` で `PushPause` / `PopPause`）
 - [0013-child-stress-per-day-and-badge-removal.md](docs/decisions/0013-child-stress-per-day-and-badge-removal.md) — 子どものストレス計算を1日あたりに変更し、カードのストレス段階バッジを廃止した理由
 - [0019-two-save-slots.md](docs/decisions/0019-two-save-slots.md) — セーブをオートと手動の2枠にし、「最初から」ではセーブを消さない理由
+- [0020-ending-on-leaving-home.md](docs/decisions/0020-ending-on-leaving-home.md) — ゲームの終わりを「20歳」から「子どもの巣立ち」に変え、進路で巣立つ年齢を変えた理由
 
 ---
 
@@ -104,8 +116,9 @@ Unity 製の子育てシミュレーションゲーム。**このファイルは
 
 **仕様として未決定**
 
-- **子どものステータス**：仕様は [docs/design/child-status.md](docs/design/child-status.md) にまとめた。残るは **テスト・受験の時期**（節目テスト＋本番／毎年／20歳の1回のみ）と、「進路が狭まる」の具体的な判定。
+- **子どものステータス**：仕様は [docs/design/child-status.md](docs/design/child-status.md) にまとめた。テスト・受験の時期は決定済み（[docs/design/ending.md](docs/design/ending.md) 2.5章）。
+- **進路とエンディング**：方針は決定済み（[docs/decisions/0020-ending-on-leaving-home.md](docs/decisions/0020-ending-on-leaving-home.md)）。職業の候補と重み、浪人の上限、留年を入れるか、などは未定。→ [docs/design/ending.md](docs/design/ending.md) 10章
 - **家出までの日数**：子のストレスが限界のまま何日続いたらゲームオーバーか。仮で30日。→ [docs/design/child-status.md](docs/design/child-status.md) 4章
 - **カレンダー機能の仕様**：主要な仕様は決定済み（[docs/decisions/0010-calendar-follows-reality.md](docs/decisions/0010-calendar-follows-reality.md)）。残りは状態の色と画面サイズ（たたき台）だけ。→ [docs/design/calendar-system.md](docs/design/calendar-system.md) 7章
 - **家族構成**：親2人＋子1人？ プレイヤー＋子2人？ → [docs/design/concept.md](docs/design/concept.md) 6章
-- **テンポ**：20歳到達まで約2時間。判断画面で止まるぶんさらに長くなる。速度設定でどう調整するか。
+- **テンポ**：巣立ちまで高卒ルートで約1時間50分、大卒ルートで約2時間15分。判断画面で止まるぶんさらに長くなる。速度設定でどう調整するか。

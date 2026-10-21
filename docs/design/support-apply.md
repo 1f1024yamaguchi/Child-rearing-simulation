@@ -1,6 +1,6 @@
 ---
 title: 支援制度の申請と効果の反映
-updated: 2026-10-08
+updated: 2026-10-19
 status: 確定（他メンバーの合意待ちの項目は docs/team/agreements-needed.md）
 related: [docs/design/expenses.md, docs/design/support-systems.md, docs/design/calendar-system.md, docs/design/effects.md, docs/code/architecture.md, docs/decisions/0014-support-state-in-manager.md]
 ---
@@ -388,6 +388,8 @@ public class SupportSchemeRuntime   // そのまま SaveData に入れられる�
         [やめる]  [申請する]
 ```
 
+> **2026-10-19 追記**：貸与型奨学金は、このダイアログに **金額を選ぶ欄** と **「卒業後に返さなくてはいけない」の注意** を足して使う。制度のデータに「選べる金額の一覧」を持たせ、一覧がある制度だけ金額の欄を出す。→ [ending.md](ending.md) 3.3
+
 ### 7.4 申請した直後
 
 1. `SupportManager.Apply` → `OnStateChanged`。カードが自分の表示だけ更新（作り直さない）。
@@ -450,7 +452,11 @@ public class SupportSchemeRuntime   // そのまま SaveData に入れられる�
 | id | 名前 | 肩代わりする支出（expenses.md） | 期間 | 条件 | 現実との対応 |
 |---|---|---|---|---|---|
 | `preschool_free` | 幼児教育・保育の無償化 | `nursery_fee`（保育料）を全額。**給食費（`nursery_meal`）は対象外** | 3歳〜5歳 | 子どもが3〜5歳 | 給食費・延長保育は自己負担のまま、を体験させる |
-| `hs_tuition_support` | 高等学校等就学支援金 | `hs_tuition`（高校授業料）を月9,900まで（公立の年118,800） | 15歳4月〜18歳3月 | 子どもが15歳4月以降 | 2026年度から所得制限なし。申請した月から（さかのぼらない） |
+| `hs_tuition_support` | 高等学校等就学支援金 | `hs_tuition`（高校授業料）を、公立は月9,900まで（年118,800）／**私立は月38,100まで（年457,200）** | 15歳4月〜18歳3月 | 子どもが15歳4月以降 | 2026年度から所得制限なし（私立の上限も所得に関係なく年457,200）。**入学金・制服代などは対象外**。申請した月から（さかのぼらない） |
+
+> **2026-10-19 追記**：高校受験で公立に落ちると私立に進む（[ending.md](ending.md) 2.5章）ので、上限を公立／私立の2段にした。
+> ただし今の `hs_tuition`（[expenses.md](expenses.md)）は公立の授業料（月9,900）しかない。
+> 私立高校の授業料・入学金の段を expenses.md に足し、上限を公立／私立で切り替えるのは、高校受験を作るときにまとめて行う。
 
 ### 9.3 所得条件を試す制度（1つだけ）
 

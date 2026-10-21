@@ -1,6 +1,6 @@
 ---
 title: 支出の仕組み（家計簿）
-updated: 2026-10-06
+updated: 2026-10-21
 status: 設計中（たたき台）・担当：山口
 related: [docs/design/support-apply.md, docs/design/food-system.md, docs/design/events.md, docs/design/effects.md, docs/code/architecture.md, docs/decisions/0015-real-money-and-expenses.md]
 ---
@@ -12,7 +12,7 @@ related: [docs/design/support-apply.md, docs/design/food-system.md, docs/design/
 
 ---
 
-> **2026-10-09**：どんな費目（電気代・税金など）を入れるかは、他のメンバーに現実の支出を調べてもらってから決めて実装する。6章の表はそれまでのたたき台。
+> **2026-10-09**：どんな費目（電気代・税金など）を入れるかは、他のメンバーに現実の支出を調べてもらってから決めて実装する。6章の表はそれまでのたたき台。調べた内容は [../research/expenses.md](../research/expenses.md) に集める。
 
 ## 1. 何が変わるか
 
