@@ -68,6 +68,7 @@ Unity 製の子育てシミュレーションゲーム。**このファイルは
 |---|---|
 | [support-systems.md](docs/research/support-systems.md) | 支援制度・手当・助成の調査（国／自治体／会社／民間） |
 | [expenses.md](docs/research/expenses.md) | 子育てにかかるお金の調査（固定費／段階ごと／選択制／その時だけ） |
+| [events.md](docs/research/events.md) | 子育て中に起きるイベントの調査（体調／成長・学校／家庭・仕事／季節・行事） |
 
 ### 実装メモ — `docs/code/`
 

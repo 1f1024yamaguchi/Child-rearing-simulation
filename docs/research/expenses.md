@@ -1,7 +1,7 @@
 ---
 title: 子育てにかかるお金の調査メモ
 updated: 2026-10-21
-status: 調査メモ（仕様ではない）
+status: 調査メモ（仕様ではない）・担当：有坂さん
 related: [docs/design/expenses.md]
 ---
 

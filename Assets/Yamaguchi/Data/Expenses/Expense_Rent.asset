@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a1b2c3d4e5f60718293a4b5c6d7e8f01, type: 3}
+  m_Name: Expense_Rent
+  m_EditorClassIdentifier: Assembly-CSharp::ExpenseItem
+  id: rent
+  title: "\u5BB6\u8CC3"
+  description: "\u5BB6\u8CC3\uFF08\u751F\u6D3B\u306E\u56FA\u5B9A\u8CBB\uFF09"
+  category: 0
+  mode: 0
+  tiers:
+  - label: "\u6BCE\u6708"
+    fromAge:
+      year: 0
+      month: 1
+      day: 1
+    toAge:
+      year: 20
+      month: 12
+      day: 31
+    monthlyCost: 90000
+    requirements: []
+    monthlyEffects: []

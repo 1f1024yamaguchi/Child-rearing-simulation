@@ -267,6 +267,8 @@ docs/design/ending.md 2.5章・3.4・3.5・4章（留年）を読んでから作
 
 ### 依頼5：職業の判定・将来の夢・巣立ち（ログまで）
 
+> [antigravity-result-scene.md](antigravity-result-scene.md) の依頼R1 を先に済ませた場合、4. の EndingResult は作らずに職業まわりの項目を足すだけにし、EndingFlow を `GraduationWatcher.OnGraduated` に付け替える。
+
 ```
 docs/design/ending.md 5章・6.2・7章 を読んでから作業してください。置き場所は Assets/Yamaguchi/Scripts/Core/（職業のアセットは Assets/Yamaguchi/Data/Careers/）。
 
@@ -311,6 +313,8 @@ docs/design/ending.md 5章・6.2・7章 を読んでから作業してくださ�
 ---
 
 ### 依頼6：画面（進路決定・選び直し・リザルト・子カード）
+
+> 3. の ResultScreenUI は [antigravity-result-scene.md](antigravity-result-scene.md) の依頼R2 で end シーンに作る。済んでいれば、ここでは進路のあゆみ・職業のイラストの表示を足すだけにする。
 
 ```
 docs/design/ending.md 3.1・3.4・3.5・5.3・7章 と、docs/code/ui-support-card.md、docs/code/ui-scroll-patterns.md を読んでから作業してください。

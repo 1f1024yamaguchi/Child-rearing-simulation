@@ -31,10 +31,10 @@ related: [docs/design/support-apply.md, docs/design/calendar-system.md, docs/des
 | # | お願い・確認したいこと | 丸山さんへの影響 | 詳しくは | 合意日 |
 |---|---|---|---|---|
 | M1 | `EffectApplier` に `Apply(effects, LedgerSource source)` を追加し、お金が動いたら `Ledger.Record` を呼ぶ。今の `Apply(effects)` は残す | `EffectApplier.cs` を少し変更 | expenses.md 5.6 | |
-| M2 | `EventChoiceButtonUI` 56行目で、イベント名と選択肢名を渡す形にする | 1行変更 | expenses.md 5.6 | |
+| M2 | `EventChoice` に家計簿の種類（`ledgerCategory`）を足し、`EventChoiceButtonUI` 56行目でイベント名・選択肢名と一緒に渡す（`EventCardUI` → `ChoiceBlockUI` → ボタンへイベント名を渡す） | 4ファイル変更。お金が動く選択肢を作るときに種類を入れる | antigravity-expenses.md 2.6・依頼E1b | |
 | M3 | 支援制度・支出の条件は `RequirementSO`（山口）として作り、`EventConditionSO` とはまとめない | 影響なし（共有の連絡のみ） | support-apply.md 10章 | |
 
-**順番**：山口が `Ledger` と `LedgerSource` を先に Core に作る → 連絡 → 丸山さんが M1・M2。
+**順番**：山口が `Ledger` と `LedgerSource` を先に Core に作る → M1・M2 も **山口が行う**（2026-10-21 変更。[antigravity-expenses.md](antigravity-expenses.md) 依頼E1b）。作業前に丸山さんへ一言伝える。
 
 ---
 
@@ -42,7 +42,7 @@ related: [docs/design/support-apply.md, docs/design/calendar-system.md, docs/des
 
 | # | お願い・確認したいこと | 有坂さんへの影響 | 詳しくは | 合意日 |
 |---|---|---|---|---|
-| A1 | 食費でお金を減らすときは `EffectApplier.Apply(effects, new LedgerSource("食費（普通）", ExpenseCategory.食費))` の形で呼ぶ（家計簿に「食費」として載るように） | 呼び方を合わせる | expenses.md 5.6 | |
+| A1 | 食費でお金を減らすとき（`MealSystemManager` 201行目）は `EffectApplier.Apply(effects, new LedgerSource("食費（普通）", ExpenseCategory.食費))` の形で呼ぶ（家計簿に「食費」として載るように）。**山口が行う**（2026-10-21 変更。依頼E1b） | 1行変更 | expenses.md 5.6 | |
 | A3 | 食事の状態（ランク・最後に食費を引いた日・今月の額など）を `ISaveParticipant` で保存・復元してもらう | 自分の分の Capture/Restore を書く | save-system.md 1.2・[request-arisaka-meal-save.md](request-arisaka-meal-save.md) | |
 | A2 | **お金がマイナスになるようになる**（0円止めを外す）。`MoneyUI` でマイナスを表示できるようにする（赤字表示など） | `MoneyUI.cs` の確認 | expenses.md 5.7 | |
 

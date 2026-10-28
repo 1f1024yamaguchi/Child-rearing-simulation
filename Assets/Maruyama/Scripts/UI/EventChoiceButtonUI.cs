@@ -18,11 +18,18 @@ namespace Maruyama.UI
 
         private EventChoice currentChoice;
         private Action onChosenCallback;
+        private string eventTitle = string.Empty;
 
         public void Setup(EventChoice choice, Action onChosen)
         {
+            Setup(choice, string.Empty, onChosen);
+        }
+
+        public void Setup(EventChoice choice, string title, Action onChosen)
+        {
             currentChoice = choice;
             onChosenCallback = onChosen;
+            eventTitle = title ?? string.Empty;
 
             if (labelText != null && choice != null)
             {
@@ -53,7 +60,8 @@ namespace Maruyama.UI
             if (currentChoice != null)
             {
                 Debug.Log($"[EventChoiceButtonUI] 選択肢 '{currentChoice.label}' がクリックされました。Effect を適用します。");
-                EffectApplier.Apply(currentChoice.effects);
+                string ledgerName = string.IsNullOrEmpty(eventTitle) ? currentChoice.label : $"{eventTitle}：{currentChoice.label}";
+                EffectApplier.Apply(currentChoice.effects, new LedgerSource(ledgerName, currentChoice.ledgerCategory));
                 Debug.Log($"[EventChoiceButtonUI] 選択肢 '{currentChoice.label}' の Effect 適用完了。");
             }
 

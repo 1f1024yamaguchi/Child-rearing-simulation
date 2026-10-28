@@ -7,6 +7,8 @@ related: [docs/design/support-apply.md, docs/design/food-system.md, docs/design/
 
 # 支出の仕組み（家計簿）
 
+> 実装の分け方と Antigravity への依頼文は [../team/antigravity-expenses.md](../team/antigravity-expenses.md)。
+
 > 毎月かかるお金（家賃・光熱費・保育料・学費・塾など）をデータで持ち、月が変わるたびに引き落とす仕組み。
 > **目的は「子育てにどれだけお金がかかるか」をプレイヤーが体感すること**（2026-10-05 決定）。金額は実際の円。下の表の金額は公的な調査の平均や目安で、**ゲームに入れる前に調整するたたき台**。
 
@@ -192,9 +194,9 @@ EffectApplier.Apply(effects, new LedgerSource("病院に連れて行く", Expens
 
 - `EffectApplier` は Money の効果を適用するとき、`Ledger.Record` も呼ぶ。**お金が動けば必ず家計簿に残る**ので記録漏れが起きない。
 - 丸山さんの変更は `EventChoiceButtonUI` の1行（イベント名と選択肢名を渡す）。古い呼び方も残すので、すぐ直さなくても壊れない。
-- **案A に決定、変更は丸山さんに依頼する（2026-10-06）。** `EffectApplier` は丸山さんのフォルダ（`Assets/Maruyama/Scripts/Core/`）にあるため。
-  - 丸山さんの作業：①`EffectApplier.Apply(effects, LedgerSource source)` の呼び方を追加（今の `Apply(effects)` は残す）。Money の効果を適用したら `Ledger.Record` を呼ぶ ②`EventChoiceButtonUI` 56行目でイベント名・選択肢名を渡す。
-  - 山口の作業（先に用意）：`LedgerSource`（文字列＋`ExpenseCategory`）と `Ledger.Record` を Core に作る。これが無いと丸山さんの変更がコンパイルできないので、**山口 → 丸山さんの順**。
+- **案A に決定（2026-10-06）。変更は丸山さんの担当分も含めて山口が行う（2026-10-21 変更。[../team/antigravity-expenses.md](../team/antigravity-expenses.md) 依頼E1b）。** `EffectApplier` は丸山さんのフォルダ（`Assets/Maruyama/Scripts/Core/`）にあるので、作業の前に丸山さんへ伝える。
+  - 丸山さんのファイルへの変更（山口が行う）：①`EffectApplier.Apply(effects, LedgerSource source)` の呼び方を追加（今の `Apply(effects)` は残す）。Money の効果を適用したら `Ledger.Record` を呼ぶ ②`EventChoiceButtonUI` 56行目でイベント名・選択肢名を渡す。
+  - 山口の作業（先に用意）：`LedgerSource`（文字列＋`ExpenseCategory`）と `Ledger.Record` を Core に作る。これが無いと丸山さんの変更がコンパイルできないので、**`Ledger`（依頼E1）→ つなぎ込み（依頼E1b）の順**。
 
 ---
 

@@ -19,7 +19,7 @@ related: [docs/design/support-apply.md, docs/design/expenses.md, docs/design/cal
 | 3 | 申請ボタン・確認ダイアログ・通知・タブ | **完了（前半 2026-10-07、後半 2026-10-11 確認）** |
 | 4 | セーブ・ロード | **完了（2026-10-13）**。セーブ依頼2で `SupportManager` と年収の記録を参加者にして実装・確認済み（[antigravity-save-system.md](antigravity-save-system.md)）。下の依頼文は不要 |
 | 5 | カレンダーとのつなぎ | 草尾さん K5・K6 の合意後（[agreements-needed.md](agreements-needed.md)） |
-| 6 | 無償化（支出の肩代わり） | 支出の仕組み（[expenses.md](../design/expenses.md)）ができてから |
+| 6 | 無償化（支出の肩代わり） | [antigravity-expenses.md](antigravity-expenses.md) の依頼E3 に移した |
 
 ステップ1〜3だけで「申請したらお金が入る・カードに期限や受給状況が出る」は動く。
 

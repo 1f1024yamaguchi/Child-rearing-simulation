@@ -471,6 +471,8 @@ related: [docs/design/rules-and-stats.md, docs/design/child-status.md, docs/desi
 
 ## 7. リザルト画面
 
+> リザルトは本編とは別の `end` シーンで出す（巣立ち・家出の両方）。シーンの切り替えと家出のリザルトは [result-scene.md](result-scene.md)。
+
 上から順に流す（スキップ可）。
 
 1. **巣立ちの場面**：「○○は △△ になりました」＋ 職業のイラスト

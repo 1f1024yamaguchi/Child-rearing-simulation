@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a1b2c3d4e5f60718293a4b5c6d7e8f01, type: 3}
+  m_Name: Expense_SchoolSupplies
+  m_EditorClassIdentifier: Assembly-CSharp::ExpenseItem
+  id: school_supplies
+  title: "\u5B66\u7528\u54C1\u306A\u3069\uFF08\u4E2D\u5B66\u6821\uFF09"
+  description: "\u4E2D\u5B66\u6821\u306E\u5B66\u6821\u6559\u80B2\u8CBB\uFF08\u90E8\u6D3B\u30FB\u4FEE\u5B66\u65C5\u884C\u30FB\u6559\u6750\u306A\u3069\uFF09"
+  category: 5
+  mode: 0
+  tiers:
+  - label: "\u4E2D\u5B66\u6821"
+    fromAge:
+      year: 12
+      month: 4
+      day: 1
+    toAge:
+      year: 15
+      month: 3
+      day: 31
+    monthlyCost: 12563
+    requirements: []
+    monthlyEffects: []

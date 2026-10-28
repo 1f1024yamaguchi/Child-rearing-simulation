@@ -198,7 +198,7 @@ namespace Arisaka
             lastDeductedAgeDay = ageDay;
 
             var costEffect = plan.CreateDailyCostEffect(dailyCost);
-            EffectApplier.Apply(new[] { costEffect });
+            EffectApplier.Apply(new[] { costEffect }, new LedgerSource($"食費（{plan.title}）", ExpenseCategory.食費));
 
             Debug.Log($"[MealSystemManager] {year}歳 {month}月{day}日分食費引き落とし: {dailyCost:N0}円 (当月累計: {paidThisMonth:N0}/{plan.costPerMonth:N0}円, 所持金残高: {GameState.I.Money:N0}円)");
         }

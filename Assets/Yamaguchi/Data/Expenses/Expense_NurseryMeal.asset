@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a1b2c3d4e5f60718293a4b5c6d7e8f01, type: 3}
+  m_Name: Expense_NurseryMeal
+  m_EditorClassIdentifier: Assembly-CSharp::ExpenseItem
+  id: nursery_meal
+  title: "\u4FDD\u80B2\u5712\u306E\u7D66\u98DF\u8CBB"
+  description: "3\u301C5\u6B73\u306E\u7D66\u98DF\u8CBB\uFF08\u4E3B\u98DF\u8CBB\u30FB\u526F\u98DF\u8CBB\uFF09"
+  category: 4
+  mode: 0
+  tiers:
+  - label: "3\u301C5\u6B73"
+    fromAge:
+      year: 3
+      month: 1
+      day: 1
+    toAge:
+      year: 5
+      month: 12
+      day: 31
+    monthlyCost: 4500
+    requirements: []
+    monthlyEffects: []

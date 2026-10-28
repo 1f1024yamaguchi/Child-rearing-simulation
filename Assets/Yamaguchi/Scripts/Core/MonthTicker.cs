@@ -5,6 +5,8 @@ public class MonthTicker : MonoBehaviour
 {
     public static MonthTicker I { get; private set; }
     public event Action<int, int> OnMonthChanged;   // (歳, 月)
+    /// OnMonthChanged の処理が全部終わった直後に同じ (歳, 月) で出す。赤字判定・家計簿の締めはこちら。Resync では出さない。
+    public event Action<int, int> OnMonthSettled;
 
     private int lastYear = -1, lastMonth = -1;
 
@@ -37,5 +39,6 @@ public class MonthTicker : MonoBehaviour
         if (y == lastYear && m == lastMonth) return;   // 同じ月なら何もしない
         lastYear = y; lastMonth = m;
         OnMonthChanged?.Invoke(y, m);
+        OnMonthSettled?.Invoke(y, m);
     }
 }

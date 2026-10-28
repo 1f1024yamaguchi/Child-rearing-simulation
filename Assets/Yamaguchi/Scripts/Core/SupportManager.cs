@@ -221,7 +221,7 @@ public class SupportManager : MonoBehaviour, ISaveParticipant
 
         // 申請したときに1回だけ起きること（OnApply の本体／Monthly の手間のストレスなど）
         int money = MoneyOf(s.effects);
-        EffectApplier.Apply(s.effects);
+        EffectApplier.Apply(s.effects, new LedgerSource(s.title, ExpenseCategory.支援制度));
 
         if (s.effectTiming == EffectTiming.OnApply)
         {
@@ -261,7 +261,7 @@ public class SupportManager : MonoBehaviour, ISaveParticipant
             if (idx < 0 || idx >= s.monthlyTiers.Count) continue;
             var tier = s.monthlyTiers[idx];
             owedMoney += tier.MoneyAmount();
-            EffectApplier.Apply(tier.monthlyEffects);
+            EffectApplier.Apply(tier.monthlyEffects, new LedgerSource(s.title, ExpenseCategory.支援制度));
         }
         rt.owedTierIndexes.Clear();
         rt.renewedYear = FirstRenewedYear(s, Today());
@@ -447,7 +447,7 @@ public class SupportManager : MonoBehaviour, ISaveParticipant
 
         var tier = s.monthlyTiers[idx];
         int money = tier.MoneyAmount();
-        EffectApplier.Apply(tier.monthlyEffects);
+        EffectApplier.Apply(tier.monthlyEffects, new LedgerSource(s.title, ExpenseCategory.支援制度));
         rt.lastPaidAmount = money;
         Debug.Log($"[SupportManager] {s.title} 段:{tier.DisplayLabel()} {FormatMoney(money)}");
         OnPaid?.Invoke(s);

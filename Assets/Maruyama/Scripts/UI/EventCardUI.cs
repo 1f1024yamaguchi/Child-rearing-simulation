@@ -84,7 +84,7 @@ namespace Maruyama.UI
                         if (choice == null) continue;
 
                         var blockInstance = Instantiate(choiceBlockPrefab, choicesContainer);
-                        blockInstance.Setup(choice, HandleChoiceSelected);
+                        blockInstance.Setup(choice, data.title, HandleChoiceSelected);
                     }
                 }
             }

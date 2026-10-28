@@ -11,16 +11,24 @@ namespace Maruyama.Core
     {
         public static void Apply(IEnumerable<Effect> effects)
         {
+            Apply(effects, LedgerSource.Unknown);
+        }
+
+        /// <summary>
+        /// 効果を適用する。Money の効果は「何のお金か」(source) と一緒に家計簿 (Ledger) にも記録する。
+        /// </summary>
+        public static void Apply(IEnumerable<Effect> effects, LedgerSource source)
+        {
             if (effects == null) return;
 
             foreach (var e in effects)
             {
                 if (e == null) continue;
-                ApplySingleEffect(e);
+                ApplySingleEffect(e, source);
             }
         }
 
-        private static void ApplySingleEffect(Effect e)
+        private static void ApplySingleEffect(Effect e, LedgerSource source)
         {
             switch (e.kind)
             {
@@ -28,7 +36,9 @@ namespace Maruyama.Core
                     if (GameState.I != null)
                     {
                         int beforeMoney = GameState.I.Money;
-                        GameState.I.AddMoney(Mathf.RoundToInt(e.value));
+                        int moneyDelta = Mathf.RoundToInt(e.value);
+                        GameState.I.AddMoney(moneyDelta);
+                        Ledger.I.Record(source ?? LedgerSource.Unknown, moneyDelta);   // 効果の額で記録する
                         int afterMoney = GameState.I.Money;
                         Debug.Log($"[EffectApplier] お金: {beforeMoney:#,0}円 ➔ {afterMoney:#,0}円 (変化量: {e.value:+#,0;-#,0;0}円)");
                     }

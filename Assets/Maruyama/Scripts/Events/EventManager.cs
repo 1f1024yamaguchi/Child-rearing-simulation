@@ -29,20 +29,33 @@ namespace Maruyama.Events
             Instance = this;
         }
 
-        private void OnEnable()
+        private bool subscribed;
+
+        private void Start()
         {
-            if (MonthTicker.I != null)
+            if (subscribed) return;
+            if (MonthTicker.I == null)
             {
-                MonthTicker.I.OnMonthChanged += HandleMonthChanged;
+                Debug.LogError("EventManager: MonthTicker が見つかりません");
+                return;
             }
+            MonthTicker.I.OnMonthChanged += HandleMonthChanged;
+            subscribed = true;
         }
 
-        private void OnDisable()
+        private void OnDestroy()
         {
-            if (MonthTicker.I != null)
+            if (subscribed && MonthTicker.I != null)
             {
                 MonthTicker.I.OnMonthChanged -= HandleMonthChanged;
             }
+            subscribed = false;
+        }
+
+        [ContextMenu("Debug/今すぐイベントを出す")]
+        private void DebugTriggerNow()
+        {
+            TriggerEventPair();
         }
 
         private void HandleMonthChanged(int year, int month)

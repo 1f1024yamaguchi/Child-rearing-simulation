@@ -19,6 +19,11 @@ namespace Maruyama.UI
 
         public void Setup(EventChoice choice, Action onChosen)
         {
+            Setup(choice, string.Empty, onChosen);
+        }
+
+        public void Setup(EventChoice choice, string eventTitle, Action onChosen)
+        {
             // 既存のチップをクリア
             if (chipsContainer != null)
             {
@@ -43,7 +48,7 @@ namespace Maruyama.UI
             // ボタンのセットアップ
             if (choiceButton != null)
             {
-                choiceButton.Setup(choice, onChosen);
+                choiceButton.Setup(choice, eventTitle, onChosen);
             }
         }
     }

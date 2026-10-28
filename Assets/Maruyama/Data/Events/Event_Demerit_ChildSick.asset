@@ -25,6 +25,7 @@ MonoBehaviour:
       value: -8000
       duration: 0
       days: 0
+    ledgerCategory: 7
   - label: "\u5BB6\u3067\u69D8\u5B50\u3092\u898B\u308B"
     effects:
     - kind: 2
@@ -37,4 +38,5 @@ MonoBehaviour:
       value: 8
       duration: 0
       days: 0
+    ledgerCategory: 7
   conditions: []
