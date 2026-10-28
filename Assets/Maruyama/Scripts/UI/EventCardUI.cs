@@ -29,7 +29,8 @@ namespace Maruyama.UI
         private Action onCardCompletedCallback;
 
         public void Bind(EventData data, Action onCompleted)
-        {
+        {   
+            isCompleted = false;
             onCardCompletedCallback = onCompleted;
 
             if (data == null)

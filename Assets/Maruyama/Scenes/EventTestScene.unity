@@ -566,6 +566,59 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!1 &1589272100
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1589272102}
+  - component: {fileID: 1589272101}
+  m_Layer: 0
+  m_Name: PreschoolManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1589272101
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1589272100}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c72e5cda3a82b78448d19e0b68c4aa12, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Maruyama.Events.PreschoolManager
+  currentType: 0
+  afterSchoolCare: 0
+  event1Done: 0
+  event2Done: 0
+  event3Done: 0
+  event1Data: {fileID: 0}
+  event2Data: {fileID: 0}
+  event3Data: {fileID: 0}
+  dialogUI: {fileID: 0}
+--- !u!4 &1589272102
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1589272100}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.06929, y: -0.12473, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1664727876
 GameObject:
   m_ObjectHideFlags: 0
@@ -654,3 +707,4 @@ SceneRoots:
   - {fileID: 205800318}
   - {fileID: 966231204}
   - {fileID: 730370895}
+  - {fileID: 1589272102}

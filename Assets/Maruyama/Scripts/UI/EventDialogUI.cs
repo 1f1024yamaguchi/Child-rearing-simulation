@@ -1,4 +1,4 @@
-using Maruyama.Core;
+using System;
 using Maruyama.Events;
 using UnityEngine;
 
@@ -6,7 +6,14 @@ namespace Maruyama.UI
 {
     /// <summary>
     /// 左:デメリットカード / 右:メリットカード の 2枚を横並び表示し、
-    /// MaruyamaPauseManager により表示中のゲーム内時間停止を制御するダイアログ UI。
+    /// 食事選択画面（MealSelectionDialogUI）と同じ OnEnable / OnDisable + isPausedBySelf パターンで
+    /// 表示中のゲーム内時間を停止するダイアログ UI。
+    ///
+    /// ■ 時間停止の方式（MealSelectionDialogUI を参考に実装）
+    /// - OnEnable で GameClock.I.PushPause() を呼ぶ（isPausedBySelf フラグで二重呼び出し防止）
+    /// - OnDisable で GameClock.I.PopPause() を呼ぶ（isPausedBySelf フラグで対になるときだけ）
+    /// - 表示は gameObject.SetActive(true/false) で行い、Unity の OnEnable/OnDisable に委ねる
+    /// - MaruyamaPauseManager には依存しない（GameClock.PushPause と体系を統一）
     /// </summary>
     public class EventDialogUI : MonoBehaviour
     {
@@ -14,28 +21,79 @@ namespace Maruyama.UI
         [SerializeField] private EventCardUI demeritCardUI;
         [SerializeField] private EventCardUI meritCardUI;
 
-        [Header("ルートパネル")]
+        [Header("ルートパネル（廃止・後方互換用）")]
+        [Tooltip("旧バージョンとの互換のため残しています。このフィールドは使われません。")]
         [SerializeField] private GameObject dialogPanel;
 
         private bool demeritCompleted = false;
         private bool meritCompleted = false;
         private bool isOpen = false;
 
+        /// <summary>食事選択と同じ方式: OnEnable で停止したかどうかを追跡するフラグ</summary>
+        private bool isPausedBySelf = false;
+
+        /// <summary>ダイアログが閉じたときに呼ぶコールバック（EventManager が isDialogOpen フラグを解除するために使う）</summary>
+        private Action onClosedCallback;
+
+        // ---- Unity ライフサイクル（MealSelectionDialogUI と同じパターン）----
+
+        private void OnEnable()
+        {
+            // 判断画面を開いたときに時間を停止する（Decision 0004 / MealSelectionDialogUI と同方式）
+            if (!isPausedBySelf)
+            {
+                if (GameClock.I != null)
+                {
+                    GameClock.I.PushPause();
+                }
+                isPausedBySelf = true;
+                Debug.Log("[EventDialogUI] イベント画面を開きました。時間を停止します。");
+            }
+        }
+
+        private void OnDisable()
+        {
+            // 判断画面を閉じたときに時間停止を解除する（MealSelectionDialogUI と同方式）
+            if (isPausedBySelf)
+            {
+                if (GameClock.I != null)
+                {
+                    GameClock.I.PopPause();
+                }
+                isPausedBySelf = false;
+                Debug.Log("[EventDialogUI] イベント画面を閉じました。時間を再開します。");
+            }
+        }
+
+        // ---- 表示 API ----
+
+        /// <summary>
+        /// イベントダイアログを表示する（コールバックなし版・後方互換）。
+        /// </summary>
         public void Show(EventData demeritData, EventData meritData)
+        {
+            Show(demeritData, meritData, null);
+        }
+
+        /// <summary>
+        /// イベントダイアログを表示する。
+        /// gameObject.SetActive(true) → OnEnable → GameClock.PushPause の順で時間を停止する。
+        /// </summary>
+        /// <param name="demeritData">デメリットカードのデータ（null なら非表示）</param>
+        /// <param name="meritData">メリットカードのデータ（null なら非表示）</param>
+        /// <param name="onClosed">ダイアログが閉じたときのコールバック</param>
+        public void Show(EventData demeritData, EventData meritData, Action onClosed)
         {
             if (isOpen) return;
             isOpen = true;
 
+            onClosedCallback = onClosed;
+
             demeritCompleted = demeritData == null;
             meritCompleted = meritData == null;
 
-            if (dialogPanel != null) dialogPanel.SetActive(true);
-
-            // 時間停止を要求
-            if (MaruyamaPauseManager.Instance != null)
-            {
-                MaruyamaPauseManager.Instance.PushPause();
-            }
+            // MealSelectionDialogUI と同じ: gameObject.SetActive(true) で OnEnable を呼ぶ
+            gameObject.SetActive(true);
 
             // 左カード（デメリット）のバインド
             if (demeritCardUI != null)
@@ -66,20 +124,23 @@ namespace Maruyama.UI
             }
         }
 
+        /// <summary>
+        /// ダイアログを閉じる。
+        /// gameObject.SetActive(false) → OnDisable → GameClock.PopPause の順で時間を再開する。
+        /// </summary>
         public void Close()
         {
             if (!isOpen) return;
             isOpen = false;
 
-            if (dialogPanel != null) dialogPanel.SetActive(false);
+            // MealSelectionDialogUI と同じ: gameObject.SetActive(false) で OnDisable を呼ぶ
+            gameObject.SetActive(false);
 
-            // 時間停止要求を解除
-            if (MaruyamaPauseManager.Instance != null)
-            {
-                MaruyamaPauseManager.Instance.PopPause();
-            }
-
-            Debug.Log("[EventDialogUI] イベント画面を閉じました。時間が再開されます。");
+            // 閉じたことを EventManager へ通知
+            var callback = onClosedCallback;
+            onClosedCallback = null;
+            callback?.Invoke();
         }
     }
 }
+

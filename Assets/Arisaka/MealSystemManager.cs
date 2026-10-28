@@ -209,6 +209,13 @@ namespace Arisaka
             currentGrade = plan.grade;
             lastChosenGrade = plan.grade;
             Debug.Log($"[MealSystemManager] 今月の食事プランが '{plan.title}' に決定されました。（費用はその月の日数で日割りされ、翌日以降に一日ごとに引き落とされます）");
+
+            // 食事グレードに応じて今月の病気イベント発生日をスケジュールする（仕様 §2〜§5）
+            if (GameState.I != null && Maruyama.Events.EventManager.Instance != null)
+            {
+                GameDate.FromAgeDays(GameState.I.AgeDays, out int year, out int month, out int _);
+                Maruyama.Events.EventManager.Instance.ScheduleForMeal(plan.grade, year, month);
+            }
         }
 
         private MealPlan GetCurrentPlan()
