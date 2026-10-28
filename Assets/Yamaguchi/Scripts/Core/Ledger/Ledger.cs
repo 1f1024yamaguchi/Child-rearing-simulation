@@ -12,6 +12,16 @@ public class LedgerYearSummary
     public int support;    // 支援で助かった額（支援制度の入金 ＋ covered）
 }
 
+/// <summary>1か月ぶんの合計（年の画面の棒グラフ用）。</summary>
+[Serializable]
+public class LedgerMonthSummary
+{
+    public int monthIndex;
+    public int income;     // 入金 + の合計（正の数）
+    public int expense;    // 出金 − の合計（正の数）
+    public int covered;    // 支援で肩代わりされた額の合計（正の数）
+}
+
 /// <summary>Ledger のセーブ内容。</summary>
 [Serializable]
 public class LedgerSaveData
@@ -23,10 +33,19 @@ public class LedgerSaveData
         public int total;      // 入金 +／出金 − の合計
     }
 
+    [Serializable]
+    public class YearLinesEntry
+    {
+        public int age;
+        public List<LedgerLine> lines = new List<LedgerLine>();
+    }
+
     public List<LedgerLine> lines = new List<LedgerLine>();
     public List<CategoryTotal> categoryTotals = new List<CategoryTotal>();
     public int totalCovered;
     public List<LedgerYearSummary> years = new List<LedgerYearSummary>();
+    public List<YearLinesEntry> yearLines = new List<YearLinesEntry>();
+    public List<LedgerMonthSummary> monthSummaries = new List<LedgerMonthSummary>();
 }
 
 /// <summary>
@@ -48,6 +67,8 @@ public class Ledger
     private readonly List<LedgerLine> lines = new List<LedgerLine>();
     private readonly Dictionary<ExpenseCategory, int> categoryTotals = new Dictionary<ExpenseCategory, int>();
     private readonly Dictionary<int, LedgerYearSummary> years = new Dictionary<int, LedgerYearSummary>();
+    private readonly Dictionary<int, List<LedgerLine>> yearLines = new Dictionary<int, List<LedgerLine>>();
+    private readonly Dictionary<int, LedgerMonthSummary> monthSummaries = new Dictionary<int, LedgerMonthSummary>();
     private int totalCovered;
 
     public event Action<LedgerLine> OnRecorded;
@@ -68,6 +89,7 @@ public class Ledger
         int month = CurrentMonthIndex();
         string name = string.IsNullOrEmpty(source.name) ? LedgerSource.Unknown.name : source.name;
 
+        // 月の行
         LedgerLine line = null;
         foreach (var l in lines)
         {
@@ -90,8 +112,41 @@ public class Ledger
         categoryTotals[source.category] = cur + amount;
         totalCovered += covered;
 
-        // 年ごとの合計
+        // 年ごとの行の合計（age ごとに「名前＋種類」でまとめる）
         int age = month / 12;
+        if (!yearLines.TryGetValue(age, out var yLines))
+        {
+            yLines = new List<LedgerLine>();
+            yearLines[age] = yLines;
+        }
+        LedgerLine yLine = null;
+        foreach (var l in yLines)
+        {
+            if (l.source == name && l.category == source.category)
+            {
+                yLine = l;
+                break;
+            }
+        }
+        if (yLine == null)
+        {
+            yLine = new LedgerLine { monthIndex = -1, source = name, category = source.category };
+            yLines.Add(yLine);
+        }
+        yLine.amount += amount;
+        yLine.covered += covered;
+
+        // 月ごとの合計（棒グラフ用）
+        if (!monthSummaries.TryGetValue(month, out var mSummary))
+        {
+            mSummary = new LedgerMonthSummary { monthIndex = month };
+            monthSummaries[month] = mSummary;
+        }
+        if (amount > 0) mSummary.income += amount;
+        else if (amount < 0) mSummary.expense += -amount;
+        mSummary.covered += covered;
+
+        // 年ごとの合計
         if (!years.TryGetValue(age, out var y))
         {
             y = new LedgerYearSummary { age = age };
@@ -121,6 +176,61 @@ public class Ledger
         }
         return result;
     }
+
+    /// <summary>子の年齢（歳）の1年分の内訳行。コピーを返す。</summary>
+    public List<LedgerLine> LinesOfYear(int age)
+    {
+        var result = new List<LedgerLine>();
+        if (yearLines.TryGetValue(age, out var list))
+        {
+            foreach (var l in list)
+            {
+                result.Add(new LedgerLine
+                {
+                    monthIndex = l.monthIndex,
+                    source = l.source,
+                    category = l.category,
+                    amount = l.amount,
+                    covered = l.covered
+                });
+            }
+        }
+        return result;
+    }
+
+    /// <summary>指定した月の合計（収入・支出・支援で助かった額）。</summary>
+    public LedgerMonthSummary MonthSummary(int monthIndex)
+    {
+        if (monthSummaries.TryGetValue(monthIndex, out var s))
+        {
+            return new LedgerMonthSummary
+            {
+                monthIndex = s.monthIndex,
+                income = s.income,
+                expense = s.expense,
+                covered = s.covered
+            };
+        }
+        return new LedgerMonthSummary { monthIndex = monthIndex };
+    }
+
+    /// <summary>行が残っている一番古い月（monthIndex）。行が無ければ今月。</summary>
+    public int OldestMonthIndex
+    {
+        get
+        {
+            if (lines.Count == 0) return CurrentMonthIndex();
+            int min = int.MaxValue;
+            foreach (var l in lines)
+            {
+                if (l.monthIndex < min) min = l.monthIndex;
+            }
+            return min == int.MaxValue ? CurrentMonthIndex() : min;
+        }
+    }
+
+    /// <summary>現在の月番号（歳*12 + 月-1）。</summary>
+    public int CurrentMonth => CurrentMonthIndex();
 
     /// <summary>種類ごとのゲーム全体の合計（入金 +／出金 −）。</summary>
     public int TotalOf(ExpenseCategory category)
@@ -195,6 +305,29 @@ public class Ledger
         {
             data.years.Add(new LedgerYearSummary { age = y.age, income = y.income, expense = y.expense, support = y.support });
         }
+        foreach (var kv in yearLines)
+        {
+            var entry = new LedgerSaveData.YearLinesEntry { age = kv.Key };
+            foreach (var l in kv.Value)
+            {
+                entry.lines.Add(new LedgerLine
+                {
+                    monthIndex = l.monthIndex, source = l.source, category = l.category,
+                    amount = l.amount, covered = l.covered
+                });
+            }
+            data.yearLines.Add(entry);
+        }
+        foreach (var m in monthSummaries.Values)
+        {
+            data.monthSummaries.Add(new LedgerMonthSummary
+            {
+                monthIndex = m.monthIndex,
+                income = m.income,
+                expense = m.expense,
+                covered = m.covered
+            });
+        }
         return data;
     }
 
@@ -229,6 +362,38 @@ public class Ledger
                 if (y != null) years[y.age] = new LedgerYearSummary { age = y.age, income = y.income, expense = y.expense, support = y.support };
             }
         }
+        if (data.yearLines != null)
+        {
+            foreach (var entry in data.yearLines)
+            {
+                if (entry == null || entry.lines == null) continue;
+                var list = new List<LedgerLine>();
+                foreach (var l in entry.lines)
+                {
+                    if (l == null) continue;
+                    list.Add(new LedgerLine
+                    {
+                        monthIndex = l.monthIndex, source = l.source, category = l.category,
+                        amount = l.amount, covered = l.covered
+                    });
+                }
+                yearLines[entry.age] = list;
+            }
+        }
+        if (data.monthSummaries != null)
+        {
+            foreach (var m in data.monthSummaries)
+            {
+                if (m == null) continue;
+                monthSummaries[m.monthIndex] = new LedgerMonthSummary
+                {
+                    monthIndex = m.monthIndex,
+                    income = m.income,
+                    expense = m.expense,
+                    covered = m.covered
+                };
+            }
+        }
         totalCovered = data.totalCovered;
     }
 
@@ -238,12 +403,14 @@ public class Ledger
         lines.Clear();
         categoryTotals.Clear();
         years.Clear();
+        yearLines.Clear();
+        monthSummaries.Clear();
         totalCovered = 0;
     }
 
     // ------------------------------------------------------------
 
-    private static int CurrentMonthIndex()
+    public static int CurrentMonthIndex()
     {
         if (GameState.I == null) return 0;
         int y, m, d;
