@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 99a1663d2c3e59c46acc2bb177a7b192, type: 3}
+  m_Name: Deduction_DependentChild
+  m_EditorClassIdentifier: Assembly-CSharp::TaxDeduction
+  id: dependent_child
+  title: "\u6276\u990A\u63A7\u9664\uFF08\u5B50\uFF09"
+  description: "16\u301C18\u6B73\u306E\u5B50\u3069\u3082\u3092\u990A\u3063\u3066\u3044\u308B\u3068\u304D\u300215\u6B73\u307E\u3067\u306F\u5150\u7AE5\u624B\u5F53\u304C\u3042\u308B\u306E\u3067\u3001\u3053\u306E\u63A7\u9664\u306F\u3042\u308A\u307E\u305B\u3093\u3002"
+  route: 0
+  kind: 0
+  incomeTaxAmount: 380000
+  residentTaxAmount: 330000
+  childAgeMin: 16
+  childAgeMax: 18
+  spouseIncomeMax: 580000
+  claimantIncomeMax: 0
+  extraRequirements: []
+  medicalFloor: 100000
+  medicalIncomeRate: 0.05
+  medicalCap: 2000000

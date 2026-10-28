@@ -1,6 +1,6 @@
 ---
 title: 支出の仕組み（家計簿）
-updated: 2026-10-21
+updated: 2026-10-28
 status: 設計中（たたき台）・担当：山口
 related: [docs/design/support-apply.md, docs/design/food-system.md, docs/design/events.md, docs/design/effects.md, docs/code/architecture.md, docs/decisions/0015-real-money-and-expenses.md]
 ---
@@ -122,6 +122,13 @@ public class ExpenseCover
 - **肩代わりは制度が「受給中」のときだけ**。申請しなければ全額払う＝「知っていれば得をする」。
 - 対象外のものは残る（例：無償化でも給食費は払う）→ 現実の「無償化なのにお金がかかる」が体験できる。
 
+**実装のルール（2026-10-28・依頼E3。理由は [../decisions/0022-expense-cover-rules.md](../decisions/0022-expense-cover-rules.md)）**
+
+- 肩代わりが効くのは、制度が Active かつ**申請した月の翌月から**。支給停止中は効かない。窓口は `SupportManager.CoveringSchemes()`。
+- 肩代わり額：Full＝全額／Rate＝額×割合／UpTo＝○円まで。複数の制度は合計し、支出の額を上限にする。
+- 家計簿：支払った額は `EffectApplier` が amount として、肩代わり額は `ExpenseManager` が `Ledger.I.Record(source, 0, covered)` で**同じ行**に covered として足す。全額肩代わりでも行は残る（amount 0・covered ○○）。
+- 今入っている制度：`preschool_free`（保育料を 3歳1月1日〜5歳12月31日 全額）、`hs_tuition_support`（高校授業料を 15歳4月〜18歳3月 月9,900円まで）。
+
 ---
 
 ## 5. 家計簿（Ledger）
@@ -157,6 +164,8 @@ public class LedgerLine
 
 ## 5.5 給料は手取りで入る（2026-10-06 決定）
 
+> **2026-10-28 更新：** 一律の手取り率は、年単位の税金（源泉徴収・年末調整・確定申告・住民税）に置き換えた。→ [taxes.md](taxes.md)／[0021](../decisions/0021-yearly-income-tax.md)。下の手取り率は `TaxManager` が無いシーンだけで使う。
+
 現実の給料は、額面から**税金（所得税・住民税）と社会保険料（健康保険・年金・雇用保険）**が引かれて振り込まれる。学習目的のため、ゲームでも**手取りでお金が増える**ようにする。
 
 - 給料日（`HouseholdIncome.Payday`）に、額面 × **手取り率** を所持金に足す。
@@ -164,7 +173,7 @@ public class LedgerLine
 - **給料日に「給料が入りました（手取り +○○円）」の通知を1つだけ出す**（2026-10-07 決定）。支援制度の毎月の支給は個別に通知しない。
 - 家計簿には「給料（母）額面 +250,000」「税金・社会保険 −50,000」のように**引かれた額も1行で見せる**（何に引かれているかを知ることが学習になる）。
 - 申請条件の「年収」は**額面**で数える（[support-apply.md](support-apply.md) 4.2.1。現実の所得制限の目安も額面の年収で語られることが多いため）。`IncomeHistory` には額面を記録する。
-- 将来、年収で手取り率を変える（累進）ことも段の表でできるが、今は一律。
+- ~~将来、年収で手取り率を変える（累進）ことも段の表でできるが、今は一律。~~ → 税金を年単位で計算する形にした（[taxes.md](taxes.md)）。
 - **ボーナスは入れない**（2026-10-07 決定）。お金が増える仕組みはイベントや頑張りを優先する。
 
 ---

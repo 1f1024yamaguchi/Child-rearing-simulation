@@ -1,0 +1,55 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea7ceb50aff1b1d4a80539c5d7a3a83e, type: 3}
+  m_Name: Support_HSTuitionSupport
+  m_EditorClassIdentifier: Assembly-CSharp::SupportScheme
+  id: hs_tuition_support
+  title: "\u9AD8\u7B49\u5B66\u6821\u7B49\u5C31\u5B66\u652F\u63F4\u91D1"
+  description: "\u9AD8\u6821\u306E\u6388\u696D\u6599\u3092\u56FD\u304C\u80A9\u4EE3\u308F\u308A\u3059\u308B\uFF08\u516C\u7ACB\u306F\u67089,900\u5186\u307E\u3067\uFF09"
+  icon: {fileID: 0}
+  category: 0
+  merits:
+  - "\u516C\u7ACB\u9AD8\u6821\u306E\u6388\u696D\u6599\u304C\u5B9F\u8CEA0\u5186"
+  demerits:
+  - "\u5165\u5B66\u91D1\u30FB\u5236\u670D\u4EE3\u306A\u3069\u306F\u5BFE\u8C61\u5916"
+  - "\u7533\u8ACB\u304C\u9045\u308C\u305F\u6708\u306E\u5206\u306F\u3055\u304B\u306E\u307C\u3089\u306A\u3044"
+  effectTiming: 1
+  effects: []
+  applyRequirements:
+  - {fileID: 11400000, guid: fe343fd834ca47ceb5799d10b028525d, type: 2}
+  monthlyTiers: []
+  covers:
+  - expense: {fileID: 11400000, guid: f100000000000000000000000000000a, type: 2}
+    type: 2
+    value: 9900
+    fromAge:
+      year: 15
+      month: 4
+      day: 1
+    toAge:
+      year: 18
+      month: 3
+      day: 31
+  start:
+    year: 15
+    month: 4
+    day: 1
+  deadlineType: 0
+  deadline:
+    year: 0
+    month: 1
+    day: 1
+  yearly:
+    month: 8
+    day: 31
+  lapseYears: 2
+  renewWindowDays: 31

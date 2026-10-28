@@ -106,6 +106,31 @@ public class SupportManager : MonoBehaviour, ISaveParticipant
 
     public SupportState GetState(SupportScheme s) => GetRuntime(s).state;
 
+    /// <summary>受給中（Active）の制度の一覧。並びは Schemes と同じ。</summary>
+    public IEnumerable<SupportScheme> ActiveSchemes()
+    {
+        foreach (var s in schemes)
+        {
+            if (IsValid(s) && GetRuntime(s).state == SupportState.Active) yield return s;
+        }
+    }
+
+    /// <summary>
+    /// 今月、支出の肩代わり（covers）が効いている制度の一覧（expenses.md 4章）。
+    /// 受給中（Active）かつ covers があり、申請した月より後の月のもの（毎月の支給と同じく「翌月から」）。
+    /// 支給停止（Suspended）中は肩代わりしない。covers の期間の判定は使う側（ExpenseManager）で行う。
+    /// </summary>
+    public IEnumerable<SupportScheme> CoveringSchemes()
+    {
+        int monthIndex = MonthIndexOf(Today());
+        foreach (var s in schemes)
+        {
+            if (!IsValid(s) || s.covers == null || s.covers.Count == 0) continue;
+            var rt = GetRuntime(s);
+            if (rt.state == SupportState.Active && monthIndex > rt.appliedMonthIndex) yield return s;
+        }
+    }
+
     /// <summary>制度の実行中の状態。無ければ今日の日付と条件から計算して作る。</summary>
     public SupportSchemeRuntime GetRuntime(SupportScheme s)
     {
@@ -414,6 +439,8 @@ public class SupportManager : MonoBehaviour, ISaveParticipant
                     SetState(s, rt, SupportState.Ended);
                     continue;
                 }
+                // 支給表が空で covers だけの制度（無償化など）はお金を払わない。肩代わりは ExpenseManager が行う
+                if (IsCoversOnly(s)) continue;
                 PayMonth(s, rt, monthIndex, today, ctx);
             }
             else if (rt.state == SupportState.Suspended)
@@ -494,16 +521,35 @@ public class SupportManager : MonoBehaviour, ISaveParticipant
         return -1;
     }
 
-    /// <summary>支給表の最後の toAge を過ぎたか。支給表が空の制度は終わらない（covers はステップ6）。</summary>
+    /// <summary>
+    /// 支給表の最後の toAge（covers があればその toAge も含めたいちばん遅い日）を過ぎたか。
+    /// 支給表も covers も空の制度は終わらない。
+    /// </summary>
     private static bool HasEnded(SupportScheme s, int today)
     {
-        if (s.monthlyTiers == null || s.monthlyTiers.Count == 0) return false;
         int last = -1;
-        foreach (var t in s.monthlyTiers)
+        if (s.monthlyTiers != null)
         {
-            if (t != null) last = Mathf.Max(last, t.toAge.ToAgeDays());
+            foreach (var t in s.monthlyTiers)
+            {
+                if (t != null) last = Mathf.Max(last, t.toAge.ToAgeDays());
+            }
+        }
+        if (s.covers != null)
+        {
+            foreach (var c in s.covers)
+            {
+                if (c != null) last = Mathf.Max(last, c.toAge.ToAgeDays());
+            }
         }
         return last >= 0 && today > last;
+    }
+
+    /// <summary>支給表が空で covers だけを持つ制度か。</summary>
+    private static bool IsCoversOnly(SupportScheme s)
+    {
+        return (s.monthlyTiers == null || s.monthlyTiers.Count == 0)
+            && s.covers != null && s.covers.Count > 0;
     }
 
     /// <summary>

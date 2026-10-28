@@ -5,7 +5,7 @@ using UnityEngine;
 /// <summary>
 /// 支援制度のデータ（制度1つ ＝ アセット1つ）。support-systems.md 3.5 ＋ support-apply.md 5.1。
 /// 申請済み／受給中といった「今の状態」はここに書かない（SupportSchemeRuntime に id をキーにして持つ）。
-/// ※ covers（支出の肩代わり）はステップ6で足す。
+/// covers（支出の肩代わり）は受給中のあいだだけ ExpenseManager が使う（expenses.md 4章）。空なら今までどおり。
 /// </summary>
 [CreateAssetMenu(menuName = "子育て/支援制度")]
 public class SupportScheme : ScriptableObject
@@ -30,6 +30,10 @@ public class SupportScheme : ScriptableObject
 
     [Header("毎月の支給（Monthly のとき）")]
     public List<PaymentTier> monthlyTiers = new List<PaymentTier>();   // 3.2 の支給表
+
+    [Header("支出の肩代わり（受給中のあいだ有効）")]
+    [Tooltip("無償化など。支給表が空で covers だけの制度は、お金は払わず支出を減らす（申請の翌月から）")]
+    public List<ExpenseCover> covers = new List<ExpenseCover>();   // expenses.md 4章
 
     [Header("申請できる期間")]
     public GameDay      start    = new GameDay { year = 0, month = 1, day = 1 };
@@ -59,6 +63,18 @@ public class SupportScheme : ScriptableObject
                 if (monthlyTiers[i] == null) continue;
                 monthlyTiers[i].fromAge = Fix(monthlyTiers[i].fromAge);
                 monthlyTiers[i].toAge   = Fix(monthlyTiers[i].toAge);
+            }
+        }
+
+        if (covers != null)
+        {
+            for (int i = 0; i < covers.Count; i++)
+            {
+                if (covers[i] == null) continue;
+                covers[i].fromAge = Fix(covers[i].fromAge);
+                covers[i].toAge   = Fix(covers[i].toAge);
+                if (covers[i].type == CoverType.Rate) covers[i].value = Mathf.Clamp01(covers[i].value);
+                else if (covers[i].value < 0f)        covers[i].value = 0f;
             }
         }
     }

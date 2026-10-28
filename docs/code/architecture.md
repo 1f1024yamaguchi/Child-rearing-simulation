@@ -1,8 +1,8 @@
 ---
 title: アーキテクチャ（時間・お金・親ステータス）
-updated: 2026-09-25
+updated: 2026-10-28
 status: 実装済み（一部未実装）
-related: [docs/design/rules-and-stats.md, docs/code/ui-main-test-hud.md]
+related: [docs/design/rules-and-stats.md, docs/code/ui-main-test-hud.md, docs/design/taxes.md]
 ---
 
 # アーキテクチャ（時間・お金・親ステータス）
@@ -24,9 +24,14 @@ GameClock （実時間 1秒 = ゲーム内 1日）
               ├─ DayTicker    → OnDayPassed(通算日数)
               │     ├─ WageAccrual        … 各親の日給を積み立て
               │     └─ ParentStressSystem … 各親のストレスを増減
+              │     └─ TaxManager         … 11/15 年末調整の書類、2/16〜3/15 確定申告
               └─ MonthTicker  → OnMonthChanged(歳, 月)
-                    └─ HouseholdIncome    … 給料日。積立分を GameState.AddMoney
+                    └─ HouseholdIncome    … 給料日。TaxManager.Withhold で親ごとに天引きして手取りを GameState.AddMoney
+                 → OnMonthSettled(歳, 月)
+                    └─ TaxManager         … 12月の給料日のあとに年末調整
 ```
+
+税金（源泉徴収・年末調整・確定申告・住民税）の仕様は [../design/taxes.md](../design/taxes.md)。
 
 - `DayTicker` / `MonthTicker` はどちらも取りこぼし対策済み（複数日まとまって進んでも1日ずつ処理する）。
 - `GameClock.Tick()` は現在 **`AddAgeDays(1f)` を呼ぶだけ**。お金・ストレスの増減はここではなく、上記の各システムが担当している。

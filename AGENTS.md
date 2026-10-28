@@ -56,6 +56,7 @@ Unity 製の子育てシミュレーションゲーム。**このファイルは
 | [support-systems.md](docs/design/support-systems.md) | 子育て支援制度のカテゴリ、メリットとデメリットの型、制度一覧画面の設計 | 制度データを扱う（草尾・丸山の共通の土台） |
 | [support-apply.md](docs/design/support-apply.md) | 制度の申請→状態管理→効果の反映、申請前後のカード表示（期限・受給状況） | サポート画面の申請・制度の状態を実装する |
 | [expenses.md](docs/design/expenses.md) | 毎月の支出（固定費・保育料・学費・塾）、無償化の肩代わり、家計簿 | お金の出入りに関わる機能を実装する |
+| [taxes.md](docs/design/taxes.md) | 税金（所得税・住民税・社会保険料）、年末調整・確定申告、控除の申請 | 給料の天引き・税金・控除を触る |
 | [company-support.md](docs/design/company-support.md) | 会社の制度（育休・時短）。親の働き方の状態と給料連動の支給、段階的な作り方 | 会社タブの制度や親の働き方を実装する |
 | [save-system.md](docs/design/save-system.md) | セーブ（保存するもの一覧・参加者の仕組み・ロードの順番・オート／手動の2枠） | セーブに関わる値を持つ機能を作る |
 | [title-screen.md](docs/design/title-screen.md) | タイトル画面（続きから／最初から／セーブ選択／育成記録） | タイトル画面・育成記録を作る |
@@ -102,6 +103,7 @@ Unity 製の子育てシミュレーションゲーム。**このファイルは
 - [0013-child-stress-per-day-and-badge-removal.md](docs/decisions/0013-child-stress-per-day-and-badge-removal.md) — 子どものストレス計算を1日あたりに変更し、カードのストレス段階バッジを廃止した理由
 - [0019-two-save-slots.md](docs/decisions/0019-two-save-slots.md) — セーブをオートと手動の2枠にし、「最初から」ではセーブを消さない理由
 - [0020-ending-on-leaving-home.md](docs/decisions/0020-ending-on-leaving-home.md) — ゲームの終わりを「20歳」から「子どもの巣立ち」に変え、進路で巣立つ年齢を変えた理由
+- [0021-yearly-income-tax.md](docs/decisions/0021-yearly-income-tax.md) — 給料の天引きを一律の手取り率から、年単位の税金（年末調整・確定申告・住民税）にした理由
 
 ---
 

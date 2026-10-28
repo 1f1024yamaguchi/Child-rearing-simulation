@@ -29,7 +29,7 @@ MonoBehaviour:
       day: 31
     monthlyCost: 0
     requirements:
-    - {fileID: 11400000, guid: e1000000000000000000000000000260, type: 3}
+    - {fileID: 11400000, guid: e1000000000000000000000000000260, type: 2}
     monthlyEffects: []
   - label: "\u301C330\u4E07\u5186"
     fromAge:
@@ -42,7 +42,7 @@ MonoBehaviour:
       day: 31
     monthlyCost: 19500
     requirements:
-    - {fileID: 11400000, guid: e1000000000000000000000000000330, type: 3}
+    - {fileID: 11400000, guid: e1000000000000000000000000000330, type: 2}
     monthlyEffects: []
   - label: "\u301C470\u4E07\u5186"
     fromAge:
@@ -55,7 +55,7 @@ MonoBehaviour:
       day: 31
     monthlyCost: 30000
     requirements:
-    - {fileID: 11400000, guid: e1000000000000000000000000000470, type: 3}
+    - {fileID: 11400000, guid: e1000000000000000000000000000470, type: 2}
     monthlyEffects: []
   - label: "\u301C640\u4E07\u5186"
     fromAge:
@@ -68,7 +68,7 @@ MonoBehaviour:
       day: 31
     monthlyCost: 44500
     requirements:
-    - {fileID: 11400000, guid: e1000000000000000000000000000640, type: 3}
+    - {fileID: 11400000, guid: e1000000000000000000000000000640, type: 2}
     monthlyEffects: []
   - label: "\u301C930\u4E07\u5186"
     fromAge:
@@ -81,7 +81,7 @@ MonoBehaviour:
       day: 31
     monthlyCost: 61000
     requirements:
-    - {fileID: 11400000, guid: e1000000000000000000000000000930, type: 3}
+    - {fileID: 11400000, guid: e1000000000000000000000000000930, type: 2}
     monthlyEffects: []
   - label: "\u301C1130\u4E07\u5186"
     fromAge:
@@ -94,7 +94,7 @@ MonoBehaviour:
       day: 31
     monthlyCost: 80000
     requirements:
-    - {fileID: 11400000, guid: e1000000000000000000000000001130, type: 3}
+    - {fileID: 11400000, guid: e1000000000000000000000000001130, type: 2}
     monthlyEffects: []
   - label: "\u305D\u308C\u4EE5\u4E0A"
     fromAge:

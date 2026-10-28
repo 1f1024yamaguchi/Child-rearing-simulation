@@ -132,6 +132,11 @@ public static class SupportScheduleText
         {
             parts.Add($"今：{TierAmount(cur)}（次回 {GameDate.Format(NextMonthStart(today))}）");
         }
+        else if ((s.monthlyTiers == null || s.monthlyTiers.Count == 0) && s.covers != null && s.covers.Count > 0)
+        {
+            // covers だけの制度（無償化など）：お金は入らず、支出が減る（申請の翌月から）
+            parts.Add("支出を肩代わり中（申請した翌月から）");
+        }
         else
         {
             parts.Add($"今月は対象外{UnmetTierReasons(s, today)}");

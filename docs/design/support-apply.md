@@ -1,6 +1,6 @@
 ---
 title: 支援制度の申請と効果の反映
-updated: 2026-10-19
+updated: 2026-10-28
 status: 確定（他メンバーの合意待ちの項目は docs/team/agreements-needed.md）
 related: [docs/design/expenses.md, docs/design/support-systems.md, docs/design/calendar-system.md, docs/design/effects.md, docs/code/architecture.md, docs/decisions/0014-support-state-in-manager.md]
 ---
@@ -327,6 +327,8 @@ public class SupportSchemeRuntime   // そのまま SaveData に入れられる�
 | `IReadOnlyList<SupportScheme> Schemes` | 一覧（Inspector の `schemes`、並び順＝表示順） |
 | `IEnumerable<SupportScheme> GetByCategory(SupportCategory c)` | タブ用 |
 | `SupportState GetState(s)` / `SupportSchemeRuntime GetRuntime(s)` | 状態と詳細 |
+| `IEnumerable<SupportScheme> ActiveSchemes()` | 受給中（Active）の制度の一覧 |
+| `IEnumerable<SupportScheme> CoveringSchemes()` | 今月 covers が効いている制度（Active かつ申請の翌月以降）。`ExpenseManager` が肩代わりの計算に使う（expenses.md 4章） |
 | `IEnumerable<RequirementSO> UnmetRequirements(s)` | 満たしていない条件（カードに「条件：年収910万円以下」と出す用） |
 | `PaymentTier CurrentTier(s)` / `PaymentTier NextTier(s)` | 今の段・次の段（「3歳から 月10,000」と出す用） |
 | `bool CanApply(s)` / `CanRenew(s)` / `CanResume(s)` | ボタンを押せるか |

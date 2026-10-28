@@ -1,7 +1,7 @@
 ---
 title: 支出と家計簿の実装法と Antigravity への依頼文
-updated: 2026-10-21
-status: 依頼前
+updated: 2026-10-28
+status: 進行中（E2 の確認待ち）
 related: [docs/design/expenses.md, docs/team/agreements-needed.md, docs/design/support-apply.md, docs/design/save-system.md, docs/decisions/0015-real-money-and-expenses.md, docs/design/result-scene.md]
 ---
 
@@ -412,10 +412,10 @@ TextMeshPro の注意：TextOverflowModes.Ellipsis は使わない／日本語�
 
 | 依頼 | 内容 | 状態 |
 |---|---|---|
-| E1 | 家計簿の土台・給料の手取り・月の精算の順番 | 未依頼 |
-| E1b | イベント・食事のお金を家計簿につなぐ（M1・M2・A1。山口が実施） | 依頼済み・確認中 |
-| E1b-2 | Main_test2 でイベントが毎月出ない不具合の修正（EventManager の購読を Start へ） | 未依頼 |
-| E2 | 毎月の支出（自動） | E1b 待ち |
-| E3 | 無償化（肩代わり） | 未依頼 |
+| E1 | 家計簿の土台・給料の手取り・月の精算の順番 | **完了**（2026-10-21。takeHomeRate 0.8 を確認） |
+| E1b | イベント・食事のお金を家計簿につなぐ（M1・M2・A1。山口が実施） | **ほぼ完了**（2026-10-22。病院が「イベント名：選択肢」で載ることを確認）。残り：`Event_Merit_Daycare`「一時預かり保育に申し込む」の種類を 保育 に／`MaruyamaTestRunner` の確認 |
+| E1b-2 | Main_test2 でイベントが毎月出ない不具合の修正（EventManager の購読を Start へ） | **完了**（2026-10-22。Main_test2 の Canvas に EventDialog を置き、CardsPanel を 1280×720・Scale 0.625 に） |
+| E2 | 毎月の支出（自動） | **完了**（2026-10-28 確認。保育料のアセットの年収の条件への参照が `type: 3` で切れていたのを `type: 2` に直した → 年収の段が正しく選ばれる） |
+| E3 | 無償化（肩代わり） | **完了**（2026-10-28 確認。保育の無償化：申請した翌月から保育料 0 円・給食費は払う・6歳1月で受給終了／就学支援金：翌月から授業料 0 円・肩代わり 9,900 円／児童手当は変わらない／セーブ→ロード後も肩代わりが続く） |
 | E4 | お金が足りないとき・終わり方をまとめる | 未依頼 |
-| E5 | 家計簿の画面・誕生日のまとめ | 未依頼 |
+| E5 | 家計簿の画面・誕生日のまとめ | 未依頼（それまで家計簿は `LedgerDebugMenu` で Console に出して見る） |
