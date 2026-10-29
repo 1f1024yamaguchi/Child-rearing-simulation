@@ -496,6 +496,7 @@ GameObject:
   - component: {fileID: 4911126429557205068}
   - component: {fileID: 1374886482629988312}
   - component: {fileID: 5288156906090829720}
+  - component: {fileID: 4940592943626913452}
   m_Layer: 0
   m_Name: btn_ok
   m_TagString: Untagged
@@ -625,6 +626,19 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+--- !u!114 &4940592943626913452
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2252052904915169163}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3cddb0c4f91f3984e9a5fe3033684a06, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ButtonClickSE
+  overrideClip: {fileID: 0}
 --- !u!1 &2367460471224769370
 GameObject:
   m_ObjectHideFlags: 0
@@ -1035,6 +1049,7 @@ GameObject:
   - component: {fileID: 3879976650840120828}
   - component: {fileID: 2330174305960438358}
   - component: {fileID: 989735016288194550}
+  - component: {fileID: 4035098995087057005}
   m_Layer: 0
   m_Name: btn_cancel
   m_TagString: Untagged
@@ -1164,6 +1179,19 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+--- !u!114 &4035098995087057005
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3396832286264816411}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3cddb0c4f91f3984e9a5fe3033684a06, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ButtonClickSE
+  overrideClip: {fileID: 0}
 --- !u!1 &4715435310964305784
 GameObject:
   m_ObjectHideFlags: 0
@@ -2182,6 +2210,7 @@ GameObject:
   - component: {fileID: 9174748964992526734}
   - component: {fileID: 8864612810529222064}
   - component: {fileID: 1099492577301096851}
+  - component: {fileID: 2781879836691773131}
   m_Layer: 0
   m_Name: btn_who
   m_TagString: Untagged
@@ -2311,6 +2340,19 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+--- !u!114 &2781879836691773131
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7799393599835469499}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3cddb0c4f91f3984e9a5fe3033684a06, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ButtonClickSE
+  overrideClip: {fileID: 0}
 --- !u!1 &7823108152532304306
 GameObject:
   m_ObjectHideFlags: 0

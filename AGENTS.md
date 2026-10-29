@@ -81,6 +81,7 @@ Unity 製の子育てシミュレーションゲーム。**このファイルは
 | [ui-support-card.md](docs/code/ui-support-card.md) | 制度カード（SupportCard）の階層・状態ごとの表示・使い方 | サポート画面やカレンダーで制度の情報を表示する |
 | [ui-support-toast.md](docs/code/ui-support-toast.md) | 通知（SupportToast）が何をきっかけに何を出すか、仕組みと判断 | 申請・期限切れの通知を触る／通知を足す |
 | [ui-start-scene.md](docs/code/ui-start-scene.md) | スタート画面（Start_scene）の GameObject 階層、OnClick 配線、設定手順 | スタート画面を構築・確認する |
+| [sound-system.md](docs/code/sound-system.md) | サウンド（SE・BGM・音量設定パネル）のスクリプト構成と Unity 設定手順 | SE・BGM・音量設定画面を設定・利用する |
 | [how-to-add-support-scheme.md](docs/code/how-to-add-support-scheme.md) | 支援制度（カード）の足し方と、制度アセットの各項目（年齢の日付・期限・支給表・条件）の意味 | 制度を追加・調整する |
 
 ### チーム — `docs/team/`

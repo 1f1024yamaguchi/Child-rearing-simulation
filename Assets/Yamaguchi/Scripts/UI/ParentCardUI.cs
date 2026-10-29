@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 public class ParentCardUI : MonoBehaviour
 {
@@ -11,6 +12,10 @@ public class ParentCardUI : MonoBehaviour
     [Header("特性・状態")]
     [Tooltip("特性・状態の行を管理する PersonTraitRowsUI（任意）")]
     [SerializeField] private PersonTraitRowsUI traitRows;
+
+    [Header("産休表示")]
+    [Tooltip("産休中にスライダーのつまみの上へ「産休中（あと○日）」を出すテキスト（任意）")]
+    [SerializeField] private TMP_Text leaveLabel;
 
     private ParentStatus parent;
     private bool subscribed;
@@ -95,5 +100,30 @@ public class ParentCardUI : MonoBehaviour
             : mode == WorkMode.ParentalLeave ? "育休中"
             : mode == WorkMode.ShortTime ? "時短勤務中" : "通常勤務";
         statusList?.SetStatus("workMode", "勤務", label);
+        RefreshLeaveLabel();
     }
+
+    private int shownLeaveDay = -1;
+
+    // 日付が変わったら残り日数を更新する（ロードで日付が飛んだ場合も拾えるよう Update で見る）
+    private void Update()
+    {
+        if (parent == null || leaveLabel == null || parent.WorkMode != WorkMode.MaternityLeave) return;
+        if (Today() != shownLeaveDay) RefreshLeaveLabel();
+    }
+
+    /// 産休中だけ、スライダーのつまみの上に「産休中（あと○日）」を出す。
+    private void RefreshLeaveLabel()
+    {
+        if (leaveLabel == null) return;
+        bool show = parent != null && parent.WorkMode == WorkMode.MaternityLeave;
+        leaveLabel.gameObject.SetActive(show);
+        if (!show) { shownLeaveDay = -1; return; }
+
+        shownLeaveDay = Today();
+        int left = SupportManager.PostpartumLeaveDaysLeft(shownLeaveDay);
+        leaveLabel.text = $"産休中（あと{left}日）";
+    }
+
+    private static int Today() => GameState.I != null ? Mathf.FloorToInt(GameState.I.AgeDays) : 0;
 }

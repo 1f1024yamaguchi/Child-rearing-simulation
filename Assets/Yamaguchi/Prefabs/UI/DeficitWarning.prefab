@@ -731,6 +731,7 @@ GameObject:
   - component: {fileID: 138685298941196413}
   - component: {fileID: 7290606739524946739}
   - component: {fileID: 3373406247597841452}
+  - component: {fileID: 3339417579884163460}
   m_Layer: 0
   m_Name: Dim
   m_TagString: Untagged
@@ -851,6 +852,19 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!114 &3339417579884163460
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6823426425241800676}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3cddb0c4f91f3984e9a5fe3033684a06, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ButtonClickSE
+  overrideClip: {fileID: 0}
 --- !u!1 &7027098743833028483
 GameObject:
   m_ObjectHideFlags: 0
@@ -1215,6 +1229,7 @@ GameObject:
   - component: {fileID: 7850084946600365552}
   - component: {fileID: 8522521798855015496}
   - component: {fileID: 2235700490786471389}
+  - component: {fileID: 8644376865475204187}
   m_Layer: 0
   m_Name: CloseButton
   m_TagString: Untagged
@@ -1324,6 +1339,19 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &8644376865475204187
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7625193510624611400}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3cddb0c4f91f3984e9a5fe3033684a06, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ButtonClickSE
+  overrideClip: {fileID: 0}
 --- !u!1 &7727857383796438419
 GameObject:
   m_ObjectHideFlags: 0
@@ -1336,6 +1364,7 @@ GameObject:
   - component: {fileID: 3195013763733466211}
   - component: {fileID: 367570642590323952}
   - component: {fileID: 6230882956451518353}
+  - component: {fileID: 8256526817416470904}
   m_Layer: 0
   m_Name: SupportButton
   m_TagString: Untagged
@@ -1445,6 +1474,19 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &8256526817416470904
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7727857383796438419}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3cddb0c4f91f3984e9a5fe3033684a06, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ButtonClickSE
+  overrideClip: {fileID: 0}
 --- !u!1 &8328086108849856290
 GameObject:
   m_ObjectHideFlags: 0
@@ -1457,6 +1499,7 @@ GameObject:
   - component: {fileID: 8361038253661301522}
   - component: {fileID: 1797281794831273922}
   - component: {fileID: 2913992055586328050}
+  - component: {fileID: 2890245951155904375}
   m_Layer: 0
   m_Name: ViewLedgerButton
   m_TagString: Untagged
@@ -1566,6 +1609,19 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &2890245951155904375
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8328086108849856290}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3cddb0c4f91f3984e9a5fe3033684a06, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ButtonClickSE
+  overrideClip: {fileID: 0}
 --- !u!1 &8357096040221276836
 GameObject:
   m_ObjectHideFlags: 0
@@ -1620,7 +1676,6 @@ MonoBehaviour:
   ledgerButton: {fileID: 2913992055586328050}
   supportButton: {fileID: 6230882956451518353}
   closeButton: {fileID: 2235700490786471389}
-  watcher: {fileID: 0}
   ledgerPanel: {fileID: 0}
   supportPanel: {fileID: 0}
 --- !u!1 &8360244347692010816
@@ -1635,6 +1690,7 @@ GameObject:
   - component: {fileID: 6615789624193031147}
   - component: {fileID: 8900959450165431430}
   - component: {fileID: 3513771513536306083}
+  - component: {fileID: 5859297398805675490}
   m_Layer: 0
   m_Name: CloseXButton
   m_TagString: Untagged
@@ -1756,6 +1812,19 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!114 &5859297398805675490
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8360244347692010816}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3cddb0c4f91f3984e9a5fe3033684a06, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ButtonClickSE
+  overrideClip: {fileID: 0}
 --- !u!1 &8438374080099673409
 GameObject:
   m_ObjectHideFlags: 0

@@ -946,6 +946,7 @@ GameObject:
   - component: {fileID: 2041342751417945136}
   - component: {fileID: 1506387475389786885}
   - component: {fileID: 4804669994410225102}
+  - component: {fileID: 7399504946920402090}
   m_Layer: 0
   m_Name: Dim
   m_TagString: Untagged
@@ -1054,6 +1055,19 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &7399504946920402090
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4012154732677156647}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3cddb0c4f91f3984e9a5fe3033684a06, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ButtonClickSE
+  overrideClip: {fileID: 0}
 --- !u!1 &4438227699079107051
 GameObject:
   m_ObjectHideFlags: 0
@@ -1204,6 +1218,7 @@ GameObject:
   - component: {fileID: 1415056364362068058}
   - component: {fileID: 3472539499722513717}
   - component: {fileID: 6629752427229659470}
+  - component: {fileID: 6898246261414958028}
   m_Layer: 0
   m_Name: btn_ok
   m_TagString: Untagged
@@ -1333,6 +1348,19 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+--- !u!114 &6898246261414958028
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4978125621113566747}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3cddb0c4f91f3984e9a5fe3033684a06, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ButtonClickSE
+  overrideClip: {fileID: 0}
 --- !u!1 &5017718274777131771
 GameObject:
   m_ObjectHideFlags: 0
@@ -1858,6 +1886,7 @@ GameObject:
   - component: {fileID: 8860193562874120334}
   - component: {fileID: 2645770192663077715}
   - component: {fileID: 4433152255716311995}
+  - component: {fileID: 7488141158627624851}
   m_Layer: 0
   m_Name: btn_cancel
   m_TagString: Untagged
@@ -1987,6 +2016,19 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+--- !u!114 &7488141158627624851
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8319339152423966498}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3cddb0c4f91f3984e9a5fe3033684a06, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ButtonClickSE
+  overrideClip: {fileID: 0}
 --- !u!1 &8351574059179634582
 GameObject:
   m_ObjectHideFlags: 0

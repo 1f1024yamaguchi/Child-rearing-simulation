@@ -32,6 +32,17 @@ namespace Arisaka
 
         private List<MealPlan> plans;
 
+        [Header("オート選択")]
+        [Tooltip("ON のとき、食事選択ダイアログは猶予時間のあと自動で決定する（プレイヤーが先に選べばそちらが優先）")]
+        [SerializeField] private bool autoSelect = false;
+
+        /// <summary>オート選択が ON か（ダイアログのボタンで切り替え。セーブ対象）</summary>
+        public bool AutoSelect
+        {
+            get => autoSelect;
+            set => autoSelect = value;
+        }
+
         public MealGrade CurrentGrade => currentGrade;
         public MealGrade? LastChosenGrade => lastChosenGrade;
 
@@ -241,6 +252,7 @@ namespace Arisaka
             public int    currentMonthKey = -1;
             public int    paidThisMonth;
             public bool   selectionPending;
+            public bool   autoSelect;
         }
 
         public string Capture()
@@ -254,7 +266,8 @@ namespace Arisaka
                 lastDeductedAgeDay    = lastDeductedAgeDay,
                 currentMonthKey       = currentMonthKey,
                 paidThisMonth         = paidThisMonth,
-                selectionPending      = selectionPending
+                selectionPending      = selectionPending,
+                autoSelect            = autoSelect
             };
             return JsonUtility.ToJson(d);
         }
@@ -279,6 +292,7 @@ namespace Arisaka
             currentMonthKey       = d.currentMonthKey;
             paidThisMonth         = d.paidThisMonth;
             selectionPending      = d.selectionPending;
+            autoSelect            = d.autoSelect;
 
             // ③ 今月の選択がまだなら、画面を出し直す（3章の決定）
             if (selectionPending && GameState.I != null)

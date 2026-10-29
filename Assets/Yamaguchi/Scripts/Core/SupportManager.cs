@@ -456,7 +456,7 @@ public class SupportManager : MonoBehaviour, ISaveParticipant
     {
         var mother = Household.I != null ? Household.I.Mother : null;
         if (mother != null && mother.WorkMode == WorkMode.MaternityLeave &&
-            ageDays > new GameDay(0, 2, 25).ToAgeDays())
+            ageDays > PostpartumLeaveLastDay)
             mother.SetWorkMode(WorkMode.Normal);
 
         EvaluateAll();
@@ -671,10 +671,16 @@ public class SupportManager : MonoBehaviour, ISaveParticipant
     private void EnsurePostpartumLeave()
     {
         var mother = Household.I != null ? Household.I.Mother : null;
-        if (mother != null && Today() <= new GameDay(0, 2, 25).ToAgeDays() &&
+        if (mother != null && Today() <= PostpartumLeaveLastDay &&
             mother.WorkMode == WorkMode.Normal)
             mother.SetWorkMode(WorkMode.MaternityLeave);
     }
+
+    /// <summary>産後休業の最終日（通算日数）。0歳2月25日＝産後56日目（company-support.md 2.5）。</summary>
+    public static int PostpartumLeaveLastDay => new GameDay(0, 2, 25).ToAgeDays();
+
+    /// <summary>産後休業の残り日数（今日を含む）。期間を過ぎていれば 0。</summary>
+    public static int PostpartumLeaveDaysLeft(int today) => Mathf.Max(0, PostpartumLeaveLastDay - today + 1);
 
     private static bool WageModeSatisfied(SupportScheme s, ParentStatus parent)
     {

@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 2421613551022887464}
   - component: {fileID: 2957666825646786481}
   - component: {fileID: 4730867102110882846}
+  - component: {fileID: 1508165537763022512}
   m_Layer: 0
   m_Name: LedgerRow
   m_TagString: Untagged
@@ -189,6 +190,19 @@ MonoBehaviour:
   noteText: {fileID: 2810392456176566448}
   button: {fileID: 1522181978282657304}
   bgImage: {fileID: 89062543958589108}
+--- !u!114 &1508165537763022512
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 250583588108864552}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3cddb0c4f91f3984e9a5fe3033684a06, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ButtonClickSE
+  overrideClip: {fileID: 0}
 --- !u!1 &1759682609897338225
 GameObject:
   m_ObjectHideFlags: 0

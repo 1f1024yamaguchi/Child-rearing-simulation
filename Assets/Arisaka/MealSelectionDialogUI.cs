@@ -23,10 +23,24 @@ namespace Arisaka
         [SerializeField] private List<MealCardUI> cardUIs = new List<MealCardUI>();
 
         [Header("サイズ・カラー設定")]
-        [SerializeField] private Vector2 windowSize = new Vector2(720f, 460f); // 程よいサイズ感
+        [SerializeField] private Vector2 windowSize = new Vector2(720f, 460f); // 程よいサイズ感（オート操作はカード下の空きに収める。これ以上高くすると画面から見切れる）
         [SerializeField] private Color panelBg = new Color(1.0f, 0.96f, 0.88f, 1f); // 薄ベージュ・クリーム色
         [SerializeField] private Color darkText = new Color(0.12f, 0.12f, 0.12f, 1f);
         [SerializeField] private Color moneyBadgeBg = new Color(0.93f, 0.90f, 0.82f, 1f);
+
+        [Header("オート選択")]
+        [Tooltip("オート ON のとき、ダイアログを開いてから自動で決定するまでの猶予（秒）。時間停止中なので実時間で数える")]
+        [SerializeField] private float autoDelaySeconds = 5f;
+        [SerializeField] private Button autoButton;
+        [SerializeField] private TextMeshProUGUI autoButtonLabel;
+        [SerializeField] private RectTransform autoGaugeRoot;   // ゲージ全体（OFF のときは非表示）
+        [SerializeField] private RectTransform autoGaugeFill;   // 残り時間ぶんだけ幅が残る
+        [SerializeField] private TextMeshProUGUI autoGaugeLabel;
+
+        [SerializeField] private Color autoOnColor = new Color(0.30f, 0.65f, 0.40f, 1f);
+        [SerializeField] private Color autoOffColor = new Color(0.62f, 0.62f, 0.62f, 1f);
+        [SerializeField] private Color gaugeBgColor = new Color(0.87f, 0.83f, 0.74f, 1f);
+        [SerializeField] private Color gaugeFillColor = new Color(0.38f, 0.70f, 0.98f, 1f);
 
         /// <summary>プランが決定されたときのイベント</summary>
         public event Action<MealPlan> OnPlanSelected;
@@ -35,9 +49,37 @@ namespace Arisaka
         private MealGrade? previousSelectedGrade = null; // 先月選択したグレード（初回は null）
         private bool isPausedBySelf = false;
 
+        private float autoElapsed = 0f;     // オート猶予の経過秒（実時間）
+        private bool autoLocal = false;     // MealSystemManager が無いとき用のフォールバック
+
+        private bool AutoOn
+        {
+            get => MealSystemManager.Instance != null ? MealSystemManager.Instance.AutoSelect : autoLocal;
+            set
+            {
+                if (MealSystemManager.Instance != null) MealSystemManager.Instance.AutoSelect = value;
+                else autoLocal = value;
+            }
+        }
+
         private void Awake()
         {
             EnsureUIBuilt();
+            EnsureAutoUIBuilt();
+        }
+
+        private void Update()
+        {
+            if (!AutoOn) return;
+
+            // 時間は PushPause で止まっているので、timeScale に左右されない実時間で数える
+            autoElapsed += Time.unscaledDeltaTime;
+            UpdateAutoGauge();
+
+            if (autoElapsed >= autoDelaySeconds)
+            {
+                ChooseAutoPlan();
+            }
         }
 
         private void OnEnable()
@@ -65,6 +107,7 @@ namespace Arisaka
             }
 
             RefreshCards();
+            ResetAutoTimer();
         }
 
         private void OnDisable()
@@ -120,6 +163,7 @@ namespace Arisaka
             gameObject.SetActive(true);
             UpdateMoneyDisplay();
             RefreshCards();
+            ResetAutoTimer();
         }
 
         /// <summary>
@@ -128,6 +172,7 @@ namespace Arisaka
         public void RefreshCards()
         {
             EnsureUIBuilt();
+            EnsureAutoUIBuilt();
             UpdateMoneyDisplay();
 
             if (plans == null || plans.Count == 0)
@@ -141,6 +186,131 @@ namespace Arisaka
                 bool isPrev = previousSelectedGrade.HasValue && plan.grade == previousSelectedGrade.Value;
                 cardUIs[i].Setup(plan, isPrev, OnCardPlanChosen);
             }
+        }
+
+        // ---------------- オート選択 ----------------
+
+        /// <summary>オートで選ばれるプラン。先月と同じ（初回は「普通」）。</summary>
+        private MealPlan GetAutoPlan()
+        {
+            if (plans == null || plans.Count == 0) plans = MealPlan.CreateDefaultPlans();
+            var grade = previousSelectedGrade ?? MealGrade.Normal;
+            return plans.Find(p => p.grade == grade) ?? plans[0];
+        }
+
+        private void ResetAutoTimer()
+        {
+            autoElapsed = 0f;
+            UpdateAutoView();
+        }
+
+        private void OnAutoButtonClicked()
+        {
+            AutoOn = !AutoOn;
+            ResetAutoTimer();   // ON にした瞬間から猶予を数え直す
+        }
+
+        private void ChooseAutoPlan()
+        {
+            var plan = GetAutoPlan();
+            Debug.Log($"[MealSelectionDialogUI] オート選択：猶予 {autoDelaySeconds:0.#} 秒が経過したため '{plan.title}' を自動で選びました。");
+            OnCardPlanChosen(plan);
+        }
+
+        /// <summary>ボタンの見た目とゲージの表示/非表示を、オートの ON/OFF に合わせる。</summary>
+        private void UpdateAutoView()
+        {
+            bool on = AutoOn;
+            if (autoButtonLabel != null) autoButtonLabel.text = on ? "オート：ON" : "オート：OFF";
+            if (autoButton != null && autoButton.targetGraphic != null)
+            {
+                autoButton.targetGraphic.color = on ? autoOnColor : autoOffColor;
+            }
+            if (autoGaugeRoot != null) autoGaugeRoot.gameObject.SetActive(on);
+            if (on) UpdateAutoGauge();
+        }
+
+        private void UpdateAutoGauge()
+        {
+            float remain = Mathf.Max(0f, autoDelaySeconds - autoElapsed);
+            float ratio = autoDelaySeconds > 0f ? Mathf.Clamp01(remain / autoDelaySeconds) : 0f;
+
+            if (autoGaugeFill != null)
+            {
+                // 残り時間ぶんだけ左から幅が残る（満タン→空に減っていく）
+                autoGaugeFill.anchorMax = new Vector2(ratio, 1f);
+            }
+            if (autoGaugeLabel != null)
+            {
+                autoGaugeLabel.text = $"あと{Mathf.CeilToInt(remain)}秒で「{GetAutoPlan().title}」を自動選択";
+            }
+        }
+
+        private void EnsureAutoUIBuilt()
+        {
+            if (autoButton != null && autoGaugeRoot != null)
+            {
+                autoButton.onClick.RemoveListener(OnAutoButtonClicked);
+                autoButton.onClick.AddListener(OnAutoButtonClicked);
+                return;
+            }
+            if (containerPanel == null) return;
+
+            var jpFont = Resources.Load<TMP_FontAsset>("JPFont") ?? TMP_Settings.defaultFontAsset;
+
+            // 1. オートボタン（右下）
+            var btnGO = new GameObject("AutoButton", typeof(RectTransform), typeof(Image), typeof(Button));
+            btnGO.transform.SetParent(containerPanel, false);
+            SetRect(btnGO.GetComponent<RectTransform>(), new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(1f, 0.5f), new Vector2(-20f, 24f), new Vector2(130f, 30f));
+            var btnImg = btnGO.GetComponent<Image>();
+            btnImg.color = autoOffColor;
+            autoButton = btnGO.GetComponent<Button>();
+            autoButton.targetGraphic = btnImg;
+            autoButton.onClick.AddListener(OnAutoButtonClicked);
+
+            var btnLabelGO = new GameObject("Label", typeof(RectTransform));
+            btnLabelGO.transform.SetParent(btnGO.transform, false);
+            autoButtonLabel = btnLabelGO.AddComponent<TextMeshProUGUI>();
+            if (jpFont != null) autoButtonLabel.font = jpFont;
+            autoButtonLabel.fontSize = 15f;
+            autoButtonLabel.fontStyle = FontStyles.Bold;
+            autoButtonLabel.alignment = TextAlignmentOptions.Center;
+            autoButtonLabel.color = Color.white;
+            autoButtonLabel.raycastTarget = false;
+            SetStretchFull(autoButtonLabel.rectTransform, 0f, 0f);
+
+            // 2. ゲージ（左下。背景＋残り時間バー＋文字）
+            var gaugeGO = new GameObject("AutoGauge", typeof(RectTransform), typeof(Image));
+            gaugeGO.transform.SetParent(containerPanel, false);
+            autoGaugeRoot = gaugeGO.GetComponent<RectTransform>();
+            SetRect(autoGaugeRoot, new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(0f, 0.5f), new Vector2(20f, 24f), new Vector2(520f, 22f));
+            var gaugeBg = gaugeGO.GetComponent<Image>();
+            gaugeBg.color = gaugeBgColor;
+            gaugeBg.raycastTarget = false;
+
+            var fillGO = new GameObject("Fill", typeof(RectTransform), typeof(Image));
+            fillGO.transform.SetParent(gaugeGO.transform, false);
+            autoGaugeFill = fillGO.GetComponent<RectTransform>();
+            autoGaugeFill.anchorMin = Vector2.zero;
+            autoGaugeFill.anchorMax = Vector2.one;     // 幅は UpdateAutoGauge が anchorMax.x で動かす
+            autoGaugeFill.offsetMin = Vector2.zero;
+            autoGaugeFill.offsetMax = Vector2.zero;
+            var fillImg = fillGO.GetComponent<Image>();
+            fillImg.color = gaugeFillColor;
+            fillImg.raycastTarget = false;
+
+            var gaugeLabelGO = new GameObject("Label", typeof(RectTransform));
+            gaugeLabelGO.transform.SetParent(gaugeGO.transform, false);
+            autoGaugeLabel = gaugeLabelGO.AddComponent<TextMeshProUGUI>();
+            if (jpFont != null) autoGaugeLabel.font = jpFont;
+            autoGaugeLabel.fontSize = 13f;
+            autoGaugeLabel.fontStyle = FontStyles.Bold;
+            autoGaugeLabel.alignment = TextAlignmentOptions.Center;
+            autoGaugeLabel.color = darkText;
+            autoGaugeLabel.raycastTarget = false;
+            SetStretchFull(autoGaugeLabel.rectTransform, 0f, 0f);
+
+            UpdateAutoView();
         }
 
         private void OnCardPlanChosen(MealPlan chosenPlan)
