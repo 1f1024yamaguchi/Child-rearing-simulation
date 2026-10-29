@@ -76,7 +76,7 @@ public class LedgerMonthView : MonoBehaviour
         int month = (selectedMonthIndex % 12) + 1;
         if (titleText != null)
         {
-            titleText.text = $"‹  {age}歳 {month}月  ›";
+            titleText.text = $"{age}歳 {month}月";
         }
 
         if (prevMonthButton != null) prevMonthButton.interactable = selectedMonthIndex > oldest;

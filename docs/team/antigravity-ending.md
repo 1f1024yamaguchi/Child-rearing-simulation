@@ -267,7 +267,7 @@ docs/design/ending.md 2.5章・3.4・3.5・4章（留年）を読んでから作
 
 ### 依頼5：職業の判定・将来の夢・巣立ち（ログまで）
 
-> [antigravity-result-scene.md](antigravity-result-scene.md) の依頼R1 を先に済ませた場合、4. の EndingResult は作らずに職業まわりの項目を足すだけにし、EndingFlow を `GraduationWatcher.OnGraduated` に付け替える。
+> [antigravity-result-scene.md](antigravity-result-scene.md) の依頼R1 を先に済ませた場合、4. の EndingResult は作らずに職業まわりの項目を足すだけにし、GraduationWatcher は巣立ちの日に `GameState.EndGame(GameEndReason.GoalReached)` を呼ぶ（EndingFlow は `OnGameEnded` を見ているので付け替え不要）。
 
 ```
 docs/design/ending.md 5章・6.2・7章 を読んでから作業してください。置き場所は Assets/Yamaguchi/Scripts/Core/（職業のアセットは Assets/Yamaguchi/Data/Careers/）。

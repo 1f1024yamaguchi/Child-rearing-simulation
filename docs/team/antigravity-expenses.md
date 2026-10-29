@@ -1,7 +1,7 @@
 ---
 title: 支出と家計簿の実装法と Antigravity への依頼文
 updated: 2026-10-29
-status: 進行中（E2 の確認待ち）
+status: 進行中（E4 完了・確認待ち）
 related: [docs/design/expenses.md, docs/team/agreements-needed.md, docs/design/support-apply.md, docs/design/save-system.md, docs/decisions/0015-real-money-and-expenses.md, docs/design/result-scene.md]
 ---
 
@@ -398,6 +398,43 @@ docs/team/antigravity-expenses.md の 2.4・依頼E4・依頼E5 を読んでか�
 
 ---
 
+### 依頼E4-2：赤字の警告が自動で開かない不具合の修正
+
+**2026-10-29 完了**：Antigravity には頼まず、山口の指示で Claude が下の依頼文の内容のとおり直した（`BankruptcyWatcher.cs`・`DeficitWarningUI.cs`）。
+
+E4 の確認中に見つかった（2026-10-29。MCP で Play して確認）。
+
+- 赤字の月は正しく数えられる（`BankruptcyWatcher.DeficitMonths` が 1 になる）のに、警告の画面が開かない。
+- 原因：`DeficitWarningUI` は知らせ（`OnDeficitMonthsChanged`）の購読を `Start` で行っているが、警告の画面は **非表示で置いてある** ので `Start` が呼ばれず、購読されない。
+- 手で `Open()` を呼べば、表示・［家計簿を見る］・［サポート画面へ］・時間の停止はどれも正しく動いた。家計破綻（2か月）・黒字に戻ると数えが 0・セーブの削除も正しく動いた。
+
+```
+docs/team/antigravity-expenses.md の「依頼E4-2」を読んでから作業してください。
+
+【目的】赤字の月になったら、非表示で置いてある赤字の警告（DeficitWarningUI）が自動で開くようにする。
+
+【変更】
+1. BankruptcyWatcher.cs に、警告の画面への参照 [SerializeField] DeficitWarningUI warningUI を足す
+   （空なら Start で FindFirstObjectByType<DeficitWarningUI>(FindObjectsInactive.Include) で探す）。
+2. BankruptcyWatcher が赤字の月を数えたとき（1 以上で、まだ破綻していないとき）に warningUI.Open() を呼ぶ。
+   OnDeficitMonthsChanged のイベントはそのまま残す。
+3. DeficitWarningUI.cs から、Start での watcher の購読と HandleDeficitMonthsChanged を外す（二重に開かないように）。
+   ledgerPanel・supportPanel を探す処理は Open() の中（null のときだけ）に移す（非表示のままだと Start が呼ばれないため）。
+4. 警告のプレハブ・シーンは触らない。
+
+守ること：
+- BankruptcyWatcher.cs・DeficitWarningUI.cs 以外は変更しない。
+- FindObjectOfType（古い書き方）は使わず FindFirstObjectByType を使う。
+- Unity の MCP ツール（unityMCP）は使わないでください。終わったら、変更した行と、Unity で確認してほしいことを箇条書きで教えてください。
+```
+
+**確認（依頼E4-2）**
+1. Play → `GameManager/GameState` の Money を大きくマイナスにして月をまたぐ → 警告が自動で開き、時間が止まる。
+2. 警告を閉じて、もう 1 か月赤字 → 警告は出ずに家計破綻で終わる。
+3. 黒字の月には警告が出ない。
+
+---
+
 ### 依頼E5：家計簿の画面（月ごと・年ごと）
 
 **2026-10-28 に書き直した**（山口の指示：TMP で作る／お金の表示の下の［家計簿］ボタンで開く／電気代・ガス代・食費・収入が月ごとに見える／年末の所得税などの税金もリアル寄りに見せる／月と年の両方でいくらかかったか見える）。
@@ -559,5 +596,6 @@ docs/decisions/0011-pause-while-open-component.md、docs/team/antigravity-expens
 | E1b-2 | Main_test2 でイベントが毎月出ない不具合の修正（EventManager の購読を Start へ） | **完了**（2026-10-22。Main_test2 の Canvas に EventDialog を置き、CardsPanel を 1280×720・Scale 0.625 に） |
 | E2 | 毎月の支出（自動） | **完了**（2026-10-28 確認。保育料のアセットの年収の条件への参照が `type: 3` で切れていたのを `type: 2` に直した → 年収の段が正しく選ばれる） |
 | E3 | 無償化（肩代わり） | **完了**（2026-10-28 確認。保育の無償化：申請した翌月から保育料 0 円・給食費は払う・6歳1月で受給終了／就学支援金：翌月から授業料 0 円・肩代わり 9,900 円／児童手当は変わらない／セーブ→ロード後も肩代わりが続く） |
-| E4 | お金が足りないとき・終わり方をまとめる（＋家計簿の画面のメニューの値合わせ・矢印の二重表示の修正） | 未依頼（2026-10-29 に E5 の後向けに書き直した） |
+| E4 | お金が足りないとき・終わり方をまとめる（＋家計簿の画面のメニューの値合わせ・矢印の二重表示の修正） | **完了**（2026-10-29 確認。家計破綻・数えのリセット・セーブ削除・警告のボタン） |
+| E4-2 | 赤字の警告が自動で開かない不具合の修正 | **完了**（2026-10-29。山口の指示で Claude が直した：BankruptcyWatcher から DeficitWarningUI.Open() を呼ぶ形に。MCP で動作確認） |
 | E5 | 家計簿の画面（月ごと・年ごと。TMP・［家計簿］ボタンから開く・税金と年末調整も見せる） | **完了**（2026-10-28。画面のはみ出し・棒と金額の重なりは山口が MCP でプレハブを直した） |

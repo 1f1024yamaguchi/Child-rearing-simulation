@@ -211,7 +211,7 @@ TitleMenuUI / SaveSelectPanelUI    GameStartup（GameManager に付ける）
 | 項目 | 例 | 取得元 |
 |---|---|---|
 | 終わった日時（実時間） | 2026/10/14 15:00 | `DateTime.Now`（並び順にも使う） |
-| 結末 | 20歳到達 ／ 家出 | `GameState.OnGameOver` ／ `RunawayWatcher.OnRunaway` |
+| 結末 | 巣立ち ／ 家出 ／ 家計破綻 | `GameState.OnGameEnded(GameEndReason)`（決定 0024）。保存は [result-scene.md](result-scene.md) 5章の `RecordStore`（2026-10-29 決定） |
 | 就いた職業 | 研究者 | エンディング判定（未設計。rules-and-stats.md 1章） |
 | 到達年齢 | 20歳 ／ 14歳（家出） | `GameState.AgeDays` |
 | 稼いだお金の合計 | 9,840万円 | **生涯の給料累計が必要**（下記） |

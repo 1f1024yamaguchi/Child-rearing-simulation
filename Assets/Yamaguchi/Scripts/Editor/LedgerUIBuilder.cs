@@ -15,6 +15,7 @@ public static class LedgerUIBuilder
     private const string PrefabDir = "Assets/Yamaguchi/Prefabs/UI";
     private const string RowPrefabPath = "Assets/Yamaguchi/Prefabs/UI/LedgerRow.prefab";
     private const string PanelPrefabPath = "Assets/Yamaguchi/Prefabs/UI/LedgerPanel.prefab";
+    private const string DeficitWarningPrefabPath = "Assets/Yamaguchi/Prefabs/UI/DeficitWarning.prefab";
 
     private static readonly Color Paper = new Color(0.98f, 0.97f, 0.95f);
     private static readonly Color HeaderBg = new Color(0.92f, 0.90f, 0.86f);
@@ -115,12 +116,14 @@ public static class LedgerUIBuilder
         var dimBtn = dim.AddComponent<Button>();
         dimBtn.targetGraphic = dimImg;
 
-        // メインウィンドウ（Window：740 x 520）
+        // メインウィンドウ（Window：全画面Stretch 左右 24・上下 12）
         var win = NewUI("Window", root.transform);
         var winRt = (RectTransform)win.transform;
-        winRt.anchorMin = winRt.anchorMax = new Vector2(0.5f, 0.5f);
+        winRt.anchorMin = Vector2.zero;
+        winRt.anchorMax = Vector2.one;
         winRt.pivot = new Vector2(0.5f, 0.5f);
-        winRt.sizeDelta = new Vector2(740f, 520f);
+        winRt.offsetMin = new Vector2(24f, 12f);
+        winRt.offsetMax = new Vector2(-24f, -12f);
         var winImg = win.AddComponent<Image>();
         winImg.color = Paper;
 
@@ -195,7 +198,7 @@ public static class LedgerUIBuilder
         mpRt.anchoredPosition = new Vector2(-120f, 0f);
         mpRt.sizeDelta = new Vector2(36f, 28f);
 
-        var mTitle = NewText("MonthTitle", mNav.transform, font, "‹  0歳 1月  ›", 17f, Ink, TextAlignmentOptions.Center);
+        var mTitle = NewText("MonthTitle", mNav.transform, font, "0歳 1月", 17f, Ink, TextAlignmentOptions.Center);
         mTitle.fontStyle = FontStyles.Bold;
         var mtRt = mTitle.rectTransform;
         mtRt.anchorMin = new Vector2(0.5f, 0.5f);
@@ -278,7 +281,7 @@ public static class LedgerUIBuilder
         ypRt.anchoredPosition = new Vector2(-150f, 0f);
         ypRt.sizeDelta = new Vector2(36f, 26f);
 
-        var yTitle = NewText("YearTitle", yNav.transform, font, "‹  0歳の1年（1月〜12月）  ›", 17f, Ink, TextAlignmentOptions.Center);
+        var yTitle = NewText("YearTitle", yNav.transform, font, "0歳の1年（1月〜12月）", 17f, Ink, TextAlignmentOptions.Center);
         yTitle.fontStyle = FontStyles.Bold;
         var ytRt = yTitle.rectTransform;
         ytRt.anchorMin = new Vector2(0.5f, 0.5f);
@@ -325,13 +328,13 @@ public static class LedgerUIBuilder
         bcHlg.childForceExpandWidth = true;
         bcHlg.childForceExpandHeight = true;
 
-        // 年の左右パネル
+        // 年の左右パネル（Panels：上の余白 136）
         var yPanels = NewUI("Panels", yearViewGo.transform);
         var yPanelsRt = (RectTransform)yPanels.transform;
         yPanelsRt.anchorMin = new Vector2(0f, 0f);
         yPanelsRt.anchorMax = new Vector2(1f, 1f);
         yPanelsRt.offsetMin = new Vector2(16f, 52f);
-        yPanelsRt.offsetMax = new Vector2(-16f, -116f);
+        yPanelsRt.offsetMax = new Vector2(-16f, -136f);
         var yHlg = yPanels.AddComponent<HorizontalLayoutGroup>();
         yHlg.spacing = 16f;
         yHlg.childControlWidth = true;
@@ -368,6 +371,7 @@ public static class LedgerUIBuilder
         yvSo.FindProperty("rowPrefab").objectReferenceValue = rowPrefab;
         yvSo.FindProperty("balanceSummaryText").objectReferenceValue = yBalText;
         yvSo.FindProperty("childCostSummaryText").objectReferenceValue = yCostText;
+        yvSo.FindProperty("maxBarHeight").floatValue = 40f;
         yvSo.ApplyModifiedPropertiesWithoutUndo();
 
         // ------------------------------------------------------------
@@ -544,6 +548,198 @@ public static class LedgerUIBuilder
 
         EditorSceneManager.MarkSceneDirty(canvas.scene);
         Debug.Log("[LedgerUIBuilder] シーンへの配置と設定が完了しました。シーンを保存してください");
+    }
+
+    // ------------------------------------------------------------
+    // 3. 赤字の警告を作ってシーンに置く
+    // ------------------------------------------------------------
+
+    [MenuItem("子育て/家計簿/3. 赤字の警告を作ってシーンに置く")]
+    public static void BuildAndAttachDeficitWarning()
+    {
+        if (!Directory.Exists(PrefabDir))
+        {
+            Directory.CreateDirectory(PrefabDir);
+        }
+
+        var font = LoadFont();
+
+        // 3-1. DeficitWarning プレハブの作成
+        var warningPrefabObj = BuildDeficitWarningPrefab(font);
+
+        // 3-2. 開いているシーンの Canvas を探す
+        var canvas = GameObject.Find("Canvas");
+        if (canvas == null || canvas.GetComponent<Canvas>() == null)
+        {
+            Debug.LogError("[LedgerUIBuilder] Canvas が見つかりません。シーンに Canvas が必要です");
+            return;
+        }
+
+        var existing = canvas.transform.Find("DeficitWarning");
+        GameObject warningObj;
+        if (existing != null)
+        {
+            warningObj = existing.gameObject;
+        }
+        else
+        {
+            warningObj = (GameObject)PrefabUtility.InstantiatePrefab(warningPrefabObj, canvas.transform);
+            Undo.RegisterCreatedObjectUndo(warningObj, "Instantiate DeficitWarning");
+        }
+
+        // Canvas の子の一番下に非表示で置く
+        warningObj.transform.SetAsLastSibling();
+        warningObj.SetActive(false);
+
+        // 3-3. BankruptcyWatcher を GameManager の下に置く
+        var gameManager = GameObject.Find("GameManager");
+        if (gameManager == null)
+        {
+            Debug.LogWarning("[LedgerUIBuilder] GameManager が見つかりませんでした。BankruptcyWatcher の追加は手動で行ってください");
+        }
+        else
+        {
+            var watcher = gameManager.GetComponent<BankruptcyWatcher>();
+            if (watcher == null)
+            {
+                watcher = Undo.AddComponent<BankruptcyWatcher>(gameManager);
+                Debug.Log("[LedgerUIBuilder] GameManager に BankruptcyWatcher を追加しました");
+            }
+        }
+
+        EditorSceneManager.MarkSceneDirty(canvas.scene);
+        Debug.Log("[LedgerUIBuilder] 以下の処理を完了しました（シーンの保存は手動で行ってください）：\n" +
+                  $"  1. プレハブを作成：{DeficitWarningPrefabPath}\n" +
+                  $"  2. シーンの Canvas の子の一番下に非表示で配置（{warningObj.name}）\n" +
+                  $"  3. GameManager に BankruptcyWatcher を追加");
+    }
+
+    private static GameObject BuildDeficitWarningPrefab(TMP_FontAsset font)
+    {
+        var root = NewUI("DeficitWarning", null);
+        Stretch(root);
+
+        // 半透明暗幕（Dim）
+        var dim = NewUI("Dim", root.transform);
+        Stretch(dim);
+        var dimImg = dim.AddComponent<Image>();
+        dimImg.color = new Color(0f, 0f, 0f, 0.6f);
+        var dimBtn = dim.AddComponent<Button>();
+        dimBtn.targetGraphic = dimImg;
+
+        // メインウィンドウ（Window：余白 左右 60・上下 80、全画面に伸ばして余白を残す）
+        var win = NewUI("Window", root.transform);
+        var winRt = (RectTransform)win.transform;
+        winRt.anchorMin = Vector2.zero;
+        winRt.anchorMax = Vector2.one;
+        winRt.pivot = new Vector2(0.5f, 0.5f);
+        winRt.offsetMin = new Vector2(60f, 80f);
+        winRt.offsetMax = new Vector2(-60f, -80f);
+        var winImg = win.AddComponent<Image>();
+        winImg.color = Paper;
+
+        // ヘッダー
+        var header = NewUI("Header", win.transform);
+        var headerRt = (RectTransform)header.transform;
+        headerRt.anchorMin = new Vector2(0f, 1f);
+        headerRt.anchorMax = new Vector2(1f, 1f);
+        headerRt.pivot = new Vector2(0.5f, 1f);
+        headerRt.anchoredPosition = new Vector2(0f, 0f);
+        headerRt.sizeDelta = new Vector2(0f, 44f);
+        var headerImg = header.AddComponent<Image>();
+        headerImg.color = new Color(0.96f, 0.88f, 0.88f);
+
+        var title = NewText("Title", header.transform, font, "家計の警告（赤字）", 18f, new Color(0.75f, 0.15f, 0.15f), TextAlignmentOptions.Left);
+        title.fontStyle = FontStyles.Bold;
+        var tRt = title.rectTransform;
+        tRt.anchorMin = new Vector2(0f, 0.5f);
+        tRt.anchorMax = new Vector2(0f, 0.5f);
+        tRt.pivot = new Vector2(0f, 0.5f);
+        tRt.anchoredPosition = new Vector2(16f, 0f);
+        tRt.sizeDelta = new Vector2(250f, 32f);
+
+        // × ボタン
+        var closeXBtn = NewButton("CloseXButton", header.transform, font, "×", new Color(0.85f, 0.83f, 0.80f), out _);
+        var cxRt = (RectTransform)closeXBtn.transform;
+        cxRt.anchorMin = new Vector2(1f, 0.5f);
+        cxRt.anchorMax = new Vector2(1f, 0.5f);
+        cxRt.pivot = new Vector2(1f, 0.5f);
+        cxRt.anchoredPosition = new Vector2(-12f, 0f);
+        cxRt.sizeDelta = new Vector2(32f, 32f);
+
+        // 本文コンテナ
+        var content = NewUI("Content", win.transform);
+        var cRt = (RectTransform)content.transform;
+        cRt.anchorMin = Vector2.zero;
+        cRt.anchorMax = Vector2.one;
+        cRt.offsetMin = new Vector2(24f, 70f);
+        cRt.offsetMax = new Vector2(-24f, -54f);
+        var vlg = content.AddComponent<VerticalLayoutGroup>();
+        vlg.spacing = 16f;
+        vlg.childAlignment = TextAnchor.MiddleCenter;
+        vlg.childControlWidth = true;
+        vlg.childControlHeight = false;
+        vlg.childForceExpandWidth = true;
+        vlg.childForceExpandHeight = false;
+
+        var msgText = NewText("MessageText", content.transform, font,
+            "今月は 0円 足りませんでした。\n来月も足りないと家計が破綻します。", 18f, Ink, TextAlignmentOptions.Center);
+        msgText.fontStyle = FontStyles.Bold;
+        var msgLe = msgText.gameObject.AddComponent<LayoutElement>();
+        msgLe.preferredHeight = 60f;
+
+        var guideText = NewText("GuideText", content.transform, font,
+            "支援制度を申請して給付金や無償化を受けるか、\n家計簿を確認して支出を見直してください。", 14f, SubText, TextAlignmentOptions.Center);
+        var gLe = guideText.gameObject.AddComponent<LayoutElement>();
+        gLe.preferredHeight = 44f;
+
+        // ボタンコンテナ
+        var btnArea = NewUI("Buttons", win.transform);
+        var baRt = (RectTransform)btnArea.transform;
+        baRt.anchorMin = new Vector2(0f, 0f);
+        baRt.anchorMax = new Vector2(1f, 0f);
+        baRt.pivot = new Vector2(0.5f, 0f);
+        baRt.anchoredPosition = new Vector2(0f, 16f);
+        baRt.sizeDelta = new Vector2(-48f, 44f);
+        var baHlg = btnArea.AddComponent<HorizontalLayoutGroup>();
+        baHlg.spacing = 16f;
+        baHlg.childAlignment = TextAnchor.MiddleCenter;
+        baHlg.childControlWidth = true;
+        baHlg.childControlHeight = true;
+        baHlg.childForceExpandWidth = true;
+        baHlg.childForceExpandHeight = true;
+
+        var viewLedgerBtn = NewButton("ViewLedgerButton", btnArea.transform, font, "家計簿を見る", new Color(1.00f, 0.85f, 0.55f), out _);
+        var supportBtn = NewButton("SupportButton", btnArea.transform, font, "サポート画面へ", new Color(0.75f, 0.88f, 1.00f), out _);
+        var closeBtn = NewButton("CloseButton", btnArea.transform, font, "閉じる", new Color(0.88f, 0.86f, 0.84f), out _);
+
+        // DeficitWarningUI コンポーネントの設定
+        var warningComp = root.AddComponent<DeficitWarningUI>();
+        var so = new SerializedObject(warningComp);
+        SetObjectReferenceSafe(so, "messageText", msgText);
+        SetObjectReferenceSafe(so, "ledgerButton", viewLedgerBtn);
+        SetObjectReferenceSafe(so, "supportButton", supportBtn);
+        SetObjectReferenceSafe(so, "closeButton", closeBtn);
+        so.ApplyModifiedPropertiesWithoutUndo();
+
+        // 暗幕・ヘッダー×ボタンのクリックでも閉じるように登録
+        UnityEventTools.AddPersistentListener(dimBtn.onClick, warningComp.Close);
+        UnityEventTools.AddPersistentListener(closeXBtn.onClick, warningComp.Close);
+
+        var saved = PrefabUtility.SaveAsPrefabAsset(root, DeficitWarningPrefabPath);
+        Object.DestroyImmediate(root);
+        return saved;
+    }
+
+    private static void SetObjectReferenceSafe(SerializedObject so, string propName, Object value)
+    {
+        var prop = so.FindProperty(propName);
+        if (prop == null)
+        {
+            Debug.LogError($"[LedgerUIBuilder] SerializedProperty '{propName}' が見つかりませんでした (target: {so.targetObject?.GetType().Name})");
+            return;
+        }
+        prop.objectReferenceValue = value;
     }
 
     // ------------------------------------------------------------

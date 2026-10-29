@@ -100,6 +100,7 @@ public class RunawayWatcher : MonoBehaviour, ISaveParticipant
                 hasRunAway = true;
                 Debug.LogWarning($"RunawayWatcher: 子どもが家出しました（{dangerDayCount}日連続で限界ストレス）");
                 gameClock?.SetRunning(false);
+                GameState.I?.EndGame(GameEndReason.Runaway);
                 OnRunaway?.Invoke();
                 // エンディング画面やゲームオーバー演出は未実装のため、ここでは止めるだけ
             }

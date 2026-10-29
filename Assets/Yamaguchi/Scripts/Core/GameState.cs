@@ -28,7 +28,8 @@ public class GameState : MonoBehaviour
     public event Action<int> OnStressChanged;
     public event Action<float> OnAgeChanged;
     public event Action<float> OnBalanceChanged;
-    public event Action OnGameOver;
+    public event Action OnGameOver;                         // 移行期間用（GoalReached のときだけ発火）
+    public event Action<GameEndReason> OnGameEnded;
 
     // ---- 読み取り専用プロパティ ----
     public int Money => money;
@@ -50,11 +51,27 @@ public class GameState : MonoBehaviour
         DontDestroyOnLoad(gameObject);
     }
 
+    // ---- ゲーム終了（ゴール到達・家出・家計破綻）----
+
+    /// <summary>
+    /// ゲームを終了させる。ゴール到達・家出・家計破綻のいずれでもここを通す（expenses.md 5.7・依頼E4）。
+    /// </summary>
+    public void EndGame(GameEndReason reason)
+    {
+        if (IsGameOver) return;
+        IsGameOver = true;
+        OnGameEnded?.Invoke(reason);
+        if (reason == GameEndReason.GoalReached)
+        {
+            OnGameOver?.Invoke(); // 移行期間として既存の OnGameOver も出す
+        }
+    }
+
     // ---- 書き込みは全部この窓口を通す ----
 
     public void AddMoney(int delta)
     {
-        money = Mathf.Max(0, money + delta);
+        money = money + delta; // 依頼E4：マイナス所持金を許可する（0円止めを外す）
         OnMoneyChanged?.Invoke(money);
     }
 
@@ -71,8 +88,7 @@ public class GameState : MonoBehaviour
 
         if (!IsGameOver && ageDays >= GoalAgeDays)
         {
-            IsGameOver = true;
-            OnGameOver?.Invoke();
+            EndGame(GameEndReason.GoalReached);
         }
     }
 
@@ -87,7 +103,7 @@ public class GameState : MonoBehaviour
     /// </summary>
     public void LoadValues(int newMoney, int newStress, float newAgeDays, float newBalance)
     {
-        money = Mathf.Max(0, newMoney);
+        money = newMoney; // 依頼E4：0円止めを外す
         stress = Mathf.Clamp(newStress, 0, 100);
         ageDays = Mathf.Max(0f, newAgeDays);
         workLifeBalance = Mathf.Clamp01(newBalance);
@@ -107,4 +123,14 @@ public class GameState : MonoBehaviour
         LoadValues(newMoney, newStress, newAgeDays, newBalance);
         IsGameOver = newIsGameOver;
     }
+}
+
+/// <summary>
+/// ゲームの終了理由（expenses.md 5.7・依頼E4）。
+/// </summary>
+public enum GameEndReason
+{
+    GoalReached, // 20歳到達（ゴール）
+    Runaway,     // 子どもの家出
+    Bankrupt     // 家計破綻（赤字が規定月数継続）
 }

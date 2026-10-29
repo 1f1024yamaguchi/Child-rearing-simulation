@@ -11,17 +11,18 @@ public class AutoSaver : MonoBehaviour
 {
     private bool pending;
     private bool monthSubscribed;
-    private bool gameOverSubscribed;
-    private RunawayWatcher runaway;
+    private bool gameEndedSubscribed;
 
-    /// ゲームが終わっているか（ゴール到達 or 家出）。SaveButton からも使う。
+    /// ゲームが終わっているか（ゴール到達・家出・家計破綻）。SaveButton からも使う。
     public static bool GameEnded
     {
         get
         {
             if (GameState.I != null && GameState.I.IsGameOver) return true;
             var rw = FindObjectOfType<RunawayWatcher>();
-            return rw != null && rw.HasRunAway;
+            if (rw != null && rw.HasRunAway) return true;
+            var bw = FindObjectOfType<BankruptcyWatcher>();
+            return bw != null && bw.HasBankrupted;
         }
     }
 
@@ -38,11 +39,9 @@ public class AutoSaver : MonoBehaviour
     private void OnDisable()
     {
         if (monthSubscribed && MonthTicker.I != null) MonthTicker.I.OnMonthChanged -= HandleMonthChanged;
-        if (gameOverSubscribed && GameState.I != null) GameState.I.OnGameOver -= HandleGameOver;
-        if (runaway != null) runaway.OnRunaway -= HandleGameOver;
-        runaway = null;
+        if (gameEndedSubscribed && GameState.I != null) GameState.I.OnGameEnded -= HandleGameEnded;
         monthSubscribed = false;
-        gameOverSubscribed = false;
+        gameEndedSubscribed = false;
         pending = false;
     }
 
@@ -53,15 +52,10 @@ public class AutoSaver : MonoBehaviour
             MonthTicker.I.OnMonthChanged += HandleMonthChanged;
             monthSubscribed = true;
         }
-        if (!gameOverSubscribed && GameState.I != null)
+        if (!gameEndedSubscribed && GameState.I != null)
         {
-            GameState.I.OnGameOver += HandleGameOver;
-            gameOverSubscribed = true;
-        }
-        if (runaway == null)
-        {
-            runaway = FindObjectOfType<RunawayWatcher>();
-            if (runaway != null) runaway.OnRunaway += HandleGameOver;   // 家出は GameState.OnGameOver を出さないので別に購読
+            GameState.I.OnGameEnded += HandleGameEnded;
+            gameEndedSubscribed = true;
         }
     }
 
@@ -70,7 +64,7 @@ public class AutoSaver : MonoBehaviour
         pending = true;   // 保存は LateUpdate まで待つ
     }
 
-    private void HandleGameOver()
+    private void HandleGameEnded(GameEndReason reason)
     {
         pending = false;
         SaveSystem.Delete();

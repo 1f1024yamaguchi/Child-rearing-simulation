@@ -17,7 +17,7 @@ public class LedgerYearView : MonoBehaviour
     [Header("12か月の支出の棒グラフ")]
     [SerializeField] private RectTransform barChartContainer;
     [SerializeField] private GameObject barPrefab; // 棒プレハブ（または12本のプレースホルダ）
-    [SerializeField] private float maxBarHeight = 60f;
+    [SerializeField] private float maxBarHeight = 40f;
 
     [Header("スクロール一覧")]
     [SerializeField] private RectTransform incomeContent;
@@ -76,7 +76,7 @@ public class LedgerYearView : MonoBehaviour
 
         if (titleText != null)
         {
-            titleText.text = $"‹  {selectedAge}歳の1年（1月〜12月）  ›";
+            titleText.text = $"{selectedAge}歳の1年（1月〜12月）";
         }
 
         if (prevYearButton != null) prevYearButton.interactable = selectedAge > 0;
