@@ -37,6 +37,7 @@ public class SlidePanel : MonoBehaviour
     private MotionHandle handle;
 
     public bool IsOpen { get; private set; }
+    public event System.Action<bool> OnOpenChanged;
 
     private void Awake()
     {
@@ -80,6 +81,7 @@ public class SlidePanel : MonoBehaviour
     public void SetOpen(bool open)
     {
         IsOpen = open;
+        OnOpenChanged?.Invoke(open);
         Vector2 target = open ? openPos : closedPos;
 
         if (handle.IsActive()) handle.Cancel();   // 途中反転はこれだけで済む

@@ -1,6 +1,6 @@
 ---
 title: 支出と家計簿の実装法と Antigravity への依頼文
-updated: 2026-10-28
+updated: 2026-10-29
 status: 進行中（E2 の確認待ち）
 related: [docs/design/expenses.md, docs/team/agreements-needed.md, docs/design/support-apply.md, docs/design/save-system.md, docs/decisions/0015-real-money-and-expenses.md, docs/design/result-scene.md]
 ---
@@ -53,7 +53,7 @@ ExpenseCover（SupportScheme に持たせる）
 GameState のマイナス許可・OnGameEnded(GameEndReason)・BankruptcyWatcher・赤字の警告
 
 （画面：依頼E5）
-家計簿の画面・誕生日のまとめ
+家計簿の画面（月ごと・年ごと）
 ```
 
 ### 2.2 お金が動く場所と、家計簿への載り方
@@ -332,8 +332,21 @@ docs/design/expenses.md の 4章、docs/design/support-apply.md（無償化の�
 
 ### 依頼E4：お金が足りないとき・終わり方をまとめる
 
+**2026-10-29 に書き直した**：E5（家計簿の画面）の後に頼むため。主な変更は、赤字の警告の［家計簿を見る］を家計簿の画面につなぐこと、警告の画面を TMP・エディタのメニューで作ること、家計簿の画面の大きさの修正（2026-10-28・29 に山口が MCP で直した値）をメニューに合わせること。
+
+#### 前提（2026-10-29 時点）
+
+- 家計簿の画面（`LedgerPanelUI`）はできている。`LedgerPanel.prefab` の大きさは手で直してあり、**「子育て/家計簿/1」のメニューを押すと消える**：
+  - `Window`：全画面に伸ばして余白 左右 24・上下 12（固定 740×520 だと 16:9 ではみ出した）
+  - `YearView/Panels`：上の余白 136（棒グラフの月の名前と見出しが重なった）
+  - `LedgerYearView.maxBarHeight`：40（一番高い棒が金額の文字に重なった）
+- 税金の仕組み（`TaxManager`。年末調整・確定申告・住民税）が入っていて、毎月の給料日以外にもお金が動く。
+- end シーン（`EndingFlow`・依頼R1）はまだ無い。
+
 ```
-docs/design/expenses.md の 5.7 と docs/design/result-scene.md、docs/team/antigravity-expenses.md の 2.4 を読んでから作業してください。
+docs/design/expenses.md の 5.7、docs/design/taxes.md の 2章、docs/design/result-scene.md、
+docs/team/antigravity-expenses.md の 2.4・依頼E4・依頼E5 を読んでから作業してください。
+家計簿の画面（LedgerPanelUI・依頼E5）はもうできています。
 
 1. GameState.cs：
    - AddMoney と LoadValues の 0 円止め（Mathf.Max(0, …)）を外す。
@@ -347,53 +360,181 @@ docs/design/expenses.md の 5.7 と docs/design/result-scene.md、docs/team/anti
    - MonthTicker.OnMonthSettled で所持金がマイナスなら 赤字の月 +1、プラスなら 0 に戻す。
    - 赤字の月 >= [SerializeField] 上限（既定 2）で GameState.I.EndGame(Bankrupt) と OnBankrupt。
    - 赤字の月が 1 以上になったら OnDeficitMonthsChanged(int) を出す。
-5. DeficitWarningUI.cs（UI）：OnDeficitMonthsChanged で開く。
-   「今月は ○○円 足りませんでした。来月も赤字だと家計が破綻します」＋［家計簿を見る］（依頼E5 までは押せないままでよい）＋［サポート画面へ］＋［閉じる］。
-   開いている間は時間を止める（PushPause / PopPause）。
-6. result-scene.md の EndingFlow を作っていれば（Assets/Yamaguchi/Scripts/Core/Ending/）、
-   購読を GameState.OnGameEnded の1つに変え、EndingReason に 家計破綻 を足す。まだ無ければ何もしない。
+   - 購読は Start で行う（OnEnable だと MonthTicker.I がまだ無いことがある。依頼E1b-2 と同じ理由）。
+   - 年末調整・確定申告の還付・住民税（TaxManager）でもお金が動くが、判定は月の精算の後なのでそのままでよい。違う動きになりそうなら報告に書く。
+5. DeficitWarningUI.cs（UI。Assets/Yamaguchi/Scripts/UI/Ledger/）：OnDeficitMonthsChanged で開く。開いている間は時間を止める（PauseWhileOpen）。
+   - 「今月は ○○円 足りませんでした。来月も足りないと家計が破綻します」
+   - ［家計簿を見る］：DeficitWarningUI を閉じてから LedgerPanelUI.Open() で今月の［月］タブを開く
+   - ［サポート画面へ］：SupportPanelController を開く ／ ［閉じる］
+   - 文字はすべて TextMeshProUGUI、フォントは Resources.Load<TMP_FontAsset>("JPFont")。Ellipsis は使わない。
+   - 画面は固定サイズにせず、全画面に伸ばして余白を残す形にする（800×600 基準・16:9 でもはみ出さないように）。
+6. エディタのメニュー（LedgerUIBuilder.cs に足す）：
+   - 「子育て/家計簿/3. 赤字の警告を作ってシーンに置く」… DeficitWarning.prefab（Assets/Yamaguchi/Prefabs/UI/）を作り、
+     開いているシーンの Canvas の子の一番下に非表示で置き、BankruptcyWatcher を GameManager の下に置く。何をしたかをログに出す。シーンの保存は人間が行う。
+   - 「子育て/家計簿/1. 家計簿の画面のプレハブを作る」の中身を、今の LedgerPanel.prefab に合わせる：
+     Window を全画面に伸ばして余白 左右 24・上下 12／YearView/Panels の上の余白 136／LedgerYearView の maxBarHeight 40。
+7. 家計簿の画面の見た目の修正：月・年の移動で、ボタンの［‹］［›］と見出しの文字「‹ 0歳 3月 ›」の矢印が二重に出ている。
+   見出しの文字から矢印を外す（LedgerMonthView・LedgerYearView）。
+8. end シーン（EndingFlow）はまだ作っていないので、今回は何もしない。家計破綻で終わったら時間が止まるだけでよい。
 
 守ること：
 - 他の人のコードで OnGameOver を使っているところは変えずに、報告に一覧を書く（移行期間は両方出すので壊れない）。
 - 有坂さんの MoneyUI がマイナスを表示できるか確認し、直さずに報告に書く（agreements-needed.md A2）。
-- Unity の MCP ツール（unityMCP）は使わないでください。終わったら、シーンに置くもの・Unity で確認してほしいことを箇条書きで教えてください。
+- LedgerPanel.prefab そのものは書き換えない（メニュー 1 の中身だけ合わせる）。
+- Maruyama・Arisaka・Kusao のフォルダのファイルは変更しない。シーンファイルを直接書き換えない。
+- Unity の MCP ツール（unityMCP）は使わないでください。終わったら、メニューの使い方・Unity で確認してほしいことを箇条書きで教えてください。
 ```
 
 **確認（依頼E4）**
-1. 所持金を Inspector で少なくして月をまたぐ → マイナスになり、警告が出て時間が止まる。
-2. 次の月もマイナス → 家計破綻で終わる（EndingFlow があれば end シーンへ）。セーブが消えている。
-3. 1か月赤字 → 次の月プラスに戻ると、数えが 0 に戻る。
-4. 20歳到達・家出も今までどおり終わる。
+1. メニュー「子育て/家計簿/3」を実行して `Main_test2` を保存。`GameManager` の下に `BankruptcyWatcher`、Canvas の一番下に赤字の警告（非表示）がある。
+2. 所持金を Inspector で少なくして月をまたぐ → マイナスになり、警告が出て時間が止まる。
+3. 警告の［家計簿を見る］で、家計簿の画面がその月の［月］タブで開く。［サポート画面へ］でサポート画面が開く。
+4. 次の月もマイナス → 家計破綻で終わり、時間が止まる。セーブが消えている。
+5. 1 か月赤字 → 次の月プラスに戻ると、数えが 0 に戻る（警告は出ない）。
+6. 20 歳到達・家出も今までどおり終わる。
+7. HUD のお金の表示がマイナスでおかしくならないか（有坂さんの MoneyUI）。
+8. 家計簿の月・年の見出しの矢印が二重になっていない。
+9. 「子育て/家計簿/1」を押し直しても、家計簿の画面がはみ出さず、棒と金額が重ならない（押す前に LedgerPanel.prefab をコミットしておくこと）。
 
 ---
 
-### 依頼E5：家計簿の画面・誕生日のまとめ
+### 依頼E5：家計簿の画面（月ごと・年ごと）
+
+**2026-10-28 に書き直した**（山口の指示：TMP で作る／お金の表示の下の［家計簿］ボタンで開く／電気代・ガス代・食費・収入が月ごとに見える／年末の所得税などの税金もリアル寄りに見せる／月と年の両方でいくらかかったか見える）。
+誕生日のまとめ（元の E5 の 2）は外し、後に回す（4章）。
+
+#### 画面の決まりごと
+
+- 文字はすべて **TextMeshPro（`TextMeshProUGUI`）**。フォントは `Resources.Load<TMP_FontAsset>("JPFont")`。ボタンも `Button` ＋ 子の `TextMeshProUGUI`（レガシーの `Text` は使わない）。
+- 開くボタンは **すでにある `Canvas/Buttons/Kakeibo`**（お金の表示の下の［家計簿］）。今は文字のフォントが `LiberationSans SDF - Fallback` なので **JPFont に直す**。
+- 画面は `Canvas` の子の **一番下** に置く（他の HUD より手前）。Canvas は 800×600 基準（`Main_test2`）。
+- 開いている間は時間を止める（`PauseWhileOpen`。決定 0011）。
+- 給料は **手取りで入る**（今の作りのまま）。家計簿では「額面」「天引き（社会保険料・所得税・住民税）」「手取り」に分けて見せる。
+
+#### 月の画面（［月］タブ）
 
 ```
-docs/design/expenses.md の 5.1、docs/code/ui-scroll-patterns.md、docs/code/ui-support-card.md を読んでから作業してください。
-置き場所は Assets/Yamaguchi/Scripts/UI/Ledger/。UI はプレハブにする（シーンを直接いじらない）。
+┌──────────────────────────────────────────────┐
+│ 家計簿        ［月］［年］                     ［×］│
+│        ‹  3歳 2月  ›                              │
+│ ┌ 収入 ───────────────── ┐┌ 支出 ──────────────┐│
+│ │ 給料（母）額面  300,000 ││ 住居   家賃   90,000 ││
+│ │ 給料（父）額面  200,010 ││ 光熱費 電気代 13,263 ││
+│ │ 社会保険料    − 75,002  ││        ガス・水道 10,000││
+│ │ 所得税        − 10,830  ││ 通信   通信費 12,000 ││
+│ │ 住民税        − 18,500  ││ 食費   食費（普通）90,000││
+│ │ 児童手当      + 15,000  ││ 保育   保育料  0     ││
+│ │                         ││      （支援 −44,500） ││
+│ │                         ││ 医療   …            ││
+│ └─────────────────────────┘└──────────────────────┘│
+│ 手取り 411,678 ＋支援 15,000 − 支出 219,763 ＝ 差し引き +206,915 │
+│ 支援で助かった額 59,500   子育てにかかったお金 94,500         │
+└──────────────────────────────────────────────┘
+```
 
-1. LedgerPanelUI.cs：月の家計簿。下部のボタンから開く。開いている間は時間を止める。
-   - ［先月］［今月］の切り替え（24か月まで戻れるとよい）。
-   - 上に「収入／支出／支援で助かった額／差し引き」。
-   - 下に行の一覧（縦スクロール。status_scroll と同じ作り）。収入は緑、支出は赤、肩代わりがあれば「（支援 −○○円）」。
-   - 支出は種類ごとにまとめた小計も出す。
-2. BirthdaySummaryUI.cs：子どもが1歳になるたび（MonthTicker で 1月になったとき）に開き、時間を止める。
-   「この1年でかかったお金：○○円（うち支援で助かった額 ○○円）」と、子育てにかかったお金の内訳（IsChildCost の種類だけ）。
-3. DeficitWarningUI の［家計簿を見る］を LedgerPanelUI につなぐ。
-4. お金の書式（「12,345円」「12.3万円」）は1つのクラスにまとめる（リザルト画面でも使えるように）。
+- ‹ › で月を移動。直近 **24 か月** まで戻れる（`Ledger` が行を持っている範囲）。今月より先には進めない。
+- 左に **収入と天引き**、右に **支出**。どちらも縦スクロール（`docs/code/ui-scroll-patterns.md`）。
+- 支出は **種類ごと（住居・光熱費・通信・食費・保育・学校・塾習い事・医療・その他）に見出し＋小計**、その下に行（電気代・ガス・水道 など `LedgerLine.source` そのまま）。0 円で肩代わりもない行は出さない。
+- 肩代わりがある行は「（支援 −○○円）」を小さく添える。
+- 色：収入は緑、支出・天引きは赤、支援は青（色は Inspector で変えられる）。
+- 一番下に **手取り／支援／支出／差し引き** と、**支援で助かった額**・**子育てにかかったお金**（`Ledger.IsChildCost` の種類の支出）。
 
-TextMeshPro の注意：TextOverflowModes.Ellipsis は使わない／日本語フォントは Resources.Load<TMP_FontAsset>("JPFont")。
+#### 年の画面（［年］タブ）
+
+```
+┌──────────────────────────────────────────────┐
+│ 家計簿        ［月］［年］                     ［×］│
+│        ‹  3歳の1年（1月〜12月） ›                  │
+│ 月ごとの支出  ▇▇▆▇▇▇▇▇▇▇▇█  （12本の棒・押すとその月へ）│
+│ ┌ 収入と税金 ──────────────┐┌ 支出（種類ごと）──────┐│
+│ │ 給料 額面（母）3,600,000 ││ 住居     1,080,000    ││
+│ │ 給料 額面（父）2,400,120 ││ 光熱費     279,156    ││
+│ │ 社会保険料     −900,018 ││ 食費     1,080,000    ││
+│ │ 所得税（毎月） −129,960 ││ 保育       489,500    ││
+│ │ 年末調整        +12,400 ││ …                    ││
+│ │ 確定申告の還付        0 ││                      ││
+│ │ 住民税         −222,000 ││                      ││
+│ │ → 1年の税金 −1,239,578  ││                      ││
+│ │ 支援制度       +180,000 ││                      ││
+│ └──────────────────────────┘└──────────────────────┘│
+│ 手取り ○○ ＋支援 ○○ − 支出 ○○ ＝ 1年の差し引き ○○    │
+│ 子育てにかかったお金 ○○（うち支援で助かった額 ○○）     │
+└──────────────────────────────────────────────┘
+```
+
+- 「1年」＝ **子が y 歳の 1 月〜12 月**（税金の1年と同じ。taxes.md 2章）。‹ › で年を移動（0 歳〜今の年）。今の年は途中までの合計。
+- 上に **12 か月の支出の棒グラフ**（`Image` を 12 本並べ、高さを額に合わせる。その月の合計を TMP で上に小さく）。棒を押すと［月］タブのその月へ。
+- 左は **収入と税金**。税金は行の名前ごとに1年分を足し、**「年末調整」「確定申告の還付」を別の行** にして、最後に **1年の税金の合計（社会保険料＋所得税＋年末調整＋確定申告＋住民税）** を出す。
+- 右は **支出を種類ごとの1年の合計**。種類を押すと中の行（電気代・ガス・水道 など）が開く。
+- 一番下に1年の差し引きと、子育てにかかったお金。
+
+#### データ（Ledger に足すもの）
+
+今の `Ledger` は行を **24 か月分しか持たない** ので、古い年の内訳が出せない。次を足す（セーブ対象・古いセーブは空で始まってよい）。
+
+| 足すもの | 中身 | 使う画面 |
+|---|---|---|
+| 年ごとの行の合計 | 子の年齢 y ごとに「名前＋種類」→ amount・covered の合計 | 年の画面の内訳 |
+| 月ごとの合計 | monthIndex ごとに 収入・支出・支援で助かった額 | 年の画面の棒グラフ |
+
+月の数は最大でも 20 年 × 12 か月なので、全部持っても小さい。
+
+```
+docs/design/expenses.md の 5章・5.1、docs/design/taxes.md の 2章・4章、docs/code/ui-scroll-patterns.md、
+docs/decisions/0011-pause-while-open-component.md、docs/team/antigravity-expenses.md の「依頼E5」を読んでから作業してください。
+置き場所：Core は Assets/Yamaguchi/Scripts/Core/Ledger/、UI は Assets/Yamaguchi/Scripts/UI/Ledger/、
+プレハブは Assets/Yamaguchi/Prefabs/UI/LedgerPanel.prefab。
+
+【1. Ledger に足す（Core）】
+- 年ごとの行の合計：Dictionary<int 年齢, List<LedgerLine>>（monthIndex は使わない）。Record のたびに同じ年・名前・種類の行に足す。
+  読み取り：LinesOfYear(int age)（コピーを返す）。
+- 月ごとの合計：Dictionary<int monthIndex, LedgerMonthSummary{monthIndex, income, expense, covered}>。
+  読み取り：MonthSummary(int monthIndex)、OldestMonthIndex（行が残っている一番古い月）。
+- ToSave / Restore / Clear に足す（LedgerSaveData に項目を足す。古いセーブで項目が無くても動く）。
+- 今ある読み取り（LinesOfMonth・TotalOf・TotalChildCost・TotalSupport・YearSummary）の結果は変えない。
+
+【2. 書式をまとめる（UI）】
+- MoneyFormat.cs（static）：Yen(int) →「12,345円」、Signed(int) →「+12,345」「−12,345」、Man(int) →「12.3万円」。
+  リザルト画面でも使えるように1か所にまとめる。
+
+【3. 画面（UI）】すべて TextMeshProUGUI・フォントは Resources.Load<TMP_FontAsset>("JPFont")。Ellipsis は使わない。
+- LedgerPanelUI.cs（画面の本体）：Open() / Close()。［月］［年］タブ。PauseWhileOpen を同じ GameObject に付ける前提。
+  計算はしない。値は Ledger から受け取って並べるだけ。開いたときは「今月」の［月］タブ。
+- LedgerMonthView.cs：上の「月の画面」の図のとおり。‹ › で OldestMonthIndex〜今月。
+  左：給料（額面）・税金社会保険の行・支援制度の行。右：支出を種類ごとの見出し＋小計＋行。
+  0 円で covered も 0 の行は出さない。covered があれば「（支援 −○○円）」。
+  下：手取り（給料 ＋ 税金社会保険）／支援／支出／差し引き、支援で助かった額、子育てにかかったお金。
+- LedgerYearView.cs：上の「年の画面」の図のとおり。‹ › で 0 歳〜今の年。
+  12 本の棒（MonthSummary の expense。一番多い月を 100%）。棒を押すとその月の［月］タブへ。
+  左：給料（額面）、税金の行（「年末調整」「確定申告の還付」で始まる行は別の行のまま）、1 年の税金の合計、支援制度。
+  右：支出の種類ごとの 1 年の合計。押すと中の行を開く。
+  下：1 年の差し引き、子育てにかかったお金（うち支援で助かった額）。
+- LedgerRowUI.cs：1 行（名前・金額・肩代わりの注記・色）。見出し行と通常の行を兼ねる。
+- 色（収入・支出・支援・見出し）は LedgerPanelUI の [SerializeField] にまとめる。
+
+【4. プレハブとボタンをつなぐエディタメニュー】（TaxSetupBuilder・SupportUIBuilder と同じ形）
+- Assets/Yamaguchi/Scripts/Editor/LedgerUIBuilder.cs：
+  「子育て/家計簿/1. 家計簿の画面のプレハブを作る」… LedgerPanel.prefab を作る（全部 TMP。800×600 基準の Canvas に収まる大きさ）。
+  「子育て/家計簿/2. 開いているシーンに置いて［家計簿］ボタンにつなぐ」… Canvas の子の一番下に置き（非表示で）、
+   Canvas/Buttons/Kakeibo の Button.onClick に LedgerPanelUI.Open を登録し、Kakeibo の文字のフォントを JPFont にする。
+   何をしたかをログに出す。シーンの保存は人間が行う。
 
 守ること：
-- 計算はしない。値は Ledger から受け取るだけ。
-- Unity の MCP ツール（unityMCP）は使わないでください。終わったら、プレハブの階層、置き方、確認手順を箇条書きで教えてください。
+- 計算は Ledger 側。画面は並べるだけ。
+- Maruyama・Arisaka・Kusao のフォルダのファイルは変更しない。シーンファイルを直接書き換えない（メニュー 2 で人間が実行する）。
+- 他のボタン（サポート・カレンダー・セーブ・設定）の動きは変えない。
+- Unity の MCP ツール（unityMCP）は使わないでください。終わったら、作ったファイル、メニューの使い方、Unity で確認してほしいことを箇条書きで教えてください。
 ```
 
 **確認（依頼E5）**
-1. 家計簿を開くと時間が止まり、今月・先月の行と合計が出る。
-2. 0歳12月 → 1歳1月で誕生日のまとめが出る。
-3. 赤字の警告から家計簿が開ける。
+1. メニュー「子育て/家計簿/1」→「2」の順に実行し、`Main_test2` を保存。［家計簿］ボタンの文字が JPFont になっている。
+2. Play → ［家計簿］を押すと画面が開き、時間が止まる。［×］で閉じると時間が動く。
+3. 2〜3 か月進めてから開く：［月］タブで、給料（額面）・社会保険料・所得税・住民税・電気代・ガス・水道・家賃・食費（普通）などが出る。‹ で先月に戻れる。
+4. 下の「手取り」が、その月に実際に増えた給料の額と合っている。
+5. 3 歳で無償化を受けている月：保育料が 0 円で「（支援 −44,500円）」と出る。
+6. ［年］タブ：12 本の棒が出て、押すとその月に移る。12 月を過ぎた年は「年末調整」の行が出ていて、1 年の税金の合計が出る。
+7. セーブ → ロード後も、年の画面の内訳が残っている。
+8. 文字がすべて TMP（レガシーの Text が無い）で、日本語が豆腐（□）になっていない。
 
 ---
 
@@ -404,6 +545,7 @@ TextMeshPro の注意：TextOverflowModes.Ellipsis は使わない／日本語�
 | 塾・習い事の申し込み画面（Optional の支出） | 画面の置き場所が未定（expenses.md 7章）。`ExpenseManager.Enroll` は E2 で用意済み |
 | 学費・浪人の予備校代・私立高校 | 進路の仕組み（[antigravity-ending.md](antigravity-ending.md) 依頼3・8）ができてから |
 | 猶予期間中の借金・支援金 | 家計破綻が動いてから（expenses.md 5.7） |
+| 誕生日のまとめ（1 年ごとの「この1年でかかったお金」の画面） | 家計簿の［年］タブで同じことが見られるので後回し（2026-10-28） |
 | 費目と金額の見直し | メンバーの調査（[../research/expenses.md](../research/expenses.md)）が終わってから。アセットの値を変えるだけ |
 
 ---
@@ -417,5 +559,5 @@ TextMeshPro の注意：TextOverflowModes.Ellipsis は使わない／日本語�
 | E1b-2 | Main_test2 でイベントが毎月出ない不具合の修正（EventManager の購読を Start へ） | **完了**（2026-10-22。Main_test2 の Canvas に EventDialog を置き、CardsPanel を 1280×720・Scale 0.625 に） |
 | E2 | 毎月の支出（自動） | **完了**（2026-10-28 確認。保育料のアセットの年収の条件への参照が `type: 3` で切れていたのを `type: 2` に直した → 年収の段が正しく選ばれる） |
 | E3 | 無償化（肩代わり） | **完了**（2026-10-28 確認。保育の無償化：申請した翌月から保育料 0 円・給食費は払う・6歳1月で受給終了／就学支援金：翌月から授業料 0 円・肩代わり 9,900 円／児童手当は変わらない／セーブ→ロード後も肩代わりが続く） |
-| E4 | お金が足りないとき・終わり方をまとめる | 未依頼 |
-| E5 | 家計簿の画面・誕生日のまとめ | 未依頼（それまで家計簿は `LedgerDebugMenu` で Console に出して見る） |
+| E4 | お金が足りないとき・終わり方をまとめる（＋家計簿の画面のメニューの値合わせ・矢印の二重表示の修正） | 未依頼（2026-10-29 に E5 の後向けに書き直した） |
+| E5 | 家計簿の画面（月ごと・年ごと。TMP・［家計簿］ボタンから開く・税金と年末調整も見せる） | **完了**（2026-10-28。画面のはみ出し・棒と金額の重なりは山口が MCP でプレハブを直した） |

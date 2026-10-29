@@ -104,7 +104,8 @@ Unity 製の子育てシミュレーションゲーム。**このファイルは
 - [0019-two-save-slots.md](docs/decisions/0019-two-save-slots.md) — セーブをオートと手動の2枠にし、「最初から」ではセーブを消さない理由
 - [0020-ending-on-leaving-home.md](docs/decisions/0020-ending-on-leaving-home.md) — ゲームの終わりを「20歳」から「子どもの巣立ち」に変え、進路で巣立つ年齢を変えた理由
 - [0021-yearly-income-tax.md](docs/decisions/0021-yearly-income-tax.md) — 給料の天引きを一律の手取り率から、年単位の税金（年末調整・確定申告・住民税）にした理由
-- [0022-short-time-balance.md](docs/decisions/0022-short-time-balance.md) — 時短勤務中のバランスを0.2に固定する理由（旧決定 [0017](docs/decisions/0017-company-support-work-mode.md) を置き換え）
+- [0024-game-speed-control.md](docs/decisions/0024-game-speed-control.md) — 倍速機能（通常・2x・3x）の導入と日次処理の完全実行モデル
+- [0025-hud-visibility-on-panel-open.md](docs/decisions/0025-hud-visibility-on-panel-open.md) — サポート画面・人物詳細パネル表示時のHUDボタン排他非表示制御
 
 ---
 
