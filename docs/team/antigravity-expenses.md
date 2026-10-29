@@ -1,6 +1,6 @@
 ---
 title: 支出と家計簿の実装法と Antigravity への依頼文
-updated: 2026-10-28
+updated: 2026-10-29
 status: 進行中（E2 の確認待ち）
 related: [docs/design/expenses.md, docs/team/agreements-needed.md, docs/design/support-apply.md, docs/design/save-system.md, docs/decisions/0015-real-money-and-expenses.md, docs/design/result-scene.md]
 ---
@@ -332,8 +332,21 @@ docs/design/expenses.md の 4章、docs/design/support-apply.md（無償化の�
 
 ### 依頼E4：お金が足りないとき・終わり方をまとめる
 
+**2026-10-29 に書き直した**：E5（家計簿の画面）の後に頼むため。主な変更は、赤字の警告の［家計簿を見る］を家計簿の画面につなぐこと、警告の画面を TMP・エディタのメニューで作ること、家計簿の画面の大きさの修正（2026-10-28・29 に山口が MCP で直した値）をメニューに合わせること。
+
+#### 前提（2026-10-29 時点）
+
+- 家計簿の画面（`LedgerPanelUI`）はできている。`LedgerPanel.prefab` の大きさは手で直してあり、**「子育て/家計簿/1」のメニューを押すと消える**：
+  - `Window`：全画面に伸ばして余白 左右 24・上下 12（固定 740×520 だと 16:9 ではみ出した）
+  - `YearView/Panels`：上の余白 136（棒グラフの月の名前と見出しが重なった）
+  - `LedgerYearView.maxBarHeight`：40（一番高い棒が金額の文字に重なった）
+- 税金の仕組み（`TaxManager`。年末調整・確定申告・住民税）が入っていて、毎月の給料日以外にもお金が動く。
+- end シーン（`EndingFlow`・依頼R1）はまだ無い。
+
 ```
-docs/design/expenses.md の 5.7 と docs/design/result-scene.md、docs/team/antigravity-expenses.md の 2.4 を読んでから作業してください。
+docs/design/expenses.md の 5.7、docs/design/taxes.md の 2章、docs/design/result-scene.md、
+docs/team/antigravity-expenses.md の 2.4・依頼E4・依頼E5 を読んでから作業してください。
+家計簿の画面（LedgerPanelUI・依頼E5）はもうできています。
 
 1. GameState.cs：
    - AddMoney と LoadValues の 0 円止め（Mathf.Max(0, …)）を外す。
@@ -347,23 +360,41 @@ docs/design/expenses.md の 5.7 と docs/design/result-scene.md、docs/team/anti
    - MonthTicker.OnMonthSettled で所持金がマイナスなら 赤字の月 +1、プラスなら 0 に戻す。
    - 赤字の月 >= [SerializeField] 上限（既定 2）で GameState.I.EndGame(Bankrupt) と OnBankrupt。
    - 赤字の月が 1 以上になったら OnDeficitMonthsChanged(int) を出す。
-5. DeficitWarningUI.cs（UI）：OnDeficitMonthsChanged で開く。
-   「今月は ○○円 足りませんでした。来月も赤字だと家計が破綻します」＋［家計簿を見る］（依頼E5 までは押せないままでよい）＋［サポート画面へ］＋［閉じる］。
-   開いている間は時間を止める（PushPause / PopPause）。
-6. result-scene.md の EndingFlow を作っていれば（Assets/Yamaguchi/Scripts/Core/Ending/）、
-   購読を GameState.OnGameEnded の1つに変え、EndingReason に 家計破綻 を足す。まだ無ければ何もしない。
+   - 購読は Start で行う（OnEnable だと MonthTicker.I がまだ無いことがある。依頼E1b-2 と同じ理由）。
+   - 年末調整・確定申告の還付・住民税（TaxManager）でもお金が動くが、判定は月の精算の後なのでそのままでよい。違う動きになりそうなら報告に書く。
+5. DeficitWarningUI.cs（UI。Assets/Yamaguchi/Scripts/UI/Ledger/）：OnDeficitMonthsChanged で開く。開いている間は時間を止める（PauseWhileOpen）。
+   - 「今月は ○○円 足りませんでした。来月も足りないと家計が破綻します」
+   - ［家計簿を見る］：DeficitWarningUI を閉じてから LedgerPanelUI.Open() で今月の［月］タブを開く
+   - ［サポート画面へ］：SupportPanelController を開く ／ ［閉じる］
+   - 文字はすべて TextMeshProUGUI、フォントは Resources.Load<TMP_FontAsset>("JPFont")。Ellipsis は使わない。
+   - 画面は固定サイズにせず、全画面に伸ばして余白を残す形にする（800×600 基準・16:9 でもはみ出さないように）。
+6. エディタのメニュー（LedgerUIBuilder.cs に足す）：
+   - 「子育て/家計簿/3. 赤字の警告を作ってシーンに置く」… DeficitWarning.prefab（Assets/Yamaguchi/Prefabs/UI/）を作り、
+     開いているシーンの Canvas の子の一番下に非表示で置き、BankruptcyWatcher を GameManager の下に置く。何をしたかをログに出す。シーンの保存は人間が行う。
+   - 「子育て/家計簿/1. 家計簿の画面のプレハブを作る」の中身を、今の LedgerPanel.prefab に合わせる：
+     Window を全画面に伸ばして余白 左右 24・上下 12／YearView/Panels の上の余白 136／LedgerYearView の maxBarHeight 40。
+7. 家計簿の画面の見た目の修正：月・年の移動で、ボタンの［‹］［›］と見出しの文字「‹ 0歳 3月 ›」の矢印が二重に出ている。
+   見出しの文字から矢印を外す（LedgerMonthView・LedgerYearView）。
+8. end シーン（EndingFlow）はまだ作っていないので、今回は何もしない。家計破綻で終わったら時間が止まるだけでよい。
 
 守ること：
 - 他の人のコードで OnGameOver を使っているところは変えずに、報告に一覧を書く（移行期間は両方出すので壊れない）。
 - 有坂さんの MoneyUI がマイナスを表示できるか確認し、直さずに報告に書く（agreements-needed.md A2）。
-- Unity の MCP ツール（unityMCP）は使わないでください。終わったら、シーンに置くもの・Unity で確認してほしいことを箇条書きで教えてください。
+- LedgerPanel.prefab そのものは書き換えない（メニュー 1 の中身だけ合わせる）。
+- Maruyama・Arisaka・Kusao のフォルダのファイルは変更しない。シーンファイルを直接書き換えない。
+- Unity の MCP ツール（unityMCP）は使わないでください。終わったら、メニューの使い方・Unity で確認してほしいことを箇条書きで教えてください。
 ```
 
 **確認（依頼E4）**
-1. 所持金を Inspector で少なくして月をまたぐ → マイナスになり、警告が出て時間が止まる。
-2. 次の月もマイナス → 家計破綻で終わる（EndingFlow があれば end シーンへ）。セーブが消えている。
-3. 1か月赤字 → 次の月プラスに戻ると、数えが 0 に戻る。
-4. 20歳到達・家出も今までどおり終わる。
+1. メニュー「子育て/家計簿/3」を実行して `Main_test2` を保存。`GameManager` の下に `BankruptcyWatcher`、Canvas の一番下に赤字の警告（非表示）がある。
+2. 所持金を Inspector で少なくして月をまたぐ → マイナスになり、警告が出て時間が止まる。
+3. 警告の［家計簿を見る］で、家計簿の画面がその月の［月］タブで開く。［サポート画面へ］でサポート画面が開く。
+4. 次の月もマイナス → 家計破綻で終わり、時間が止まる。セーブが消えている。
+5. 1 か月赤字 → 次の月プラスに戻ると、数えが 0 に戻る（警告は出ない）。
+6. 20 歳到達・家出も今までどおり終わる。
+7. HUD のお金の表示がマイナスでおかしくならないか（有坂さんの MoneyUI）。
+8. 家計簿の月・年の見出しの矢印が二重になっていない。
+9. 「子育て/家計簿/1」を押し直しても、家計簿の画面がはみ出さず、棒と金額が重ならない（押す前に LedgerPanel.prefab をコミットしておくこと）。
 
 ---
 
@@ -528,5 +559,5 @@ docs/decisions/0011-pause-while-open-component.md、docs/team/antigravity-expens
 | E1b-2 | Main_test2 でイベントが毎月出ない不具合の修正（EventManager の購読を Start へ） | **完了**（2026-10-22。Main_test2 の Canvas に EventDialog を置き、CardsPanel を 1280×720・Scale 0.625 に） |
 | E2 | 毎月の支出（自動） | **完了**（2026-10-28 確認。保育料のアセットの年収の条件への参照が `type: 3` で切れていたのを `type: 2` に直した → 年収の段が正しく選ばれる） |
 | E3 | 無償化（肩代わり） | **完了**（2026-10-28 確認。保育の無償化：申請した翌月から保育料 0 円・給食費は払う・6歳1月で受給終了／就学支援金：翌月から授業料 0 円・肩代わり 9,900 円／児童手当は変わらない／セーブ→ロード後も肩代わりが続く） |
-| E4 | お金が足りないとき・終わり方をまとめる | 未依頼 |
-| E5 | 家計簿の画面（月ごと・年ごと。TMP・［家計簿］ボタンから開く・税金と年末調整も見せる） | **コード作成完了**（2026-10-28。LedgerPanel・LedgerRow・LedgerMonthView・LedgerYearView・LedgerUIBuilder を実装。メニューからプレハブ生成とシーン配置を行い確認待ち） |
+| E4 | お金が足りないとき・終わり方をまとめる（＋家計簿の画面のメニューの値合わせ・矢印の二重表示の修正） | 未依頼（2026-10-29 に E5 の後向けに書き直した） |
+| E5 | 家計簿の画面（月ごと・年ごと。TMP・［家計簿］ボタンから開く・税金と年末調整も見せる） | **完了**（2026-10-28。画面のはみ出し・棒と金額の重なりは山口が MCP でプレハブを直した） |

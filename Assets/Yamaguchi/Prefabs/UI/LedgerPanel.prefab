@@ -5017,7 +5017,7 @@ MonoBehaviour:
   nextYearButton: {fileID: 3219670605733174197}
   barChartContainer: {fileID: 1665546899689295178}
   barPrefab: {fileID: 0}
-  maxBarHeight: 60
+  maxBarHeight: 40
   incomeContent: {fileID: 7504533310534055583}
   expenseContent: {fileID: 2140408595089417342}
   rowPrefab: {fileID: 4730867102110882846, guid: 10b22d702f627874a85c45bdc19b83fe, type: 3}
