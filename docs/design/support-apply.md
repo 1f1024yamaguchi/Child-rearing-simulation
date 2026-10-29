@@ -184,7 +184,7 @@ public class PaymentTier
 2. その段の `requirements` を**全部**満たしていれば、その段の `monthlyEffects` を適用して終わり。満たしていなければ次の段を探す。
 3. 当てはまる段がなければ、その月は 0（状態は Active のまま）。
 4. 今日がすべての段の `toAge` より後（`covers` があればその期間も過ぎた後）なら Ended。
-5. 支給表が空で `covers` だけの制度（無償化など）は、お金は払わず、受給中のあいだ支出を肩代わりする（[expenses.md](expenses.md) 4章）。申請は Monthly と同じく**翌月分から**効く。
+5. 支給表が空で `covers` だけの制度（無償化など）は、お金は払わず、受給中のあいだ支出を肩代わりする（[expenses.md](expenses.md) 4章）。原則は申請の**翌月分から**だが、高等学校等就学支援金は申請月から適用する（[決定 0021](../decisions/0021-hs-tuition-cover-start-month.md)）。
 
 - こうすると「年齢で額が変わる」も「所得で額が変わる」も同じ表で書ける。
   - 例：所得で減額 → 同じ年齢の段を2つ並べ、上の段に「所得が○円以下」、下の段に条件なしで少ない額を入れる。
@@ -327,8 +327,6 @@ public class SupportSchemeRuntime   // そのまま SaveData に入れられる�
 | `IReadOnlyList<SupportScheme> Schemes` | 一覧（Inspector の `schemes`、並び順＝表示順） |
 | `IEnumerable<SupportScheme> GetByCategory(SupportCategory c)` | タブ用 |
 | `SupportState GetState(s)` / `SupportSchemeRuntime GetRuntime(s)` | 状態と詳細 |
-| `IEnumerable<SupportScheme> ActiveSchemes()` | 受給中（Active）の制度の一覧 |
-| `IEnumerable<SupportScheme> CoveringSchemes()` | 今月 covers が効いている制度（Active かつ申請の翌月以降）。`ExpenseManager` が肩代わりの計算に使う（expenses.md 4章） |
 | `IEnumerable<RequirementSO> UnmetRequirements(s)` | 満たしていない条件（カードに「条件：年収910万円以下」と出す用） |
 | `PaymentTier CurrentTier(s)` / `PaymentTier NextTier(s)` | 今の段・次の段（「3歳から 月10,000」と出す用） |
 | `bool CanApply(s)` / `CanRenew(s)` / `CanResume(s)` | ボタンを押せるか |
@@ -493,3 +491,35 @@ public class SupportSchemeRuntime   // そのまま SaveData に入れられる�
 | 会社の制度（育休・時短） | 段階的に作る → [company-support.md](company-support.md) |
 
 **他のメンバーの合意が必要な項目**は [../team/agreements-needed.md](../team/agreements-needed.md) にまとめた。合意が取れたらそちらに日付を書き、関係する文書を直す。
+
+---
+
+## 11. 調査メモの制度を追加するときの実装ギャップ
+
+調査メモにある制度は候補であり、その金額・期限・効果をそのままゲーム仕様として扱わない。追加する制度のルールは、この文書や関連する `docs/design/` で決めてからアセットにする。
+
+2026-10-28 時点の設計とコードを照合した結果、候補のうち追加に関係する不足は次のとおり。
+
+| 必要な仕組み | 関連する制度候補 | 設計・コードの状況 |
+|---|---|---|
+| 支出の肩代わり | 幼児教育・保育の無償化、高等学校等就学支援金、就学援助 | 仕組みは [expenses.md](expenses.md) 4章と本書9章で設計済み。`SupportScheme` に `covers` はなく、`ExpenseManager.CalcMonthlyCost` も未対応。対象の支出項目が登録され、肩代わり計算・受給状態との連携が実装されるまで、これらの制度を正しく動かせない。 |
+| 給与に連動する給付・働き方の変更 | 出産手当金、育児休業給付金、出生後休業支援給付金、育児時短就業給付金 | 給付率・対象親・働き方の変更は [company-support.md](company-support.md) に段階的な案がある。一方、現行の `SupportScheme` / `SupportManager` に `WorkMode` や `WageLinkedTier` はなく、その設計の実装も確認できない。会社制度の各段階に従って実装する。 |
+| 子どもの人数・ひとり親などの条件 | 児童手当の第3子以降加算、児童扶養手当、ひとり親家庭医療費助成 | `RequirementSO` は拡張できるが、現在の実装は子どもの年齢と世帯年収の条件のみ。`GameContext` に子どもの人数・ひとり親か等はなく、[concept.md](concept.md) 6章では家族構成も未決定。家族モデルと対象条件を決めるまでは、これらの条件を必要とする制度を再現しない。 |
+| 年1回の支給 | 高校生等奨学給付金など | `OnApply`（申請時1回）と `Monthly`（毎月）はあるが、年次の給付頻度はない。`Yearly` は毎年の更新期限であり、毎年の支給を意味しない。月払いへの置き換えや、年次支給の仕組み追加を決める必要がある。 |
+| 子どもの出生より前の期間 | 妊婦健康診査費用の助成など | ゲーム内の日付は子どもの年齢を基準とし、0歳1月1日が開始日。妊娠期間中の申請・受診を表す期間はない。妊娠期をゲームに含めるか、対象外にするかを決める必要がある。 |
+| 医療費など実費の還付 | 子ども医療費助成など | `ExpenseCover` の設計は月次支出項目が対象で、個別イベントで発生した費用の領収・還付や、受診後の申請期限を持つ仕組みはない。医療費イベントと還付をゲームに含めるか、対象となる費用・申請時期を決める必要がある。 |
+
+### 11.1 既存アセットとの重複・差分
+
+現行シーンに登録済みの児童手当、出産育児一時金、妊婦のための支援給付、就学援助は、調査メモと名前が重なるため同じ制度を重ねて作らない。ただし、既存アセットの値が現実制度を完全に再現しているとは限らない。
+
+特に就学援助は、現在の [Support_SchoolAid.asset](../../Assets/Yamaguchi/Data/Supports/Support_SchoolAid.asset) が月額8,000円を世帯へ支給する形だが、本書9.3の設計は給食費・学用品費を肩代わりする形である。扱いは保留とし、どちらをゲーム仕様とするか決まるまでアセットを変更しない。
+
+月額給付は申請の翌月分からとする。支出肩代わりも原則は翌月分からだが、高等学校等就学支援金だけは申請月から適用する。この例外を [expenses.md](expenses.md) 4章と [決定 0021](../decisions/0021-hs-tuition-cover-start-month.md) に記録した。
+
+### 11.2 次に決める事項
+
+1. `covers` の実装後、幼児教育・保育の無償化と高等学校等就学支援金を支出軽減としてアセット化する。
+2. 就学援助の効果は保留。月額給付のままにするか、9.3どおりの支出肩代わりへ変更するか決まるまで、既存アセットを変更しない。
+3. 家族構成を決めた後、子どもの人数・ひとり親条件を使う制度を対象に含めるか決める。
+4. 年次給付、医療費還付、妊娠期など、現行モデル外の制度をゲームに含めるか。含める場合は、その仕組みと対象範囲を個別に設計する。

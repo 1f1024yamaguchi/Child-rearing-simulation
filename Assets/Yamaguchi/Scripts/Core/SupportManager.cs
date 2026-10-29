@@ -16,8 +16,17 @@ public class SupportManager : MonoBehaviour, ISaveParticipant
     public string SaveKey => "support";
     public int RestoreOrder => 30;
 
-    private void OnEnable() => SaveSystem.Register(this);
-    private void OnDisable() => SaveSystem.Unregister(this);
+    private void OnEnable()
+    {
+        SaveSystem.Register(this);
+        SaveSystem.OnLoaded += HandleSaveLoaded;
+    }
+
+    private void OnDisable()
+    {
+        SaveSystem.Unregister(this);
+        SaveSystem.OnLoaded -= HandleSaveLoaded;
+    }
 
     [Header("制度の一覧（並び順＝表示順）")]
     [SerializeField] private List<SupportScheme> schemes = new List<SupportScheme>();
@@ -82,6 +91,7 @@ public class SupportManager : MonoBehaviour, ISaveParticipant
         if (MonthTicker.I != null) MonthTicker.I.OnMonthChanged += HandleMonthChanged;
         else Debug.LogError("SupportManager: MonthTicker が見つかりません");
 
+        EnsurePostpartumLeave();
         EvaluateAll();   // 全制度の状態を今日で1回計算
     }
 
@@ -90,6 +100,12 @@ public class SupportManager : MonoBehaviour, ISaveParticipant
         if (DayTicker.I != null) DayTicker.I.OnDayPassed -= HandleDayPassed;
         if (MonthTicker.I != null) MonthTicker.I.OnMonthChanged -= HandleMonthChanged;
         if (I == this) I = null;
+    }
+
+    private void HandleSaveLoaded()
+    {
+        EnsurePostpartumLeave();
+        EvaluateAll();
     }
 
     // ------------------------------------------------------------
@@ -184,7 +200,56 @@ public class SupportManager : MonoBehaviour, ISaveParticipant
 
     public bool CanApply(SupportScheme s)
     {
-        return GetState(s) == SupportState.Available && RequirementsMet(s, GameContext.Current());
+        if (s == null || GetState(s) != SupportState.Available ||
+            !RequirementsMet(s, GameContext.Current()) || !WorkModeRequirementsMet(s))
+            return false;
+        return true;
+    }
+
+    public bool CanReturn(SupportScheme s)
+    {
+        if (!IsValid(s) || !s.changesWorkMode || GetState(s) != SupportState.Active || Household.I == null)
+            return false;
+        var parent = Household.I.Get(s.workTarget);
+        return parent != null && parent.WorkMode == s.workMode;
+    }
+
+    public WageLinkedTier CurrentWageLinkedTier(SupportScheme s)
+    {
+        if (!IsValid(s)) return null;
+        var rt = GetRuntime(s);
+        return WageTierForDay(s, Today() - rt.workStartedAgeDays + 1);
+    }
+
+    public int CurrentWageLinkedDay(SupportScheme s)
+    {
+        if (!IsValid(s)) return 0;
+        return Mathf.Max(0, Today() - GetRuntime(s).workStartedAgeDays + 1);
+    }
+
+    public int CurrentWageLinkedDailyAmount(SupportScheme s)
+    {
+        if (!IsValid(s)) return 0;
+        var rt = GetRuntime(s);
+        var tier = CurrentWageLinkedTier(s);
+        if (tier == null) return 0;
+        float amount = 0f;
+        foreach (var parent in WageParents(s))
+        {
+            if (parent != null && WageModeSatisfied(s, parent))
+                amount += DailyWageBase(parent, tier.basis, rt.salaryBeforeLeave) * tier.rate;
+        }
+        return Mathf.RoundToInt(amount);
+    }
+
+    public bool IsWageLinkedEligible(SupportScheme s)
+    {
+        if (!IsValid(s)) return false;
+        foreach (var parent in WageParents(s))
+        {
+            if (parent != null && WageModeSatisfied(s, parent)) return true;
+        }
+        return false;
     }
 
     public bool CanRenew(SupportScheme s)
@@ -244,21 +309,50 @@ public class SupportManager : MonoBehaviour, ISaveParticipant
         rt.appliedMonthIndex = MonthIndexOf(today);
         rt.renewedYear = FirstRenewedYear(s, today);   // 毎年の手続きの1回目の期限（案C）
 
+        if (s.changesWorkMode)
+        {
+            var parent = Household.I.Get(s.workTarget);
+            parent.SetWorkMode(s.workMode);
+            rt.salaryBeforeLeave = parent.SalaryBeforeLeave;
+        }
+        else if (HasWageLinkedTiers(s) && s.wageTarget == WageTarget.WorkTarget &&
+                 HasSalaryBeforeLeaveTier(s))
+        {
+            var parent = Household.I.Get(s.workTarget);
+            if (parent != null) rt.salaryBeforeLeave = parent.SalaryBeforeLeave;
+        }
+        if (HasWageLinkedTiers(s)) rt.workStartedAgeDays = today;
+
         // 申請したときに1回だけ起きること（OnApply の本体／Monthly の手間のストレスなど）
         int money = MoneyOf(s.effects);
         EffectApplier.Apply(s.effects, new LedgerSource(s.title, ExpenseCategory.支援制度));
 
         if (s.effectTiming == EffectTiming.OnApply)
         {
+            float linkedAmount = CalculateOnApplyWageAmount(s, today);
+            rt.wageLinkedPendingAmount += linkedAmount;
             rt.lastPaidAmount = money;
             SetState(s, rt, SupportState.Received);
-            Debug.Log($"[SupportManager] {s.title}：申請しました（受け取り済み）{FormatMoney(money)}");
+            string payoutTiming = linkedAmount > 0f ? "翌月に給付" : "受け取り済み";
+            Debug.Log($"[SupportManager] {s.title}：申請しました（{payoutTiming}）{FormatMoney(money + Mathf.RoundToInt(linkedAmount))}");
         }
         else
         {
             SetState(s, rt, SupportState.Active);   // 毎月の支給は申請した月の翌月から
             Debug.Log($"[SupportManager] {s.title}：申請しました（受給中・翌月から支給）");
         }
+        if (s.changesWorkMode) EvaluateAll();
+        return true;
+    }
+
+    public bool ReturnFromWorkMode(SupportScheme s)
+    {
+        if (!CanReturn(s)) return false;
+        var parent = Household.I.Get(s.workTarget);
+        parent.SetWorkMode(WorkMode.Normal);
+        SetState(s, GetRuntime(s), SupportState.Ended);
+        EvaluateAll();
+        Debug.Log($"[SupportManager] {s.title}：働き方を通常に戻しました");
         return true;
     }
 
@@ -329,6 +423,7 @@ public class SupportManager : MonoBehaviour, ISaveParticipant
             var rt = GetRuntime(s);   // 無ければここで計算して作られる
             OnStateChanged?.Invoke(s, rt.state);
         }
+        EnsurePostpartumLeave();
     }
 
     [Serializable]
@@ -357,7 +452,16 @@ public class SupportManager : MonoBehaviour, ISaveParticipant
     // 時間で進める
     // ------------------------------------------------------------
 
-    private void HandleDayPassed(int ageDays) => EvaluateAll();
+    private void HandleDayPassed(int ageDays)
+    {
+        var mother = Household.I != null ? Household.I.Mother : null;
+        if (mother != null && mother.WorkMode == WorkMode.MaternityLeave &&
+            ageDays > new GameDay(0, 2, 25).ToAgeDays())
+            mother.SetWorkMode(WorkMode.Normal);
+
+        EvaluateAll();
+        AccrueWageLinkedBenefits(ageDays);
+    }
 
     private void EvaluateAll()
     {
@@ -383,6 +487,7 @@ public class SupportManager : MonoBehaviour, ISaveParticipant
             case SupportState.Active:
                 if (HasEnded(s, today))
                 {
+                    EndWorkMode(s);
                     SetState(s, rt, SupportState.Ended);
                 }
                 else if (s.deadlineType == DeadlineType.Yearly)
@@ -415,7 +520,7 @@ public class SupportManager : MonoBehaviour, ISaveParticipant
         if (s.deadlineType == DeadlineType.Once && today > s.DeadlineAgeDays)
             return SupportState.Expired;   // 期限日のその日のうちは申請できる
         if (today < s.StartAgeDays) return SupportState.Locked;
-        if (!RequirementsMet(s, ctx)) return SupportState.Locked;
+        if (!RequirementsMet(s, ctx) || !WorkModeRequirementsMet(s)) return SupportState.Locked;
         return SupportState.Available;
     }
 
@@ -429,16 +534,20 @@ public class SupportManager : MonoBehaviour, ISaveParticipant
 
         foreach (var s in schemes)
         {
-            if (!IsValid(s) || s.effectTiming != EffectTiming.Monthly) continue;
+            if (!IsValid(s)) continue;
             var rt = GetRuntime(s);
+            PayWageLinkedPending(s, rt, monthIndex);
+            if (s.effectTiming != EffectTiming.Monthly) continue;
 
             if (rt.state == SupportState.Active)
             {
                 if (HasEnded(s, today))
                 {
+                    EndWorkMode(s);
                     SetState(s, rt, SupportState.Ended);
                     continue;
                 }
+                if (HasWageLinkedTiers(s)) continue;
                 // 支給表が空で covers だけの制度（無償化など）はお金を払わない。肩代わりは ExpenseManager が行う
                 if (IsCoversOnly(s)) continue;
                 PayMonth(s, rt, monthIndex, today, ctx);
@@ -481,6 +590,139 @@ public class SupportManager : MonoBehaviour, ISaveParticipant
         OnStateChanged?.Invoke(s, rt.state);
     }
 
+    private void AccrueWageLinkedBenefits(int ageDays)
+    {
+        if (Household.I == null) return;
+        foreach (var s in schemes)
+        {
+            if (!IsValid(s) || s.effectTiming != EffectTiming.Monthly || !HasWageLinkedTiers(s))
+                continue;
+            var rt = GetRuntime(s);
+            if (rt.state != SupportState.Active || ageDays <= rt.appliedAgeDays)
+                continue;
+            if (s.wageBenefitUntil.ToAgeDays() > 0 && ageDays > s.wageBenefitUntil.ToAgeDays())
+                continue;
+
+            foreach (var parent in WageParents(s))
+            {
+                if (parent == null || !WageModeSatisfied(s, parent)) continue;
+                var tier = WageTierForDay(s, ageDays - rt.workStartedAgeDays);
+                if (tier == null) continue;
+                rt.wageLinkedPendingAmount += DailyWageBase(parent, tier.basis, rt.salaryBeforeLeave) * tier.rate;
+            }
+        }
+    }
+
+    private void PayWageLinkedPending(SupportScheme s, SupportSchemeRuntime rt, int monthIndex)
+    {
+        if (!HasWageLinkedTiers(s) || rt.wageLinkedPendingAmount <= 0f ||
+            monthIndex <= rt.wageLinkedLastPaidMonthIndex)
+            return;
+
+        int amount = Mathf.RoundToInt(rt.wageLinkedPendingAmount);
+        rt.wageLinkedPendingAmount = 0f;
+        rt.wageLinkedLastPaidMonthIndex = monthIndex;
+        rt.lastPaidMonthIndex = monthIndex;
+        rt.lastPaidAmount = amount;
+        if (amount > 0)
+        {
+            EffectApplier.Apply(
+                new[] { new Effect { kind = EffectKind.Money, value = amount } },
+                new LedgerSource(s.title + "（非課税）", ExpenseCategory.支援制度));
+            OnPaid?.Invoke(s);
+        }
+        OnStateChanged?.Invoke(s, rt.state);
+    }
+
+    private float CalculateOnApplyWageAmount(SupportScheme s, int today)
+    {
+        if (!HasWageLinkedTiers(s)) return 0f;
+        int maxDay = 0;
+        foreach (var tier in s.wageLinkedTiers)
+        {
+            if (tier != null)
+                maxDay = Mathf.Max(maxDay, tier.toDay > 0 ? tier.toDay : today - s.StartAgeDays + 1);
+        }
+        int days = Mathf.Max(0, Mathf.Min(maxDay, today - s.StartAgeDays + 1));
+
+        float amount = 0f;
+        var rt = GetRuntime(s);
+        foreach (var parent in WageParents(s))
+        {
+            if (parent == null) continue;
+            for (int day = 1; day <= days; day++)
+            {
+                var tier = WageTierForDay(s, day);
+                if (tier != null)
+                    amount += DailyWageBase(parent, tier.basis, rt.salaryBeforeLeave) * tier.rate;
+            }
+        }
+        return amount;
+    }
+
+    private void EndWorkMode(SupportScheme s)
+    {
+        if (!s.changesWorkMode || Household.I == null) return;
+        var parent = Household.I.Get(s.workTarget);
+        if (parent != null && parent.WorkMode == s.workMode)
+            parent.SetWorkMode(WorkMode.Normal);
+    }
+
+    private void EnsurePostpartumLeave()
+    {
+        var mother = Household.I != null ? Household.I.Mother : null;
+        if (mother != null && Today() <= new GameDay(0, 2, 25).ToAgeDays() &&
+            mother.WorkMode == WorkMode.Normal)
+            mother.SetWorkMode(WorkMode.MaternityLeave);
+    }
+
+    private static bool WageModeSatisfied(SupportScheme s, ParentStatus parent)
+    {
+        if (s.changesWorkMode) return parent.WorkMode == s.workMode;
+        return !s.requiresWorkMode || parent.WorkMode == s.requiredWorkMode;
+    }
+
+    private static IEnumerable<ParentStatus> WageParents(SupportScheme s)
+    {
+        if (Household.I == null) yield break;
+        if (s.wageTarget == WageTarget.BothParents)
+        {
+            foreach (var parent in Household.I.Parents) yield return parent;
+            yield break;
+        }
+        yield return Household.I.Get(s.workTarget);
+    }
+
+    private static WageLinkedTier WageTierForDay(SupportScheme s, int day)
+    {
+        if (s.wageLinkedTiers == null) return null;
+        foreach (var tier in s.wageLinkedTiers)
+        {
+            if (tier != null && tier.Contains(day)) return tier;
+        }
+        return null;
+    }
+
+    private static float DailyWageBase(ParentStatus parent, WageBase basis, int salaryBeforeLeave = 0)
+    {
+        return basis == WageBase.SalaryBeforeLeave
+            ? (salaryBeforeLeave > 0 ? salaryBeforeLeave : parent.SalaryBeforeLeave)
+                / (float)ParentStatus.WageDaysPerMonth
+            : parent.DailyWage;
+    }
+
+    private static bool HasWageLinkedTiers(SupportScheme s) =>
+        s.wageLinkedTiers != null && s.wageLinkedTiers.Count > 0;
+
+    private static bool HasSalaryBeforeLeaveTier(SupportScheme s)
+    {
+        foreach (var tier in s.wageLinkedTiers)
+        {
+            if (tier != null && tier.basis == WageBase.SalaryBeforeLeave) return true;
+        }
+        return false;
+    }
+
     // ------------------------------------------------------------
     // 内部ヘルパー
     // ------------------------------------------------------------
@@ -505,6 +747,22 @@ public class SupportManager : MonoBehaviour, ISaveParticipant
         foreach (var r in s.applyRequirements)
         {
             if (r != null && !r.IsSatisfied(ctx)) return false;
+        }
+        return true;
+    }
+
+    private static bool WorkModeRequirementsMet(SupportScheme s)
+    {
+        if (Household.I == null) return !s.changesWorkMode && !s.requiresWorkMode;
+        if (s.changesWorkMode)
+        {
+            var parent = Household.I.Get(s.workTarget);
+            if (parent == null || parent.WorkMode != WorkMode.Normal) return false;
+        }
+        if (s.requiresWorkMode)
+        {
+            var parent = Household.I.Get(s.workTarget);
+            if (parent == null || parent.WorkMode != s.requiredWorkMode) return false;
         }
         return true;
     }
@@ -542,6 +800,10 @@ public class SupportManager : MonoBehaviour, ISaveParticipant
                 if (c != null) last = Mathf.Max(last, c.toAge.ToAgeDays());
             }
         }
+        if (s.changesWorkMode)
+            last = Mathf.Max(last, s.workModeUntil.ToAgeDays());
+        if (HasWageLinkedTiers(s) && s.wageBenefitUntil.ToAgeDays() > 0)
+            last = Mathf.Max(last, s.wageBenefitUntil.ToAgeDays());
         return last >= 0 && today > last;
     }
 

@@ -35,6 +35,17 @@ public class SupportScheme : ScriptableObject
     [Tooltip("無償化など。支給表が空で covers だけの制度は、お金は払わず支出を減らす（申請の翌月から）")]
     public List<ExpenseCover> covers = new List<ExpenseCover>();   // expenses.md 4章
 
+    [Header("働き方（会社の制度）")]
+    public bool changesWorkMode;
+    public ParentRole workTarget;
+    public WorkMode workMode = WorkMode.ParentalLeave;
+    public GameDay workModeUntil = new GameDay { year = 0, month = 12, day = 31 };
+    public WageTarget wageTarget = WageTarget.WorkTarget;
+    public List<WageLinkedTier> wageLinkedTiers = new List<WageLinkedTier>();
+    public bool requiresWorkMode;
+    public WorkMode requiredWorkMode = WorkMode.ShortTime;
+    public GameDay wageBenefitUntil;
+
     [Header("申請できる期間")]
     public GameDay      start    = new GameDay { year = 0, month = 1, day = 1 };
     public DeadlineType deadlineType = DeadlineType.None;
@@ -76,7 +87,21 @@ public class SupportScheme : ScriptableObject
                 if (covers[i].type == CoverType.Rate) covers[i].value = Mathf.Clamp01(covers[i].value);
                 else if (covers[i].value < 0f)        covers[i].value = 0f;
             }
+
         }
+
+        if (wageLinkedTiers != null)
+        {
+            foreach (var tier in wageLinkedTiers)
+            {
+                if (tier == null) continue;
+                tier.fromDay = Mathf.Max(1, tier.fromDay);
+                tier.toDay = Mathf.Max(-1, tier.toDay);
+                tier.rate = Mathf.Clamp01(tier.rate);
+            }
+        }
+        workModeUntil = Fix(workModeUntil);
+        wageBenefitUntil = Fix(wageBenefitUntil);
     }
 
     private static GameDay Fix(GameDay d)

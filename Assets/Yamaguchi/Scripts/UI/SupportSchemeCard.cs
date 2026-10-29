@@ -14,7 +14,7 @@ using UnityEngine.UI;
 public class SupportSchemeCard : MonoBehaviour
 {
     /// <summary>主ボタンの種類（状態で決まる）。</summary>
-    public enum PrimaryAction { None, Apply, Renew, Resume }
+    public enum PrimaryAction { None, Apply, Renew, Resume, Return }
 
     [Header("基本")]
     [SerializeField] private Image icon;
@@ -160,7 +160,8 @@ public class SupportSchemeCard : MonoBehaviour
         primaryAction = PrimaryAction.None;
         string label = "";
 
-        if (mgr.CanApply(Scheme))       { primaryAction = PrimaryAction.Apply;  label = "申請する"; }
+        if (mgr.CanReturn(Scheme))      { primaryAction = PrimaryAction.Return; label = Scheme.workMode == WorkMode.ShortTime ? "時短をやめる" : "復帰する"; }
+        else if (mgr.CanApply(Scheme))  { primaryAction = PrimaryAction.Apply;  label = "申請する"; }
         else if (mgr.CanRenew(Scheme))  { primaryAction = PrimaryAction.Renew;  label = "更新する"; }
         else if (mgr.CanResume(Scheme)) { primaryAction = PrimaryAction.Resume; label = "手続きする"; }
 
@@ -267,6 +268,7 @@ public class SupportSchemeCard : MonoBehaviour
             case PrimaryAction.Apply:  mgr.Apply(Scheme);  break;
             case PrimaryAction.Renew:  mgr.Renew(Scheme);  break;
             case PrimaryAction.Resume: mgr.Resume(Scheme); break;
+            case PrimaryAction.Return: mgr.ReturnFromWorkMode(Scheme); break;
         }
     }
 

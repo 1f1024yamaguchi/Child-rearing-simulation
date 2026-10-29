@@ -14,6 +14,9 @@ public class ParentStatus : PersonStatus
 
     [Header("ワークライフバランス")]
     [Range(0f, 1f)][SerializeField] private float workLifeBalance = 0.5f;
+    [SerializeField] private WorkMode workMode = WorkMode.Normal;
+    [Range(0f, 1f)][SerializeField] private float savedWorkLifeBalance = 0.5f;
+    [SerializeField] private int salaryBeforeLeave;
 
     private float pendingWage;                // まだ受け取っていない積立給料
 
@@ -24,9 +27,13 @@ public class ParentStatus : PersonStatus
     public event Action<int> OnDailyWageChanged;        // 日給（バランスを動かすたび）
     public event Action<float> OnPendingWageChanged;    // 積立給与
     public event Action<float> OnBalanceChanged;
+    public event Action<WorkMode> OnWorkModeChanged;
 
     public float WorkLifeBalance => workLifeBalance;
     public JobRank Rank => rank;
+    public WorkMode WorkMode => workMode;
+    public float SavedWorkLifeBalance => savedWorkLifeBalance;
+    public int SalaryBeforeLeave => salaryBeforeLeave > 0 ? salaryBeforeLeave : MonthlySalary;
 
     public const int WageDaysPerMonth = 30;   // 日給の計算基準
 
@@ -46,12 +53,23 @@ public class ParentStatus : PersonStatus
     {
         get
         {
+            if (workMode == WorkMode.MaternityLeave || workMode == WorkMode.ParentalLeave)
+                return 0;
+            if (workMode == WorkMode.ShortTime)
+                return DailyWageAtBalance(0.2f);
             float mult = BalanceMultiplier(workLifeBalance);
             if (mult <= 0f) return 0;   // 休み：特性・状態の補正も含めて給料なし
-            float base_ = MonthlySalary / (float)WageDaysPerMonth * mult;
-            var (addSum, mulSum) = CollectModifier(EffectKind.Money);
-            return Mathf.RoundToInt((base_ + addSum) * (1f + mulSum));
+            return DailyWageAtBalance(workLifeBalance);
         }
+    }
+
+    private int DailyWageAtBalance(float balance)
+    {
+        float mult = BalanceMultiplier(balance);
+        if (mult <= 0f) return 0;
+        float base_ = MonthlySalary / (float)WageDaysPerMonth * mult;
+        var (addSum, mulSum) = CollectModifier(EffectKind.Money);
+        return Mathf.RoundToInt((base_ + addSum) * (1f + mulSum));
     }
 
     public float PendingWage => pendingWage;
@@ -71,9 +89,47 @@ public class ParentStatus : PersonStatus
 
     public void SetBalance(float value)
     {
+        if (workMode != WorkMode.Normal) return;
         workLifeBalance = Mathf.Clamp01(value);
         OnBalanceChanged?.Invoke(workLifeBalance);
         OnDailyWageChanged?.Invoke(DailyWage);     // バランスが変わると日給が変わる
+    }
+
+    public void SetWorkMode(WorkMode value)
+    {
+        if (workMode == value) return;
+
+        if (workMode == WorkMode.Normal && value != WorkMode.Normal)
+        {
+            savedWorkLifeBalance = workLifeBalance;
+            salaryBeforeLeave = MonthlySalary;
+        }
+
+        workMode = value;
+        if (value == WorkMode.Normal)
+            workLifeBalance = savedWorkLifeBalance;
+        else
+            workLifeBalance = value == WorkMode.ShortTime ? 0.2f : 0f;
+
+        OnWorkModeChanged?.Invoke(workMode);
+        OnBalanceChanged?.Invoke(workLifeBalance);
+        OnDailyWageChanged?.Invoke(DailyWage);
+    }
+
+    public void RestoreWorkMode(WorkMode value, float restoreBalance, int previousSalary)
+    {
+        savedWorkLifeBalance = Mathf.Clamp01(restoreBalance);
+        salaryBeforeLeave = Mathf.Max(0, previousSalary);
+        workMode = WorkMode.Normal;
+        workLifeBalance = savedWorkLifeBalance;
+        if (value != WorkMode.Normal)
+        {
+            workMode = value;
+            workLifeBalance = value == WorkMode.ShortTime ? 0.2f : 0f;
+        }
+        OnWorkModeChanged?.Invoke(workMode);
+        OnBalanceChanged?.Invoke(workLifeBalance);
+        OnDailyWageChanged?.Invoke(DailyWage);
     }
 
     /// 1日ぶん働いた分を積み立てる。DayTicker.OnDayPassed から呼ぶ。

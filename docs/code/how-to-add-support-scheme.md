@@ -1,6 +1,6 @@
 ---
 title: 支援制度の足し方と項目の意味
-updated: 2026-10-08
+updated: 2026-10-28
 status: 実装済み
 related: [docs/design/support-apply.md, docs/code/ui-support-card.md]
 ---
@@ -104,6 +104,42 @@ Effects の1行（Effect）の中身：
 - **いちばん最後の To Age を過ぎると「受給終了」**。申請していなくても受給終了になる。
 - 所得で額を変える例：同じ年齢の段を2つ並べ、上に「年収○円以下」の条件つきで多い額、下に条件なしで少ない額。
 
+### 支出の肩代わり（無償化など）
+
+`covers` は現金を給付せず、受給中の制度が対象の月次支出を減らす設定。支出項目は `Assets/Yamaguchi/Data/Expenses/` の `ExpenseItem` アセットを指定する。
+
+| 欄 | 意味 |
+|---|---|
+| Expense | 対象にする支出項目（例：保育料、給食費、高校授業料） |
+| Type | Full＝全額／Rate＝割合／UpTo＝指定額まで |
+| Value | Rate は 0〜1、UpTo は円。Full では使わない |
+| From Age / To Age | 肩代わりの対象期間（両端を含む） |
+
+- 対象の支出アセットに年齢別の段がある場合、その支出が発生する期間に合わせて設定する。
+- 月次支出の通常額から、該当する肩代わり額を差し引く。複数制度の対象になっても、肩代わり合計は支出額を超えない。
+- 制度が受給中（Active）の場合に限り有効。申請した月は対象外で、翌月分から適用する。毎年手続きが期限切れになり支給停止（Suspended）すると、再開まで肩代わりしない。
+- 家計簿には、実際に払った額と肩代わりされた額を同じ支出行に記録する。全額肩代わりの場合も、支援額が見えるよう行を残す。
+
+### 働き方連動・給与連動（会社制度）
+
+会社制度では、支援制度アセットに働き方と給与連動給付を設定する。
+
+| 欄 | 意味 |
+|---|---|
+| Changes Work Mode | 申請で親の働き方を変える制度か。育休・時短勤務で有効 |
+| Work Target | 対象の親（Mother / Father） |
+| Work Mode | 申請後の状態。ParentalLeave は日給0・バランス0、ShortTime は日給が通常の80%・バランス0.2 |
+| Work Mode Until | その日まで働き方を維持し、翌日 Normal に戻る日。カードの［復帰する］／［時短をやめる］でも途中終了できる |
+| Wage Target | WorkTarget＝指定した親、BothParents＝両親の給与を合算（出生後休業支援給付金用） |
+| Wage Linked Tiers | 休業・給付開始からの日数ごとの率。fromDay / toDay は両端を含み、toDay=-1 は終了日なし |
+| Rate / Basis | Rate は給付率。SalaryBeforeLeave は休業開始前の月給÷30、CurrentWage は現在の日給を日額の基礎にする |
+| Requires Work Mode / Required Work Mode | 申請・受給に必要な勤務状態。時短給付では ShortTime を指定 |
+| Wage Benefit Until | 給与連動の月次給付を受けられる最後の日。期限を設けない場合は0歳1月1日（通算日数0）のままにする |
+
+- 日割り給付は日次に積み上がり、月替わりにまとめて支給される。OnApply の給与連動給付も申請時点で対象期間を計算し、次の月替わりに支給する。
+- 産後の MaternityLeave は SupportManager が自動設定する。母用の ParentalLeave は産休中には申請できず、産休終了後に申請できる。
+- 会社制度は `Main_test2` の `SupportManager.Schemes` に登録する。新規カードも登録後はカテゴリ別のサポート一覧に表示される。
+
 ### 申請できる期間
 
 | 項目 | 意味 |
@@ -158,14 +194,16 @@ Effects の1行（Effect）の中身：
 | Monthly Tiers [1] | 3歳〜高校生年代 / 3歳1月1日〜18歳3月31日 / Money +10000 |
 | Start / Deadline Type | 0歳1月1日 / None |
 
-### 条件つき・毎年手続き（就学援助）
+### 条件つき・毎年手続き・支出を肩代わり（就学援助）
 
 | 項目 | 値 |
 |---|---|
 | Id / Title / Category | `school_aid` / 就学援助 / Municipality |
 | Effect Timing | Monthly |
 | Apply Requirements | 子どもの年齢（6歳4月1日〜15歳3月31日）、世帯年収（400万以下） |
-| Monthly Tiers [0] | 小・中学生 / 6歳4月1日〜15歳3月31日 / Money +8000 |
+| Monthly Tiers | （空） |
+| Covers [0] | 給食費 / Full / 6歳4月1日〜15歳3月31日 |
+| Covers [1] | 学用品など（中学校） / Full / 12歳4月1日〜15歳3月31日 |
 | Start | 6歳4月1日 |
 | Deadline Type / Yearly | Yearly / 4月30日 |
 | Lapse Years | 2 |

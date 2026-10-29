@@ -1,0 +1,55 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea7ceb50aff1b1d4a80539c5d7a3a83e, type: 3}
+  m_Name: Support_ShortTimeFather
+  m_EditorClassIdentifier: Assembly-CSharp::SupportScheme
+  id: short_time_father
+  title: 時短勤務（父）
+  description: 父が時短勤務を選択し、通常日給の80%相当で働きます。
+  icon: {fileID: 0}
+  category: 2
+  merits: []
+  demerits: []
+  effectTiming: 1
+  effects: []
+  applyRequirements: []
+  monthlyTiers: []
+  covers: []
+  changesWorkMode: 1
+  workTarget: 1
+  workMode: 3
+  workModeUntil:
+    year: 2
+    month: 12
+    day: 31
+  wageTarget: 0
+  wageLinkedTiers: []
+  requiresWorkMode: 0
+  requiredWorkMode: 3
+  wageBenefitUntil:
+    year: 0
+    month: 1
+    day: 1
+  start:
+    year: 0
+    month: 1
+    day: 1
+  deadlineType: 1
+  deadline:
+    year: 2
+    month: 12
+    day: 31
+  yearly:
+    month: 8
+    day: 31
+  lapseYears: 2
+  renewWindowDays: 31

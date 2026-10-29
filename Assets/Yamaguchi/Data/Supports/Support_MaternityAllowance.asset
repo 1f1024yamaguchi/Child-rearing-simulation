@@ -1,0 +1,60 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea7ceb50aff1b1d4a80539c5d7a3a83e, type: 3}
+  m_Name: Support_MaternityAllowance
+  m_EditorClassIdentifier: Assembly-CSharp::SupportScheme
+  id: maternity_allowance
+  title: 出産手当金
+  description: 母の産休期間中の給料を基準に、休業日数分の給付を受けます。
+  icon: {fileID: 0}
+  category: 0
+  merits: []
+  demerits: []
+  effectTiming: 0
+  effects: []
+  applyRequirements: []
+  monthlyTiers: []
+  covers: []
+  changesWorkMode: 0
+  workTarget: 0
+  workMode: 1
+  workModeUntil:
+    year: 0
+    month: 12
+    day: 31
+  wageTarget: 0
+  wageLinkedTiers:
+  - label: 産後56日間
+    fromDay: 1
+    toDay: 56
+    rate: 0.6666667
+    basis: 0
+  requiresWorkMode: 0
+  requiredWorkMode: 3
+  wageBenefitUntil:
+    year: 0
+    month: 1
+    day: 1
+  start:
+    year: 0
+    month: 1
+    day: 1
+  deadlineType: 1
+  deadline:
+    year: 2
+    month: 1
+    day: 1
+  yearly:
+    month: 8
+    day: 31
+  lapseYears: 2
+  renewWindowDays: 31

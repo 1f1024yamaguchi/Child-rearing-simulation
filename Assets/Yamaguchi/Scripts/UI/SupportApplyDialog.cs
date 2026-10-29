@@ -88,6 +88,10 @@ public class SupportApplyDialog : MonoBehaviour
         {
             case SupportSchemeCard.PrimaryAction.Renew:  verb = "を更新しますか？";       ok = "更新する";   break;
             case SupportSchemeCard.PrimaryAction.Resume: verb = "の手続きをしますか？";   ok = "手続きする"; break;
+            case SupportSchemeCard.PrimaryAction.Return:
+                verb = s.workMode == WorkMode.ShortTime ? "をやめますか？" : "から復帰しますか？";
+                ok = s.workMode == WorkMode.ShortTime ? "時短をやめる" : "復帰する";
+                break;
             default:                                     verb = "を申請しますか？";       ok = "申請する";   break;
         }
         if (titleText != null) titleText.text = s.title + verb;
@@ -98,8 +102,11 @@ public class SupportApplyDialog : MonoBehaviour
         // 「（来月から）」「（今すぐ）」は申請のときだけ
         if (timingText != null)
         {
-            timingText.gameObject.SetActive(isApply);
-            timingText.text = s.effectTiming == EffectTiming.Monthly ? "（来月から）" : "（今すぐ）";
+            bool hasWageLinkedTiers = s.wageLinkedTiers != null && s.wageLinkedTiers.Count > 0;
+            bool showTiming = isApply && (s.effectTiming == EffectTiming.Monthly || hasWageLinkedTiers);
+            timingText.gameObject.SetActive(showTiming);
+            timingText.text = hasWageLinkedTiers ? "（翌月に給付）" :
+                s.effectTiming == EffectTiming.Monthly ? "（来月から）" : "（今すぐ）";
         }
 
         // 効果は申請のときだけ見せる（更新・再開は新しく起きることが無い）
@@ -153,6 +160,7 @@ public class SupportApplyDialog : MonoBehaviour
             case SupportSchemeCard.PrimaryAction.Apply:  mgr.Apply(s);  break;
             case SupportSchemeCard.PrimaryAction.Renew:  mgr.Renew(s);  break;
             case SupportSchemeCard.PrimaryAction.Resume: mgr.Resume(s); break;
+            case SupportSchemeCard.PrimaryAction.Return: mgr.ReturnFromWorkMode(s); break;
         }
     }
 

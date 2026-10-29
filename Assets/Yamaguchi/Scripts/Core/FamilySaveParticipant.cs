@@ -27,6 +27,9 @@ public class FamilySaveParticipant : MonoBehaviour, ISaveParticipant
         public float stress;
         public int rank;
         public float workLifeBalance;
+        public int workMode;
+        public float savedWorkLifeBalance;
+        public int salaryBeforeLeave;
         public float pendingWage;
         public List<string> traits = new List<string>();
         public List<SavedCondition> conditions = new List<SavedCondition>();
@@ -73,6 +76,9 @@ public class FamilySaveParticipant : MonoBehaviour, ISaveParticipant
             stress = parent.Stress,
             rank = (int)parent.Rank,
             workLifeBalance = parent.WorkLifeBalance,
+            workMode = (int)parent.WorkMode,
+            savedWorkLifeBalance = parent.SavedWorkLifeBalance,
+            salaryBeforeLeave = parent.SalaryBeforeLeave,
             pendingWage = parent.PendingWage
         };
         if (parent.Traits != null)
@@ -161,6 +167,7 @@ public class FamilySaveParticipant : MonoBehaviour, ISaveParticipant
     {
         parent.SetStress(data.stress);
         parent.SetRank((JobRank)data.rank);
+        parent.RestoreWorkMode((WorkMode)data.workMode, data.savedWorkLifeBalance, data.salaryBeforeLeave);
         parent.SetBalance(data.workLifeBalance);
         parent.RestorePendingWage(data.pendingWage);
 

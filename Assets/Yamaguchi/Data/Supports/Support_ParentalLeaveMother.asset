@@ -1,0 +1,65 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea7ceb50aff1b1d4a80539c5d7a3a83e, type: 3}
+  m_Name: Support_ParentalLeaveMother
+  m_EditorClassIdentifier: Assembly-CSharp::SupportScheme
+  id: parental_leave_mother
+  title: 育児休業（母）
+  description: 母が育児休業を取得し、休業前の月給を基準に給付を受けます。
+  icon: {fileID: 0}
+  category: 2
+  merits: []
+  demerits: []
+  effectTiming: 1
+  effects: []
+  applyRequirements: []
+  monthlyTiers: []
+  covers: []
+  changesWorkMode: 1
+  workTarget: 0
+  workMode: 2
+  workModeUntil:
+    year: 0
+    month: 12
+    day: 31
+  wageTarget: 0
+  wageLinkedTiers:
+  - label: 180日目まで
+    fromDay: 1
+    toDay: 180
+    rate: 0.67
+    basis: 0
+  - label: 181日目以降
+    fromDay: 181
+    toDay: -1
+    rate: 0.5
+    basis: 0
+  requiresWorkMode: 0
+  requiredWorkMode: 3
+  wageBenefitUntil:
+    year: 0
+    month: 1
+    day: 1
+  start:
+    year: 0
+    month: 1
+    day: 1
+  deadlineType: 1
+  deadline:
+    year: 0
+    month: 12
+    day: 31
+  yearly:
+    month: 8
+    day: 31
+  lapseYears: 2
+  renewWindowDays: 31
