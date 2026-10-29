@@ -1,0 +1,61 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea7ceb50aff1b1d4a80539c5d7a3a83e, type: 3}
+  m_Name: Support_BirthLeaveBenefit
+  m_EditorClassIdentifier: Assembly-CSharp::SupportScheme
+  id: birth_leave_benefit
+  title: 出生後休業支援給付金
+  description: 両親とも育児休業中に申請すると、両親の休業前月給を基準に給付を受けます。
+  icon: {fileID: 0}
+  category: 2
+  merits: []
+  demerits: []
+  effectTiming: 0
+  effects: []
+  applyRequirements:
+  - {fileID: 11400000, guid: d9f38d4c2b5b4df5a632dd6e9328fb04, type: 2}
+  monthlyTiers: []
+  covers: []
+  changesWorkMode: 0
+  workTarget: 0
+  workMode: 2
+  workModeUntil:
+    year: 0
+    month: 12
+    day: 31
+  wageTarget: 1
+  wageLinkedTiers:
+  - label: 28日分
+    fromDay: 1
+    toDay: 28
+    rate: 0.13
+    basis: 0
+  requiresWorkMode: 0
+  requiredWorkMode: 3
+  wageBenefitUntil:
+    year: 0
+    month: 1
+    day: 1
+  start:
+    year: 0
+    month: 1
+    day: 1
+  deadlineType: 1
+  deadline:
+    year: 0
+    month: 2
+    day: 26
+  yearly:
+    month: 8
+    day: 31
+  lapseYears: 2
+  renewWindowDays: 31

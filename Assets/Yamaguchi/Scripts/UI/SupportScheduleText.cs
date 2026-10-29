@@ -59,6 +59,8 @@ public static class SupportScheduleText
 
             case SupportState.Received:
             {
+                if (rt.wageLinkedPendingAmount > 0f)
+                    return $"{GameDate.Format(rt.appliedAgeDays)}に申請しました（翌月に{Mathf.RoundToInt(rt.wageLinkedPendingAmount):#,0}円）";
                 string amount = rt.lastPaidAmount != 0 ? $"（{rt.lastPaidAmount:+#,0;-#,0}円）" : "";
                 return $"{GameDate.Format(rt.appliedAgeDays)}に受け取りました{amount}";
             }
@@ -107,7 +109,22 @@ public static class SupportScheduleText
     /// <summary>「3歳未満 月15,000 → 3歳〜18歳 月10,000」。支給表が無ければ空。</summary>
     public static string TierLine(SupportScheme s)
     {
-        if (s == null || s.monthlyTiers == null || s.monthlyTiers.Count == 0) return "";
+        if (s == null) return "";
+        if (s.wageLinkedTiers != null && s.wageLinkedTiers.Count > 0)
+        {
+            var linked = new StringBuilder();
+            foreach (var tier in s.wageLinkedTiers)
+            {
+                if (tier == null) continue;
+                if (linked.Length > 0) linked.Append(" → ");
+                string period = tier.toDay < 0 ? $"{tier.fromDay}日目以降" :
+                    tier.fromDay == tier.toDay ? $"{tier.fromDay}日目" : $"{tier.fromDay}〜{tier.toDay}日目";
+                string basis = tier.basis == WageBase.SalaryBeforeLeave ? "休業前月給" : "現在の給料";
+                linked.Append($"{period} {basis}の{tier.rate:P0}");
+            }
+            return linked.ToString();
+        }
+        if (s.monthlyTiers == null || s.monthlyTiers.Count == 0) return "";
 
         var sb = new StringBuilder();
         foreach (var t in s.monthlyTiers)
@@ -127,8 +144,18 @@ public static class SupportScheduleText
     {
         var parts = new List<string>();
 
-        var cur = mgr.CurrentTier(s);
-        if (cur != null)
+        var wageTier = mgr.CurrentWageLinkedTier(s);
+        if (wageTier != null && mgr.IsWageLinkedEligible(s))
+        {
+            int amount = mgr.CurrentWageLinkedDailyAmount(s);
+            int day = mgr.CurrentWageLinkedDay(s);
+            parts.Add($"{wageTier.rate:P0}・日額{amount:#,0}円（{day}日目）／次回 {GameDate.Format(NextMonthStart(today))}");
+        }
+        else if (s.wageLinkedTiers != null && s.wageLinkedTiers.Count > 0)
+        {
+            parts.Add($"給付対象外（休業・時短中ではありません）");
+        }
+        else if (mgr.CurrentTier(s) is PaymentTier cur)
         {
             parts.Add($"今：{TierAmount(cur)}（次回 {GameDate.Format(NextMonthStart(today))}）");
         }
@@ -149,6 +176,10 @@ public static class SupportScheduleText
             int d = mgr.NextDeadlineAgeDays(s);
             if (d >= 0) parts.Add($"次の手続き期限 {GameDate.Format(d)}（{RemainText(d - today)}）");
         }
+        if (s.changesWorkMode)
+            parts.Add($"復帰予定 {GameDate.Format(s.workModeUntil.ToAgeDays() + 1)}");
+        else if (s.wageBenefitUntil.ToAgeDays() > 0 && s.wageLinkedTiers != null && s.wageLinkedTiers.Count > 0)
+            parts.Add($"給付期限 {GameDate.Format(s.wageBenefitUntil.ToAgeDays())}");
 
         return string.Join("／", parts);
     }
@@ -158,6 +189,14 @@ public static class SupportScheduleText
     {
         var list = new List<string>();
         foreach (var r in mgr.UnmetRequirements(s)) list.Add(r.Describe());
+        if (Household.I != null && (s.changesWorkMode || s.requiresWorkMode))
+        {
+            var parent = Household.I.Get(s.workTarget);
+            if (parent != null && s.changesWorkMode && parent.WorkMode != WorkMode.Normal)
+                list.Add($"{parent.DisplayName}の現在の勤務が終わるまで申請できません");
+            else if (parent != null && s.requiresWorkMode && parent.WorkMode != s.requiredWorkMode)
+                list.Add($"{parent.DisplayName}が{s.requiredWorkMode}のとき申請できます");
+        }
         return list.Count > 0 ? "条件：" + string.Join("／", list) : "";
     }
 

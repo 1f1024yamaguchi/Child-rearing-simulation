@@ -11428,6 +11428,14 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 8dfc80f4786bb934bbf3dba89e87036f, type: 2}
   - {fileID: 11400000, guid: ec53bedf72b04c32be434cd9f14ccab3, type: 2}
   - {fileID: 11400000, guid: 20c89447624b4db6810d7b93d06b1581, type: 2}
+  - {fileID: 11400000, guid: a6f38d4c2b5b4df5a632dd6e9328fb01, type: 2}
+  - {fileID: 11400000, guid: b7f38d4c2b5b4df5a632dd6e9328fb02, type: 2}
+  - {fileID: 11400000, guid: c8f38d4c2b5b4df5a632dd6e9328fb03, type: 2}
+  - {fileID: 11400000, guid: eaf38d4c2b5b4df5a632dd6e9328fb05, type: 2}
+  - {fileID: 11400000, guid: fbf38d4c2b5b4df5a632dd6e9328fb06, type: 2}
+  - {fileID: 11400000, guid: ccf38d4c2b5b4df5a632dd6e9328fb07, type: 2}
+  - {fileID: 11400000, guid: ddf38d4c2b5b4df5a632dd6e9328fb08, type: 2}
+  - {fileID: 11400000, guid: eef38d4c2b5b4df5a632dd6e9328fb09, type: 2}
   debugScheme: {fileID: 11400000, guid: c620aa87746d3e34bb7955ec314ff87d, type: 2}
 --- !u!224 &1527718444 stripped
 RectTransform:

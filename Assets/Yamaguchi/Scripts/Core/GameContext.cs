@@ -8,6 +8,8 @@ public class GameContext
     public int ChildAgeDays;   // 子どもの年齢（通算日数）← GameState.AgeDays
     public int AnnualIncome;   // 世帯の年収 ← IncomeHistory.AnnualIncome
     public int Money;          // 所持金 ← GameState.Money
+    public WorkMode MotherWorkMode;
+    public WorkMode FatherWorkMode;
 
     /// <summary>今のゲームから値を集めて返す。</summary>
     public static GameContext Current()
@@ -19,6 +21,11 @@ public class GameContext
             ctx.Money = GameState.I.Money;
         }
         ctx.AnnualIncome = IncomeHistory.I.AnnualIncome;
+        if (Household.I != null)
+        {
+            if (Household.I.Mother != null) ctx.MotherWorkMode = Household.I.Mother.WorkMode;
+            if (Household.I.Father != null) ctx.FatherWorkMode = Household.I.Father.WorkMode;
+        }
         return ctx;
     }
 }

@@ -1,0 +1,59 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea7ceb50aff1b1d4a80539c5d7a3a83e, type: 3}
+  m_Name: Support_ShortTimeBenefitFather
+  m_EditorClassIdentifier: Assembly-CSharp::SupportScheme
+  id: short_time_benefit_father
+  title: 育児時短就業給付金（父）
+  description: 父の時短勤務中の現在の給料を基準に給付を受けます。
+  icon: {fileID: 0}
+  category: 2
+  merits: []
+  demerits: []
+  effectTiming: 1
+  effects: []
+  applyRequirements: []
+  monthlyTiers: []
+  covers: []
+  changesWorkMode: 0
+  workTarget: 1
+  workMode: 3
+  workModeUntil:
+    year: 0
+    month: 12
+    day: 31
+  wageTarget: 0
+  wageLinkedTiers:
+  - label: 時短勤務中
+    fromDay: 1
+    toDay: -1
+    rate: 0.1
+    basis: 1
+  requiresWorkMode: 1
+  requiredWorkMode: 3
+  wageBenefitUntil:
+    year: 1
+    month: 12
+    day: 31
+  start:
+    year: 0
+    month: 1
+    day: 1
+  deadlineType: 0
+  deadline:
+    year: 0
+    month: 1
+    day: 1
+  yearly:
+    month: 8
+    day: 31
+  lapseYears: 2
+  renewWindowDays: 31

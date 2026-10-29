@@ -75,7 +75,7 @@ GameClock （実時間 1秒 = ゲーム内 1日）
 | クラス | 役割 |
 |---|---|
 | `Household` | 母親・父親の `ParentStatus` を持つ。`Household.I.Get(ParentRole.Mother)` / `TotalMonthlySalary` |
-| `ParentStatus` | 親1人ぶんの 役職・月給・日給・ワークライフバランス・ストレス |
+| `ParentStatus` | 親1人ぶんの 役職・月給・日給・ワークライフバランス・働き方・ストレス |
 | `WageAccrual` | 毎日、各親の `AccrueDailyWage()` を呼ぶ |
 | `HouseholdIncome` | 給料日（月替わり）に各親の `CollectWage()` を回収して `GameState.AddMoney` |
 | `ParentStressSystem` | 毎日、バランスに応じて各親のストレスを増減 |
@@ -90,10 +90,11 @@ GameClock （実時間 1秒 = ゲーム内 1日）
 ```
 
 - 役職 `JobRank`：`平社員(×1.0) / 主任(×1.2) / 係長(×1.45) / 課長(×1.75) / 部長(×2.1)`
-- バランス倍率 `ParentStatus.BalanceMultiplier()`：0–20→×0.8、21–40→×0.9、41–60→×1.0、61–80→×1.2、81–100→×1.5
+- バランス倍率 `ParentStatus.BalanceMultiplier()`：0→×0、1–20→×0.8、21–40→×0.9、41–60→×1.0、61–80→×1.2、81–100→×1.5
   （[../design/rules-and-stats.md](../design/rules-and-stats.md) 3章の表をそのまま実装したもの）
 - **月給は役職だけで決まり、バランスでは変わらない**（バランスが効くのは日給）。
-- `ParentStatus` のイベント：`OnSalaryChanged` / `OnDailyWageChanged` / `OnPendingWageChanged` / `OnBalanceChanged` / `OnStressChanged`
+- `ParentStatus` の `WorkMode`：`Normal` / `MaternityLeave` / `ParentalLeave` / `ShortTime`。産休・育休は日給0・バランス0、時短はバランス0.2（日給×0.8）。Normal に戻ると開始前のバランスへ戻す。
+- `ParentStatus` のイベント：`OnSalaryChanged` / `OnDailyWageChanged` / `OnPendingWageChanged` / `OnBalanceChanged` / `OnWorkModeChanged` / `OnStressChanged`
 
 ### 親ストレス（実装済み）
 
@@ -103,10 +104,9 @@ GameClock （実時間 1秒 = ゲーム内 1日）
 
 ## 5. セーブ
 
-`Core/SaveSystem.cs`。`PlayerPrefs` + `JsonUtility`。**セーブ機能（ステータス・日時などを保存して続きから遊べるようにする）は山口が作る**（2026-09-23 決定）。`Save()` / `Load()` / `HasSave()` / `Delete()`。
+`Core/SaveSystem.cs`。2枠の JSON ファイル + `JsonUtility`。`Save()` / `Load()` / `HasSave()` / `Delete()`。
 
-保存しているのは `SaveData` の4項目だけ：`money` / `stress` / `ageDays` / `workLifeBalance`。
-**役職・積立給与・親ごとのステータスは保存されない**ので、`ParentStatus` を増やすときは `SaveData` も一緒に拡張すること。
+`SaveData` は世帯共通の基本値を保存し、`ISaveParticipant` が機能ごとのデータを sections に保存する。`FamilySaveParticipant` は親の役職・バランス・働き方・休業前給与・積立給与・特性・状態を保存する。会社制度の未払い給付は `SupportManager` の `SupportSchemeRuntime` が保存する。
 
 **追加が決まっているもの**：カレンダーのメモ（`calendarMemos`）と、制度の状態（`SupportScheme.id` ごと）。この2つを保存用の形にする部分は草尾が作る。メモはオートセーブで、書いたときに `SaveSystem.Save()` を呼んでゲーム全体をまとめて保存する。→ [../design/calendar-system.md](../design/calendar-system.md) 8.3
 

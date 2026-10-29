@@ -26,8 +26,11 @@ MonoBehaviour:
   applyRequirements:
   - {fileID: 11400000, guid: 8b0da0221726c60469939c0a22b8bd31, type: 2}
   - {fileID: 11400000, guid: 78bb53ebee4d2d246a530f540b484a36, type: 2}
-  monthlyTiers:
-  - label: "\u5C0F\u30FB\u4E2D\u5B66\u751F"
+  monthlyTiers: []
+  covers:
+  - expense: {fileID: 11400000, guid: f1000000000000000000000000000008, type: 2}
+    type: 0
+    value: 0
     fromAge:
       year: 6
       month: 4
@@ -36,13 +39,17 @@ MonoBehaviour:
       year: 15
       month: 3
       day: 31
-    monthlyEffects:
-    - kind: 0
-      target: 0
-      value: 8000
-      duration: 0
-      days: 0
-    requirements: []
+  - expense: {fileID: 11400000, guid: f1000000000000000000000000000009, type: 2}
+    type: 0
+    value: 0
+    fromAge:
+      year: 12
+      month: 4
+      day: 1
+    toAge:
+      year: 15
+      month: 3
+      day: 31
   start:
     year: 6
     month: 4
