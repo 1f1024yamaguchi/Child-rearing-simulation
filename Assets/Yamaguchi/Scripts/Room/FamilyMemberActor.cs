@@ -28,6 +28,9 @@ public class FamilyMemberActor : MonoBehaviour
     /// 向かっている、または居る場所
     public RoomSpot Target => target;
     public bool IsWalking => walking;
+    /// 歩く速さの倍率（赤ちゃんのハイハイはゆっくり、など）
+    public float SpeedScale { get; set; } = 1f;
+
 
     /// 居場所に着いたとき
     public event Action<FamilyMemberActor, RoomSpot> OnArrived;
@@ -71,7 +74,7 @@ public class FamilyMemberActor : MonoBehaviour
         float dx = walkGoal.x - p.x;
         if (Mathf.Abs(dx) > 0.001f) sr.flipX = dx < 0f;   // 絵は右向きなので、左へ歩くときだけ反転
 
-        p = Vector3.MoveTowards(p, walkGoal, walkSpeed * Time.deltaTime);
+        p = Vector3.MoveTowards(p, walkGoal, walkSpeed * SpeedScale * Time.deltaTime);
         transform.position = p;
 
         if ((p - walkGoal).sqrMagnitude < 0.000001f)

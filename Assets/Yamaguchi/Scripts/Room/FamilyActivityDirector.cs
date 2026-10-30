@@ -3,7 +3,7 @@ using UnityEngine;
 
 /// 家族の状態から「誰が部屋のどこで何をするか」を決める。
 /// - 親：ワーク寄りほど外出（仕事）が多い／ストレスが高いとソファで休む
-/// - 子：勉強寄りほど机、遊び寄りほどラグやテレビ／状態（風邪など）が付いていたらベッド
+/// - 子：勉強寄りほど机・外出（勉強）、遊び寄りほどラグやテレビ／状態（風邪など）が付いていたらベッド
 /// - 月が変わったら全員で食卓に集まる
 /// 歩く・アニメーションは FamilyMemberActor の担当。ここは行き先を決めるだけ。
 public class FamilyActivityDirector : MonoBehaviour
@@ -37,6 +37,12 @@ public class FamilyActivityDirector : MonoBehaviour
     [Tooltip("月が変わったときに食卓にいる時間")]
     [SerializeField] private float mealSeconds = 6f;
 
+    [Header("子どもの外出（少年期以降）")]
+    [Tooltip("この段階から子どもは玄関から外に出る")]
+    [SerializeField] private ChildStage outingFromStage = ChildStage.Kid;
+    [Tooltip("次の行動で外に出る基本の確率（勉強寄りほど増える）")]
+    [Range(0f, 1f)] [SerializeField] private float outingChance = 0.35f;
+
     [Header("しきい値")]
     [Tooltip("このストレス以上の親は、家にいるときソファで休む")]
     [SerializeField] private int restStress = 70;
@@ -45,6 +51,7 @@ public class FamilyActivityDirector : MonoBehaviour
     private readonly List<RoomSpot> options = new List<RoomSpot>();
     private float mealTimer;
     private bool monthSubscribed;
+    private ChildStageSwitcher childStage;
 
     private IEnumerable<FamilyMemberActor> Actors
     {
@@ -62,6 +69,7 @@ public class FamilyActivityDirector : MonoBehaviour
         if (father != null) father.Warp(sofa);
         if (child != null) child.Warp(playRug);
         foreach (var a in Actors) timers[a] = Random.Range(1f, decideInterval.y);
+        if (child != null) childStage = child.GetComponent<ChildStageSwitcher>();
 
         // MonthTicker.I は Awake で入るので、購読は Start で行う
         if (MonthTicker.I != null)
@@ -120,6 +128,14 @@ public class FamilyActivityDirector : MonoBehaviour
         // 状態（風邪気味など）が1つでも付いていたら寝ている
         if (s.Conditions != null)
             foreach (var _ in s.Conditions.All) return bed;
+
+        // 少年期以降は、玄関から外へ出かける（勉強寄りほど多い／勉強のため）
+        if (entrance != null && childStage != null && childStage.Current.HasValue
+            && childStage.Current.Value >= outingFromStage)
+        {
+            float chance = outingChance * (0.5f + 0.5f * s.StudyPlayBalance);
+            if (Random.value < chance) return entrance;
+        }
 
         // StudyPlayBalance：1=勉強 / 0=遊び
         if (Random.value < s.StudyPlayBalance) return desk;
