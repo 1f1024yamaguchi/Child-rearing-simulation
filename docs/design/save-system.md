@@ -1,6 +1,6 @@
 ---
 title: セーブ機能（続きから遊べるようにする）
-updated: 2026-10-14
+updated: 2026-10-30
 status: 設計中
 related: [docs/team/antigravity-save-system.md, docs/design/title-screen.md, docs/decisions/0019-two-save-slots.md, docs/code/architecture.md, docs/design/support-apply.md, docs/design/calendar-system.md, docs/design/food-system.md, docs/team/agreements-needed.md]
 ---
@@ -21,7 +21,7 @@ related: [docs/team/antigravity-save-system.md, docs/design/title-screen.md, doc
 | ゲーム全体 | お金、通算日数（年齢）、ゲームオーバー済みか | `GameState` |
 | 母・父（それぞれ） | ストレス、役職、ワークライフバランス、積み立て中の給料、特性、状態（残り日数つき） | `ParentStatus`（`PersonStatus`） |
 | 子ども | ストレス、成績、体調、勉強⇔遊びのバランス、趣味と趣味の経験値、特性、状態（残り日数つき） | `ChildStatus`（`PersonStatus`） |
-| 支援制度 | 制度ごとの状態・申請日・最後に払った月・手続き済みの歳・支給停止の情報 | `SupportManager.ToSave()`（作成済み） |
+| 支援制度 | 制度ごとの状態・申請日・最後に払った月・未支給の積立額・手続き済みの歳・支給停止の情報 | `SupportManager.ToSave()`（作成済み） |
 | 年収の記録 | 直近12か月の給料（額面） | `IncomeHistory.ToSave()`（作成済み） |
 | 家出の数え | 子どもが限界ストレスのまま何日たったか | `RunawayWatcher.dangerDayCount` |
 | （将来）働き方 | 産休・育休・時短の状態、休む前のバランス | `ParentStatus`（company-support.md） |

@@ -1,6 +1,6 @@
 ---
 title: アーキテクチャ（時間・お金・親ステータス）
-updated: 2026-10-28
+updated: 2026-10-30
 status: 実装済み（一部未実装）
 related: [docs/design/rules-and-stats.md, docs/code/ui-main-test-hud.md, docs/design/taxes.md]
 ---
@@ -26,7 +26,8 @@ GameClock （実時間 1秒 = ゲーム内 1日）
               │     └─ ParentStressSystem … 各親のストレスを増減
               │     └─ TaxManager         … 11/15 年末調整の書類、2/16〜3/15 確定申告
               └─ MonthTicker  → OnMonthChanged(歳, 月)
-                    └─ HouseholdIncome    … 給料日。TaxManager.Withhold で親ごとに天引きして手取りを GameState.AddMoney
+                    ├─ HouseholdIncome    … 給料日。TaxManager.Withhold で親ごとに天引きして手取りを GameState.AddMoney
+                    └─ SupportManager     … 支援制度の支給。指定月の一括給付は対象月分を積み立ててから支払う
                  → OnMonthSettled(歳, 月)
                     └─ TaxManager         … 12月の給料日のあとに年末調整
 ```
@@ -106,7 +107,7 @@ GameClock （実時間 1秒 = ゲーム内 1日）
 
 `Core/SaveSystem.cs`。2枠の JSON ファイル + `JsonUtility`。`Save()` / `Load()` / `HasSave()` / `Delete()`。
 
-`SaveData` は世帯共通の基本値を保存し、`ISaveParticipant` が機能ごとのデータを sections に保存する。`FamilySaveParticipant` は親の役職・バランス・働き方・休業前給与・積立給与・特性・状態を保存する。会社制度の未払い給付は `SupportManager` の `SupportSchemeRuntime` が保存する。
+`SaveData` は世帯共通の基本値を保存し、`ISaveParticipant` が機能ごとのデータを sections に保存する。`FamilySaveParticipant` は親の役職・バランス・働き方・休業前給与・積立給与・特性・状態を保存する。支援制度の状態・未支給給付は `SupportManager` の `SupportSchemeRuntime` が保存する。
 
 **追加が決まっているもの**：カレンダーのメモ（`calendarMemos`）と、制度の状態（`SupportScheme.id` ごと）。この2つを保存用の形にする部分は草尾が作る。メモはオートセーブで、書いたときに `SaveSystem.Save()` を呼んでゲーム全体をまとめて保存する。→ [../design/calendar-system.md](../design/calendar-system.md) 8.3
 

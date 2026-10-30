@@ -1,6 +1,6 @@
 ---
 title: 設計判断の履歴�E�EDR�E�E
-updated: 2026-10-29
+updated: 2026-10-30
 status: 運用中
 ---
 
@@ -37,3 +37,4 @@ status: 運用中
 | [0024](0024-game-speed-control.md) | 倍速機�E�E�通常・2x・3x�E��E導�Eと日次処琁E�E完�E実行モチE�� | 採用 |
 | [0024](0024-game-speed-control.md) | 倍速機能（通常・2x・3x）の導入と日次処理の完全実行モデル | 採用 |
 | [0025](0025-hud-visibility-on-panel-open.md) | サポート画面・人物詳細パネル表示時のHUDボタン排他非表示制御 | 採用 |
+| [0026](0026-tokyo-018-support-payout-schedule.md) | 018サポートを4・8・12月にまとめて支給する | 採用 |

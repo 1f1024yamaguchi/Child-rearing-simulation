@@ -1,6 +1,6 @@
 ---
 title: 子育て支援制度とボタン設計
-updated: 2026-10-05
+updated: 2026-10-30
 status: 設計中
 related: [docs/design/support-apply.md, docs/design/events.md, docs/code/ui-scroll-patterns.md, docs/design/calendar-system.md]
 ---
@@ -44,6 +44,7 @@ related: [docs/design/support-apply.md, docs/design/events.md, docs/code/ui-scro
 ### 自治体（市区町村）
 | 制度 | メリット | 現実のデメリット・注意 |
 |---|---|---|
+| 018サポート（東京都） | 都内在住の子どもに月額5,000円を給付（所得制限なし） | 申請が必要。現実は4か月分ずつ年3回の支給。国の児童手当とは別制度 |
 | 子ども医療費助成 | 通院・入院費が軽減 | 自治体で差、引っ越すと変わる／窓口で一旦立替の場合も |
 | 一時預かり／病児保育 | 急な時に子を預けられる | 利用料がかかる／予約が取りにくい／子が泣く・感染症をもらう（子ストレス・体調−） |
 | ファミリーサポート | 送迎・預かりを助け合う | 事前登録・打合せの手間／相手との相性・事故リスク |
@@ -170,6 +171,8 @@ public class SupportScheme : ScriptableObject
     [Header("効果")]
     public EffectTiming effectTiming = EffectTiming.OnApply;   // 申請したとき1回／受給中は毎月
     public List<Effect> effects;             // effects.md の共通の形。Inspector で行を足していける
+    public List<PaymentTier> monthlyTiers;   // Monthly の月額・年齢別支給表
+    public List<int> payoutMonths;           // 空＝毎月、指定あり＝その月に積立額をまとめて支給
 
     [Header("申請できる期間")]
     public GameDay      start    = new GameDay  { year = 0, month = 1, day = 1 };
@@ -206,7 +209,9 @@ public class SupportScheme : ScriptableObject
 - カードの表示（`SupportSchemeCard`）とリスト生成（`SupportPanelController`）の分け方は [../code/ui-scroll-patterns.md](../code/ui-scroll-patterns.md) 2章の「今後」どおり。
 - **効果のタイミングは制度ごとに Inspector で選ぶ**（2026-09-23 決定）。
   - `OnApply`：申請ボタンを押したときに `effects` を1回だけ適用。
-  - `Monthly`：受給中のあいだ、月が変わるたび（`MonthTicker.OnMonthChanged`）に `effects` を適用。申請した月の翌月分から始まるので、申請が遅れた月の分はもらえない（現実の児童手当と同じ）。
+  - `Monthly`：受給中のあいだ、月ごとの `monthlyTiers` を適用。申請時の `effects` は申請したときに1回だけ適用する。
+  - `payoutMonths` が空なら毎月支給。月（1〜12）を指定すると、対象月の Money 効果を積み立てて指定月にまとめて支給する（例：東京都018サポートの4・8・12月）。
+  - 対象月は申請した月の翌月から。申請が遅れた月の分はもらえない（現実の児童手当と同じ）。
 - **申請したあとの状態の管理・効果の適用・カードの表示（申請前後に期限や受給状況を出す）は [support-apply.md](support-apply.md)。**
 - 期限切れの扱いは現実の制度と同じ（[calendar-system.md](calendar-system.md) 4章、[../decisions/0010-calendar-follows-reality.md](../decisions/0010-calendar-follows-reality.md)）。
 

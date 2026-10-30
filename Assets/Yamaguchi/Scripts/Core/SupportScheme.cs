@@ -31,6 +31,10 @@ public class SupportScheme : ScriptableObject
     [Header("毎月の支給（Monthly のとき）")]
     public List<PaymentTier> monthlyTiers = new List<PaymentTier>();   // 3.2 の支給表
 
+    [Header("支給月")]
+    [Tooltip("空の場合は毎月支給。指定したゲーム内暦の月に、対象月分をまとめて支給する")]
+    public List<int> payoutMonths = new List<int>();
+
     [Header("支出の肩代わり（受給中のあいだ有効）")]
     [Tooltip("無償化など。支給表が空で covers だけの制度は、お金は払わず支出を減らす（申請の翌月から）")]
     public List<ExpenseCover> covers = new List<ExpenseCover>();   // expenses.md 4章
@@ -75,6 +79,12 @@ public class SupportScheme : ScriptableObject
                 monthlyTiers[i].fromAge = Fix(monthlyTiers[i].fromAge);
                 monthlyTiers[i].toAge   = Fix(monthlyTiers[i].toAge);
             }
+        }
+
+        if (payoutMonths != null)
+        {
+            for (int i = 0; i < payoutMonths.Count; i++)
+                payoutMonths[i] = Mathf.Clamp(payoutMonths[i], 1, 12);
         }
 
         if (covers != null)

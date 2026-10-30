@@ -5,7 +5,7 @@ using UnityEngine;
 
 /// <summary>
 /// 画面上部に出す短い通知（support-apply.md 7.4・7.5、ステップ3後半）。
-/// - 申請した直後：OnApply「○○を受け取りました　お金 +500,000」／Monthly「○○を申請しました　来月から毎月 +15,000」
+/// - 申請した直後：OnApply「○○を受け取りました　お金 +500,000」／Monthly「○○を申請しました　来月から支給または積立」
 /// - 期限切れ（SupportManager.OnExpired）：「○○の申請期限が過ぎました」
 /// - 毎月の支給（OnPaid）では出さない（10章・2026-10-07 決定）
 /// 重なったときは順番に出す。サポート画面を閉じていても出るよう Canvas の直下に置く。
@@ -120,7 +120,19 @@ public class SupportToast : MonoBehaviour
         else if (state == SupportState.Active)
         {
             string money = FormatMoney(MonthlyMoney(mgr, s));
-            Show($"{s.title}を申請しました" + (money != "" ? $"　来月から毎月 {money}" : "　来月から支給されます"));
+            if (s.payoutMonths != null && s.payoutMonths.Count > 0)
+            {
+                string months = PayoutMonths(s);
+                string payoutPeriod = months.Length > 0 ? $"{months}月" : "指定月";
+                Show($"{s.title}を申請しました" +
+                    (money != ""
+                        ? $"　来月から月{money}円分を積み立て、{payoutPeriod}にまとめて支給"
+                        : $"　来月から積み立て、{payoutPeriod}にまとめて支給"));
+            }
+            else
+            {
+                Show($"{s.title}を申請しました" + (money != "" ? $"　来月から毎月 {money}" : "　来月から支給されます"));
+            }
         }
     }
 
@@ -193,6 +205,18 @@ public class SupportToast : MonoBehaviour
             }
         }
         return tier != null ? tier.MoneyAmount() : 0;
+    }
+
+    private static string PayoutMonths(SupportScheme s)
+    {
+        var months = new List<string>();
+        foreach (int month in s.payoutMonths)
+        {
+            string value = $"{month}";
+            if (month >= 1 && month <= 12 && !months.Contains(value))
+                months.Add(value);
+        }
+        return string.Join("・", months);
     }
 
     private static string FormatMoney(int money) => money == 0 ? "" : $"{money:+#,0;-#,0}";

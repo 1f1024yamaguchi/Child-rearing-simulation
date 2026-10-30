@@ -13,6 +13,8 @@ public class SupportSchemeRuntime
     public int  appliedMonthIndex = -1;  // 申請した月（「翌月から」用）
     public int  lastPaidMonthIndex = -1; // 最後に払った月（同じ月に2回払わないため）
     public int  lastPaidAmount = 0;      // 最後に払ったお金（カード表示用）
+    public int  lastAccruedMonthIndex = -1; // 最後に一括支給用の月額を積み立てた月
+    public int  pendingPaymentAmount;       // 次の指定支給月までの未支給額
     public int  workStartedAgeDays = -1;
     public int  salaryBeforeLeave;
     public float wageLinkedPendingAmount;

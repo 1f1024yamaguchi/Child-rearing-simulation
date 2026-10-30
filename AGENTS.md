@@ -107,6 +107,7 @@ Unity 製の子育てシミュレーションゲーム。**このファイルは
 - [0021-yearly-income-tax.md](docs/decisions/0021-yearly-income-tax.md) — 給料の天引きを一律の手取り率から、年単位の税金（年末調整・確定申告・住民税）にした理由
 - [0024-game-speed-control.md](docs/decisions/0024-game-speed-control.md) — 倍速機能（通常・2x・3x）の導入と日次処理の完全実行モデル
 - [0025-hud-visibility-on-panel-open.md](docs/decisions/0025-hud-visibility-on-panel-open.md) — サポート画面・人物詳細パネル表示時のHUDボタン排他非表示制御
+- [0026-tokyo-018-support-payout-schedule.md](docs/decisions/0026-tokyo-018-support-payout-schedule.md) — 018サポートを4・8・12月にまとめて支給する理由
 
 ---
 

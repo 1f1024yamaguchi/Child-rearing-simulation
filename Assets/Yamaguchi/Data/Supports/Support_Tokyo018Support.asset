@@ -1,0 +1,79 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea7ceb50aff1b1d4a80539c5d7a3a83e, type: 3}
+  m_Name: Support_Tokyo018Support
+  m_EditorClassIdentifier: Assembly-CSharp::SupportScheme
+  id: tokyo_018_support
+  title: "\u6771\u4EAC\u90FD018\u30B5\u30DD\u30FC\u30C8"
+  description: "\u90FD\u5185\u5728\u4F4F\u306E\u5B50\u3069\u3082\u306B\u6708\u984D5,000\u5186\u3092\u652F\u7D66"
+  icon: {fileID: 0}
+  category: 1
+  merits:
+  - "\u6708\u984D5,000\u5186"
+  - "\u6240\u5F97\u5236\u9650\u306A\u3057"
+  demerits:
+  - "\u7533\u8ACB\u304C\u5FC5\u8981"
+  - "4\u30FB8\u30FB12\u6708\u306B\u307E\u3068\u3081\u3066\u632F\u308A\u8FBC\u307F"
+  effectTiming: 1
+  effects: []
+  applyRequirements: []
+  monthlyTiers:
+  - label: "0\u301C18\u6B73"
+    fromAge:
+      year: 0
+      month: 1
+      day: 1
+    toAge:
+      year: 18
+      month: 3
+      day: 31
+    monthlyEffects:
+    - kind: 0
+      target: 0
+      value: 5000
+      duration: 0
+      days: 0
+    requirements: []
+  payoutMonths:
+  - 4
+  - 8
+  - 12
+  covers: []
+  changesWorkMode: 0
+  workTarget: 0
+  workMode: 1
+  workModeUntil:
+    year: 0
+    month: 12
+    day: 31
+  wageTarget: 0
+  wageLinkedTiers: []
+  requiresWorkMode: 0
+  requiredWorkMode: 1
+  wageBenefitUntil:
+    year: 0
+    month: 1
+    day: 1
+  start:
+    year: 0
+    month: 1
+    day: 1
+  deadlineType: 0
+  deadline:
+    year: 0
+    month: 1
+    day: 1
+  yearly:
+    month: 8
+    day: 31
+  lapseYears: 2
+  renewWindowDays: 31

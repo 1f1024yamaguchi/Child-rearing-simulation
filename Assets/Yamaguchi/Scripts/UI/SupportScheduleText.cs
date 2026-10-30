@@ -133,7 +133,7 @@ public static class SupportScheduleText
             if (sb.Length > 0) sb.Append(" → ");
             sb.Append(TierText(t));
         }
-        return sb.ToString();
+        return sb.ToString() + PayoutScheduleText(s);
     }
 
     // ------------------------------------------------------------
@@ -157,7 +157,19 @@ public static class SupportScheduleText
         }
         else if (mgr.CurrentTier(s) is PaymentTier cur)
         {
-            parts.Add($"今：{TierAmount(cur)}（次回 {GameDate.Format(NextMonthStart(today))}）");
+            if (HasScheduledPayouts(s))
+            {
+                int nextPayout = NextScheduledPayoutStart(s, today);
+                string pending = rt.pendingPaymentAmount != 0
+                    ? $"／積立 {rt.pendingPaymentAmount:#,0}円"
+                    : "";
+                string next = nextPayout >= 0 ? GameDate.Format(nextPayout) : "未設定";
+                parts.Add($"今：{TierAmount(cur)}（次回まとめて {next}{pending}）");
+            }
+            else
+            {
+                parts.Add($"今：{TierAmount(cur)}（次回 {GameDate.Format(NextMonthStart(today))}）");
+            }
         }
         else if ((s.monthlyTiers == null || s.monthlyTiers.Count == 0) && s.covers != null && s.covers.Count > 0)
         {
@@ -226,6 +238,37 @@ public static class SupportScheduleText
     {
         int money = t.MoneyAmount();
         return money != 0 ? $"月{money:#,0}" : t.DisplayLabel();
+    }
+
+    private static string PayoutScheduleText(SupportScheme s)
+    {
+        if (!HasScheduledPayouts(s)) return "";
+
+        var months = new List<string>();
+        foreach (int month in s.payoutMonths)
+        {
+            string value = $"{month}";
+            if (month >= 1 && month <= 12 && !months.Contains(value))
+                months.Add(value);
+        }
+        return months.Count > 0 ? $"（{string.Join("・", months)}月にまとめて支給）" : "";
+    }
+
+    private static bool HasScheduledPayouts(SupportScheme s) =>
+        s.payoutMonths != null && s.payoutMonths.Count > 0;
+
+    private static int NextScheduledPayoutStart(SupportScheme s, int today)
+    {
+        GameDate.FromAgeDays(today, out int year, out int month, out int _);
+        int nextMonthIndex = year * 12 + month;
+        for (int offset = 0; offset < 12; offset++)
+        {
+            int monthIndex = nextMonthIndex + offset;
+            int payoutMonth = monthIndex % 12 + 1;
+            if (s.payoutMonths.Contains(payoutMonth))
+                return GameDate.ToAgeDays(monthIndex / 12, payoutMonth, 1);
+        }
+        return -1;
     }
 
     /// <summary>支給表の最後の toAge（通算日数）。無ければ -1。</summary>

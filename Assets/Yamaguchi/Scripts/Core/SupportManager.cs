@@ -6,7 +6,7 @@ using UnityEngine;
 /// <summary>
 /// 支援制度の状態を1か所で持つ（support-apply.md 6章）。画面（サポート画面・カレンダー）はこれを読むだけ。
 /// - DayTicker.OnDayPassed：日付と条件で変わる状態を判定（申請できる／期限切れ／支給停止…）
-/// - MonthTicker.OnMonthChanged：受給中の制度に「今の年齢の支給額」を払う
+/// - MonthTicker.OnMonthChanged：受給中の制度を毎月支給、または対象月分を積み立てて指定月に支給する
 /// 効果の適用は必ず EffectApplier.Apply(...)。GameState を直接触らない。
 /// </summary>
 public class SupportManager : MonoBehaviour, ISaveParticipant
@@ -339,7 +339,8 @@ public class SupportManager : MonoBehaviour, ISaveParticipant
         else
         {
             SetState(s, rt, SupportState.Active);   // 毎月の支給は申請した月の翌月から
-            Debug.Log($"[SupportManager] {s.title}：申請しました（受給中・翌月から支給）");
+            string startMode = HasScheduledPayouts(s) ? "翌月から積立" : "翌月から支給";
+            Debug.Log($"[SupportManager] {s.title}：申請しました（受給中・{startMode}）");
         }
         if (s.changesWorkMode) EvaluateAll();
         return true;
@@ -539,6 +540,10 @@ public class SupportManager : MonoBehaviour, ISaveParticipant
             PayWageLinkedPending(s, rt, monthIndex);
             if (s.effectTiming != EffectTiming.Monthly) continue;
 
+            bool scheduledPayout = HasScheduledPayouts(s);
+            if (scheduledPayout && s.payoutMonths.Contains(month) && rt.pendingPaymentAmount != 0)
+                PayAccumulatedMonth(s, rt, monthIndex);
+
             if (rt.state == SupportState.Active)
             {
                 if (HasEnded(s, today))
@@ -550,7 +555,10 @@ public class SupportManager : MonoBehaviour, ISaveParticipant
                 if (HasWageLinkedTiers(s)) continue;
                 // 支給表が空で covers だけの制度（無償化など）はお金を払わない。肩代わりは ExpenseManager が行う
                 if (IsCoversOnly(s)) continue;
-                PayMonth(s, rt, monthIndex, today, ctx);
+                if (scheduledPayout)
+                    AccrueScheduledMonth(s, rt, monthIndex, today, ctx);
+                else
+                    PayMonth(s, rt, monthIndex, today, ctx);
             }
             else if (rt.state == SupportState.Suspended)
             {
@@ -589,6 +597,49 @@ public class SupportManager : MonoBehaviour, ISaveParticipant
         OnPaid?.Invoke(s);
         OnStateChanged?.Invoke(s, rt.state);
     }
+
+    private void AccrueScheduledMonth(
+        SupportScheme s, SupportSchemeRuntime rt, int monthIndex, int today, GameContext ctx)
+    {
+        if (monthIndex <= rt.appliedMonthIndex || monthIndex <= rt.lastAccruedMonthIndex) return;
+        rt.lastAccruedMonthIndex = monthIndex;
+
+        int idx = FindTierIndex(s, today, ctx);
+        if (idx < 0)
+        {
+            OnStateChanged?.Invoke(s, rt.state);
+            return;
+        }
+
+        var tier = s.monthlyTiers[idx];
+        rt.pendingPaymentAmount += tier.MoneyAmount();
+
+        if (tier.monthlyEffects != null)
+        {
+            var nonMoneyEffects = tier.monthlyEffects.FindAll(e => e != null && e.kind != EffectKind.Money);
+            EffectApplier.Apply(nonMoneyEffects, new LedgerSource(s.title, ExpenseCategory.支援制度));
+        }
+
+        OnStateChanged?.Invoke(s, rt.state);
+    }
+
+    private void PayAccumulatedMonth(SupportScheme s, SupportSchemeRuntime rt, int monthIndex)
+    {
+        int amount = rt.pendingPaymentAmount;
+        rt.pendingPaymentAmount = 0;
+        rt.lastPaidMonthIndex = monthIndex;
+        rt.lastPaidAmount = amount;
+
+        EffectApplier.Apply(
+            new[] { new Effect { kind = EffectKind.Money, value = amount } },
+            new LedgerSource(s.title, ExpenseCategory.支援制度));
+        Debug.Log($"[SupportManager] {s.title}：対象月分をまとめて支給 {FormatMoney(amount)}");
+        OnPaid?.Invoke(s);
+        OnStateChanged?.Invoke(s, rt.state);
+    }
+
+    private static bool HasScheduledPayouts(SupportScheme s) =>
+        s.payoutMonths != null && s.payoutMonths.Count > 0;
 
     private void AccrueWageLinkedBenefits(int ageDays)
     {
