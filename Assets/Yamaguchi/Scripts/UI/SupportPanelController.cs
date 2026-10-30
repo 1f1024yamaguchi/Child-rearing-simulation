@@ -186,7 +186,15 @@ public class SupportPanelController : MonoBehaviour
         foreach (var t in tabs)
         {
             if (t == null || t.button == null) continue;
-            if (t.label != null) t.baseText = t.label.text.Trim(); // 「政府（2）」のように数が付いている場合は、括弧を取る
+            if (t.label != null)
+            {
+                t.baseText = t.label.text.Trim(); // 「政府（2）」のように数が付いている場合は、括弧を取る
+                float baseFontSize = t.label.fontSize;
+                t.label.textWrappingMode = TextWrappingModes.NoWrap;
+                t.label.fontSizeMin = 12f;
+                t.label.fontSizeMax = baseFontSize;
+                t.label.enableAutoSizing = true;
+            }
             var category = t.category;   // ラムダに渡すためのコピー
             t.button.onClick.AddListener(() => Open(category));   // onClick は実行時に配線する
         }

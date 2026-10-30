@@ -147,6 +147,32 @@ public class SupportManager : MonoBehaviour, ISaveParticipant
         }
     }
 
+    /// <summary>申請済みの制度による、病気イベントの保険診療自己負担への助成額。</summary>
+    public int MedicalExpenseCoverage(int insuredCopay, int ageDays)
+    {
+        if (insuredCopay <= 0) return 0;
+
+        int covered = 0;
+        foreach (var scheme in schemes)
+        {
+            if (!IsValid(scheme) || scheme.medicalExpenseCovers == null ||
+                scheme.medicalExpenseCovers.Count == 0)
+                continue;
+
+            var runtime = GetRuntime(scheme);
+            if (runtime.state != SupportState.Active || ageDays < runtime.appliedAgeDays)
+                continue;
+
+            foreach (var cover in scheme.medicalExpenseCovers)
+            {
+                if (cover != null && cover.Contains(ageDays))
+                    covered += cover.CoveredAmount(insuredCopay);
+            }
+        }
+
+        return Mathf.Min(insuredCopay, covered);
+    }
+
     /// <summary>制度の実行中の状態。無ければ今日の日付と条件から計算して作る。</summary>
     public SupportSchemeRuntime GetRuntime(SupportScheme s)
     {
@@ -857,6 +883,13 @@ public class SupportManager : MonoBehaviour, ISaveParticipant
                 if (c != null) last = Mathf.Max(last, c.toAge.ToAgeDays());
             }
         }
+        if (s.medicalExpenseCovers != null)
+        {
+            foreach (var cover in s.medicalExpenseCovers)
+            {
+                if (cover != null) last = Mathf.Max(last, cover.toAge.ToAgeDays());
+            }
+        }
         if (s.changesWorkMode)
             last = Mathf.Max(last, s.workModeUntil.ToAgeDays());
         if (HasWageLinkedTiers(s) && s.wageBenefitUntil.ToAgeDays() > 0)
@@ -864,11 +897,12 @@ public class SupportManager : MonoBehaviour, ISaveParticipant
         return last >= 0 && today > last;
     }
 
-    /// <summary>支給表が空で covers だけを持つ制度か。</summary>
+    /// <summary>支給表が空で支出肩代わり設定だけを持つ制度か。</summary>
     private static bool IsCoversOnly(SupportScheme s)
     {
         return (s.monthlyTiers == null || s.monthlyTiers.Count == 0)
-            && s.covers != null && s.covers.Count > 0;
+            && ((s.covers != null && s.covers.Count > 0)
+                || (s.medicalExpenseCovers != null && s.medicalExpenseCovers.Count > 0));
     }
 
     /// <summary>

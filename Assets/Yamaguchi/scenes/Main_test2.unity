@@ -17593,6 +17593,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: ddf38d4c2b5b4df5a632dd6e9328fb08, type: 2}
   - {fileID: 11400000, guid: eef38d4c2b5b4df5a632dd6e9328fb09, type: 2}
   - {fileID: 11400000, guid: 3f8e98efef7b4b8193dd4b451d4d7a29, type: 2}
+  - {fileID: 11400000, guid: c4284e40f7674b44a8feeebd618e2d71, type: 2}
+  - {fileID: 11400000, guid: d328e6275a2d4d74a4e5e5c34dd3169a, type: 2}
   debugScheme: {fileID: 11400000, guid: c620aa87746d3e34bb7955ec314ff87d, type: 2}
 --- !u!1 &1522549898
 GameObject:

@@ -1,6 +1,6 @@
 ---
 title: 支出の仕組み（家計簿）
-updated: 2026-10-28
+updated: 2026-10-30
 status: 設計中（たたき台）・担当：山口
 related: [docs/design/support-apply.md, docs/design/food-system.md, docs/design/events.md, docs/design/effects.md, docs/code/architecture.md, docs/decisions/0015-real-money-and-expenses.md]
 ---
@@ -47,6 +47,8 @@ related: [docs/design/support-apply.md, docs/design/food-system.md, docs/design/
 | **その時だけ** | イベントで発生（丸山さん） | 病院代、修学旅行 |
 
 食費とイベントの支出はそれぞれの機能が Effect で減らす。家計簿に載せるため、記録の仕方だけ揃える（5章）。
+
+イベントで発生する病院代のうち、イベント選択肢が保険診療の自己負担として明示した費用は、申請済みの子ども医療費助成で軽減する。助成額は家計簿の `covered`、世帯が実際に払う額は `amount` に記録する。保険適用外の費用は対象にしない（[support-apply.md](support-apply.md) 9.3.1、[events.md](events.md) 3章）。
 
 ---
 

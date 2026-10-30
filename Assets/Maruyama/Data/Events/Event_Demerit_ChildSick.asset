@@ -26,6 +26,7 @@ MonoBehaviour:
       duration: 0
       days: 0
     ledgerCategory: 7
+    insuredMedicalExpense: 1
   - label: "\u5BB6\u3067\u69D8\u5B50\u3092\u898B\u308B"
     effects:
     - kind: 2
@@ -39,4 +40,5 @@ MonoBehaviour:
       duration: 0
       days: 0
     ledgerCategory: 7
+    insuredMedicalExpense: 0
   conditions: []

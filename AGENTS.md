@@ -108,6 +108,7 @@ Unity 製の子育てシミュレーションゲーム。**このファイルは
 - [0024-game-speed-control.md](docs/decisions/0024-game-speed-control.md) — 倍速機能（通常・2x・3x）の導入と日次処理の完全実行モデル
 - [0025-hud-visibility-on-panel-open.md](docs/decisions/0025-hud-visibility-on-panel-open.md) — サポート画面・人物詳細パネル表示時のHUDボタン排他非表示制御
 - [0026-tokyo-018-support-payout-schedule.md](docs/decisions/0026-tokyo-018-support-payout-schedule.md) — 018サポートを4・8・12月にまとめて支給する理由
+- [0027-postnatal-care-and-child-medical-aid.md](docs/decisions/0027-postnatal-care-and-child-medical-aid.md) — 産後ケア・子ども医療費助成のゲーム用モデルと、特別支援教育就学奨励費を保留する理由
 
 ---
 

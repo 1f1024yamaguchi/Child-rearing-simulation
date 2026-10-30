@@ -64,9 +64,25 @@ public class SupportSchemeCard : MonoBehaviour
 
     private void Awake()
     {
+        ConfigureSingleLine(titleText, 12f);
+        ConfigureSingleLine(descText, 9f);
+        ConfigureSingleLine(tierText, 9f);
+        ConfigureSingleLine(deadlineText, 9f);
+
         // onClick はシリアライズされないので実行時に配線する
         if (primaryButton != null) primaryButton.onClick.AddListener(HandlePrimaryClicked);
         if (calendarButton != null) calendarButton.onClick.AddListener(HandleCalendarClicked);
+    }
+
+    private static void ConfigureSingleLine(TMP_Text text, float minimumFontSize)
+    {
+        if (text == null) return;
+
+        float baseFontSize = text.fontSize;
+        text.textWrappingMode = TextWrappingModes.NoWrap;
+        text.fontSizeMin = minimumFontSize;
+        text.fontSizeMax = baseFontSize;
+        text.enableAutoSizing = true;
     }
 
     private void OnEnable()

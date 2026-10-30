@@ -39,6 +39,10 @@ public class SupportScheme : ScriptableObject
     [Tooltip("無償化など。支給表が空で covers だけの制度は、お金は払わず支出を減らす（申請の翌月から）")]
     public List<ExpenseCover> covers = new List<ExpenseCover>();   // expenses.md 4章
 
+    [Header("医療費の助成")]
+    [Tooltip("病気イベントで発生する健康保険適用後の自己負担に対する助成")]
+    public List<MedicalExpenseCover> medicalExpenseCovers = new List<MedicalExpenseCover>();
+
     [Header("働き方（会社の制度）")]
     public bool changesWorkMode;
     public ParentRole workTarget;
@@ -100,6 +104,20 @@ public class SupportScheme : ScriptableObject
 
         }
 
+        if (medicalExpenseCovers != null)
+        {
+            for (int i = 0; i < medicalExpenseCovers.Count; i++)
+            {
+                if (medicalExpenseCovers[i] == null) continue;
+                medicalExpenseCovers[i].fromAge = Fix(medicalExpenseCovers[i].fromAge);
+                medicalExpenseCovers[i].toAge = Fix(medicalExpenseCovers[i].toAge);
+                if (medicalExpenseCovers[i].type == CoverType.Rate)
+                    medicalExpenseCovers[i].value = Mathf.Clamp01(medicalExpenseCovers[i].value);
+                else if (medicalExpenseCovers[i].value < 0f)
+                    medicalExpenseCovers[i].value = 0f;
+            }
+        }
+
         if (wageLinkedTiers != null)
         {
             foreach (var tier in wageLinkedTiers)
@@ -120,5 +138,40 @@ public class SupportScheme : ScriptableObject
         d.month = Mathf.Clamp(d.month, 1, 12);
         d.day   = Mathf.Clamp(d.day, 1, GameDate.DaysInMonth(d.month));
         return d;
+    }
+}
+
+[System.Serializable]
+public class MedicalExpenseCover
+{
+    public CoverType type = CoverType.Full;
+    [Tooltip("Rate なら 0〜1、UpTo なら円。Full では使わない")]
+    public float value;
+    public GameDay fromAge;
+    public GameDay toAge;
+
+    public bool Contains(int ageDays) =>
+        ageDays >= fromAge.ToAgeDays() && ageDays <= toAge.ToAgeDays();
+
+    public int CoveredAmount(int copay)
+    {
+        if (copay <= 0) return 0;
+
+        int covered;
+        switch (type)
+        {
+            case CoverType.Full:
+                covered = copay;
+                break;
+            case CoverType.Rate:
+                covered = Mathf.RoundToInt(copay * Mathf.Clamp01(value));
+                break;
+            case CoverType.UpTo:
+                covered = Mathf.RoundToInt(Mathf.Max(0f, value));
+                break;
+            default:
+                return 0;
+        }
+        return Mathf.Clamp(covered, 0, copay);
     }
 }

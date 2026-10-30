@@ -1,6 +1,6 @@
 ---
 title: イベント一覧
-updated: 2026-09-21
+updated: 2026-10-30
 status: 設計中
 related: [docs/design/support-systems.md, docs/design/rules-and-stats.md, docs/design/effects.md]
 ---
@@ -73,7 +73,7 @@ related: [docs/design/support-systems.md, docs/design/rules-and-stats.md, docs/d
  タイトル          例：「みらいが風邪をひいた」
  ひとこと説明       例：「熱があるみたい。病院で診てもらう？ それとも家で様子を見る？」
  効果チップ         例：体調 −15 ／ ストレス +8
- 選択肢ボタン ×2    例：「病院に行く（−¥8,000）」／「家で様子を見る」
+ 選択肢ボタン ×2    例：「病院に行く（医療費 8,000円・助成適用前）」／「家で様子を見る」
 ```
 
 - **選択肢は2つを基本**にする。読んで比べられる量に収める。
@@ -86,11 +86,13 @@ related: [docs/design/support-systems.md, docs/design/rules-and-stats.md, docs/d
 
 ```
 イベント「みらいが風邪をひいた」
-├ 選択肢「病院に行く」      : [ Money -8000, Health +15 → Child ]
+├ 選択肢「病院に行く」      : [ Money -8000（保険診療の自己負担）, Health +15 → Child ]、insuredMedicalExpense = true
 └ 選択肢「家で様子を見る」  : [ Stress +8 → Child, BadEventRate +5% (Days 7) ]
 ```
 
 こうしておけば、後から「成績が下がる」「趣味が一時停止する」といった効果を**選択肢のデータに足すだけ**で増やせる。数値も効果も今後変わる前提なので、ここは守ること。
+
+`EventChoice.insuredMedicalExpense` が true の選択肢では、負の Money 効果を保険診療の自己負担として扱う。子ども医療費助成が申請済みかつ対象年齢なら助成後の支払額と助成額を家計簿に記録する。保険適用外の費用にはこのフラグを付けない。既存の「病院に行く」選択肢には設定済み。
 
 > 子どもの名前は「みらい」。イベント文面で名前を使うときは、ハードコードせず1箇所から参照できるようにしておく（将来プレイヤーが名前を決められるようにする余地を残すため）。
 

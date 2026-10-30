@@ -38,7 +38,9 @@ namespace Maruyama.UI
                 var moneyEffect = choice.effects?.Find(e => e.kind == EffectKind.Money);
                 if (moneyEffect != null && !label.Contains("円"))
                 {
-                    label += $" ({moneyEffect.value:+#,0;-#,0;0}円)";
+                    label += choice.insuredMedicalExpense && moneyEffect.value < 0f
+                        ? $" (医療費 {Mathf.Abs(moneyEffect.value):#,0}円・助成適用前)"
+                        : $" ({moneyEffect.value:+#,0;-#,0;0}円)";
                 }
                 labelText.text = label;
             }
@@ -61,7 +63,10 @@ namespace Maruyama.UI
             {
                 Debug.Log($"[EventChoiceButtonUI] 選択肢 '{currentChoice.label}' がクリックされました。Effect を適用します。");
                 string ledgerName = string.IsNullOrEmpty(eventTitle) ? currentChoice.label : $"{eventTitle}：{currentChoice.label}";
-                EffectApplier.Apply(currentChoice.effects, new LedgerSource(ledgerName, currentChoice.ledgerCategory));
+                EffectApplier.Apply(
+                    currentChoice.effects,
+                    new LedgerSource(ledgerName, currentChoice.ledgerCategory),
+                    currentChoice.insuredMedicalExpense);
                 Debug.Log($"[EventChoiceButtonUI] 選択肢 '{currentChoice.label}' の Effect 適用完了。");
             }
 

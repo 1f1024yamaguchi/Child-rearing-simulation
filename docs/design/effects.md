@@ -1,6 +1,6 @@
 ---
 title: 効果（Effect）の共通モデル
-updated: 2026-09-21
+updated: 2026-10-30
 status: 設計中（たたき台・要合意）
 related: [docs/design/food-system.md, docs/design/events.md, docs/design/support-systems.md, docs/design/traits.md, docs/code/architecture.md]
 ---
@@ -70,7 +70,7 @@ public class Effect
 {
     public EffectKind    kind;
     public EffectTarget  target = EffectTarget.Household;
-    public float         value;      // 増減量。％のものは％ポイント
+    public float         value;      // 増減量
     public EffectDuration duration = EffectDuration.Instant;
     public int           days;       // duration == Days のときだけ使う
 }
@@ -131,6 +131,7 @@ public static class EffectApplier
 
 - 継続する効果（`ThisMonth` / `Days`）は、その場で足さずに**補正として登録し、期限が来たら外す**。登録の置き場所も1箇所にまとめる（`ModifierRegistry` など。名前は要相談）。
 - イベントの発生率を決めるときは、登録されている `GoodEventRate` / `BadEventRate` の合計を足して使う。
+- ストレスを固定値で減らす場合は `Stress` に負の値を設定する（例：`value = -10` で10ポイント減少）。
 
 ---
 

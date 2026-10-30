@@ -1,0 +1,71 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea7ceb50aff1b1d4a80539c5d7a3a83e, type: 3}
+  m_Name: Support_ChildMedicalAid
+  m_EditorClassIdentifier: Assembly-CSharp::SupportScheme
+  id: child_medical_aid
+  title: "\u5B50\u3069\u3082\u533B\u7642\u8CBB\u52A9\u6210"
+  description: "\u7533\u8ACB\u5F8C\u306E\u4FDD\u967A\u8A3A\u7642\u306E\u81EA\u5DF1\u8CA0\u62C5\u984D\u3092\u52A9\u6210"
+  icon: {fileID: 0}
+  category: 1
+  merits:
+  - "\u4FDD\u967A\u8A3A\u7642\u306E\u81EA\u5DF1\u8CA0\u62C5\u984D\u3092100%\u52A9\u6210"
+  - "18\u6B73\u5E74\u5EA6\u672B\u307E\u3067"
+  demerits:
+  - "\u7533\u8ACB\u524D\u306E\u533B\u7642\u8CBB\u306F\u5BFE\u8C61\u5916"
+  - "\u4FDD\u967A\u9069\u7528\u5916\u306E\u8CBB\u7528\u306F\u5BFE\u8C61\u5916"
+  effectTiming: 1
+  effects: []
+  applyRequirements: []
+  monthlyTiers: []
+  payoutMonths: []
+  covers: []
+  medicalExpenseCovers:
+  - type: 0
+    value: 0
+    fromAge:
+      year: 0
+      month: 1
+      day: 1
+    toAge:
+      year: 18
+      month: 3
+      day: 31
+  changesWorkMode: 0
+  workTarget: 0
+  workMode: 1
+  workModeUntil:
+    year: 0
+    month: 12
+    day: 31
+  wageTarget: 0
+  wageLinkedTiers: []
+  requiresWorkMode: 0
+  requiredWorkMode: 1
+  wageBenefitUntil:
+    year: 0
+    month: 1
+    day: 1
+  start:
+    year: 0
+    month: 1
+    day: 1
+  deadlineType: 0
+  deadline:
+    year: 0
+    month: 1
+    day: 1
+  yearly:
+    month: 8
+    day: 31
+  lapseYears: 2
+  renewWindowDays: 31

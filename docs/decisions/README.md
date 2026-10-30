@@ -38,3 +38,5 @@ status: 運用中
 | [0024](0024-game-speed-control.md) | 倍速機能（通常・2x・3x）の導入と日次処理の完全実行モデル | 採用 |
 | [0025](0025-hud-visibility-on-panel-open.md) | サポート画面・人物詳細パネル表示時のHUDボタン排他非表示制御 | 採用 |
 | [0026](0026-tokyo-018-support-payout-schedule.md) | 018サポートを4・8・12月にまとめて支給する | 採用 |
+| [0027](0027-postnatal-care-and-child-medical-aid.md) | 産後ケアと子ども医療費助成をゲーム用の簡略モデルとして定義する | 一部変更（ストレス効果は0028参照） |
+| [0028](0028-postnatal-care-stress-fixed-reduction.md) | 産後ケアのストレス効果を固定値10減少にする | 採用 |

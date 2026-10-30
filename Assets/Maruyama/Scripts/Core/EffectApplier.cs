@@ -19,16 +19,21 @@ namespace Maruyama.Core
         /// </summary>
         public static void Apply(IEnumerable<Effect> effects, LedgerSource source)
         {
+            Apply(effects, source, false);
+        }
+
+        public static void Apply(IEnumerable<Effect> effects, LedgerSource source, bool insuredMedicalExpense)
+        {
             if (effects == null) return;
 
             foreach (var e in effects)
             {
                 if (e == null) continue;
-                ApplySingleEffect(e, source);
+                ApplySingleEffect(e, source, insuredMedicalExpense);
             }
         }
 
-        private static void ApplySingleEffect(Effect e, LedgerSource source)
+        private static void ApplySingleEffect(Effect e, LedgerSource source, bool insuredMedicalExpense)
         {
             switch (e.kind)
             {
@@ -37,10 +42,18 @@ namespace Maruyama.Core
                     {
                         int beforeMoney = GameState.I.Money;
                         int moneyDelta = Mathf.RoundToInt(e.value);
+                        int covered = 0;
+                        if (insuredMedicalExpense && moneyDelta < 0 && SupportManager.I != null)
+                        {
+                            int ageDays = Mathf.FloorToInt(GameState.I.AgeDays);
+                            covered = SupportManager.I.MedicalExpenseCoverage(-moneyDelta, ageDays);
+                            moneyDelta += covered;
+                        }
                         GameState.I.AddMoney(moneyDelta);
-                        Ledger.I.Record(source ?? LedgerSource.Unknown, moneyDelta);   // 効果の額で記録する
+                        Ledger.I.Record(source ?? LedgerSource.Unknown, moneyDelta, covered);
                         int afterMoney = GameState.I.Money;
-                        Debug.Log($"[EffectApplier] お金: {beforeMoney:#,0}円 ➔ {afterMoney:#,0}円 (変化量: {e.value:+#,0;-#,0;0}円)");
+                        string coverageText = covered > 0 ? $"（医療費助成 {covered:#,0}円）" : "";
+                        Debug.Log($"[EffectApplier] お金: {beforeMoney:#,0}円 ➔ {afterMoney:#,0}円 (変化量: {moneyDelta:+#,0;-#,0;0}円){coverageText}");
                     }
                     else
                     {
