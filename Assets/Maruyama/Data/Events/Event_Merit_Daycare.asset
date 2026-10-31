@@ -25,6 +25,8 @@ MonoBehaviour:
       value: -2000
       duration: 0
       days: 0
+    ledgerCategory: 8
+    insuredMedicalExpense: 0
   - label: "\u4ECA\u56DE\u306F\u898B\u9001\u308B"
     effects:
     - kind: 1
@@ -37,4 +39,8 @@ MonoBehaviour:
       value: -3
       duration: 0
       days: 0
-  conditions: []
+    ledgerCategory: 8
+    insuredMedicalExpense: 0
+  conditions:
+  - {fileID: 11400000, guid: 9b38343d68f173d4c910b98140a9889c, type: 2}
+  weight: 1

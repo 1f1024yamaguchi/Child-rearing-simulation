@@ -1,6 +1,6 @@
 ---
 title: セーブ機能（続きから遊べるようにする）
-updated: 2026-10-30
+updated: 2026-10-31
 status: 設計中
 related: [docs/team/antigravity-save-system.md, docs/design/title-screen.md, docs/decisions/0019-two-save-slots.md, docs/code/architecture.md, docs/design/support-apply.md, docs/design/calendar-system.md, docs/design/food-system.md, docs/team/agreements-needed.md]
 ---
@@ -33,7 +33,7 @@ related: [docs/team/antigravity-save-system.md, docs/design/title-screen.md, doc
 |---|---|
 | 有坂（食事） | 今選んでいる食事のランク、最後に食費を引いた日、今月引いた額、最初の食事選択を出したか（`MealSystemManager`） |
 | 草尾（カレンダー） | メモ、予定（`CalendarPlan`）、リマインダーを出したか（calendar-system.md 8.3） |
-| 丸山（イベント） | 今は状態を持っていないので不要。「1回しか起きないイベント」などを作ったら必要 |
+| 丸山（イベント） | **実装済み**（`EventManager`・キー `"event"`）。起きた固定イベントの記録、今月の抽選済みの印と予約、直前に出したイベント、発生率の補正（[events.md](events.md) 7章） |
 
 → 他の人のコードを山口が直接いじらずに済むよう、**それぞれが自分の分を保存・復元できる仕組み**（2章）にする。
 

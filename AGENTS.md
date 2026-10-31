@@ -109,6 +109,9 @@ Unity 製の子育てシミュレーションゲーム。**このファイルは
 - [0025-hud-visibility-on-panel-open.md](docs/decisions/0025-hud-visibility-on-panel-open.md) — サポート画面・人物詳細パネル表示時のHUDボタン排他非表示制御
 - [0026-tokyo-018-support-payout-schedule.md](docs/decisions/0026-tokyo-018-support-payout-schedule.md) — 018サポートを4・8・12月にまとめて支給する理由
 - [0027-postnatal-care-and-child-medical-aid.md](docs/decisions/0027-postnatal-care-and-child-medical-aid.md) — 産後ケア・子ども医療費助成のゲーム用モデルと、特別支援教育就学奨励費を保留する理由
+- [0029-event-rate-store-and-conditions.md](docs/decisions/0029-event-rate-store-and-conditions.md) — 発生率の補正を EventRateModifiers に預け、発生条件（年齢帯・ストレス段階）を部品にした理由
+- [0030-monthly-independent-event-lottery.md](docs/decisions/0030-monthly-independent-event-lottery.md) — イベントを悪い・良いで別々に月ごとに抽選し、確率をストレスと発生率補正で決めた理由
+- [0031-fixed-events-and-event-save.md](docs/decisions/0031-fixed-events-and-event-save.md) — 固定イベント（誕生日など）を抽選と別に持ち、イベントの状態（起きた記録・予約・補正）をセーブする理由
 
 ---
 

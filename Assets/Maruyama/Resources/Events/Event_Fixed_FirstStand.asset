@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 463b3c7a53d14514babdcef341064d35, type: 3}
+  m_Name: Event_Fixed_FirstStand
+  m_EditorClassIdentifier: Assembly-CSharp::Maruyama.Events.EventData
+  id: fixed_first_stand
+  category: 1
+  title: "\u3064\u304B\u307E\u308A\u7ACB\u3061\u304C\u3067\u304D\u305F"
+  description: "\u3072\u3068\u308A\u3067\u7ACB\u3061\u4E0A\u304C\u3063\u305F\u3002\u6628\u65E5\u307E\u3067\u306F\u3067\u304D\u306A\u304B\u3063\u305F\u306E\u306B\u3002"
+  iconSprite: {fileID: 0}
+  choices:
+  - label: "\u62CD\u624B\u3057\u3066\u559C\u3076"
+    effects:
+    - kind: 1
+      target: 4
+      value: -8
+      duration: 0
+      days: 0
+    ledgerCategory: 8
+    insuredMedicalExpense: 0
+  conditions: []
+  weight: 1
+  trigger: 1
+  fixedMonth: 10
+  fixedDay: 15
+  fixedMinAgeYears: 0
+  fixedMaxAgeYears: 0

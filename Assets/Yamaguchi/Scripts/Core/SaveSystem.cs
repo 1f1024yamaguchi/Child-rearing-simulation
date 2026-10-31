@@ -79,7 +79,7 @@ public static class SaveSystem
         string path = FilePathOf(slot);
         try
         {
-            WriteAtomic(path, JsonUtility.ToJson(data, true));
+            WriteRaw(slot, JsonUtility.ToJson(data, !UseWebStorage));
         }
         catch (Exception e)
         {
@@ -87,7 +87,7 @@ public static class SaveSystem
             return false;
         }
 
-        Debug.Log($"[SaveSystem] セーブしました。({slot}: {path})");
+        Debug.Log($"[SaveSystem] セーブしました。({slot}: {(UseWebStorage ? PrefsKeyOf(slot) : path)})");
         OnSaved?.Invoke();
         return true;
     }
@@ -101,9 +101,56 @@ public static class SaveSystem
         else File.Move(tmp, path);
     }
 
+    // ---- 保存先の切り替え ----
+    // WebGL（unityroom）ではファイル保存がブラウザを閉じると消えやすいので、PlayerPrefs（ブラウザのIndexedDB）に保存する。
+    // それ以外（エディタ・PC）は従来どおり persistentDataPath のファイル。
+#if UNITY_WEBGL && !UNITY_EDITOR
+    private static bool UseWebStorage => true;
+#else
+    private static bool UseWebStorage => false;
+#endif
+
+    private static string PrefsKeyOf(SaveSlot slot) => slot == SaveSlot.Auto ? "childgame_save_auto" : "childgame_save_manual";
+
+    private static bool ExistsRaw(SaveSlot slot)
+    {
+        if (UseWebStorage) return PlayerPrefs.HasKey(PrefsKeyOf(slot));
+        return File.Exists(FilePathOf(slot));
+    }
+
+    private static string ReadRaw(SaveSlot slot)
+    {
+        if (UseWebStorage) return PlayerPrefs.GetString(PrefsKeyOf(slot), "");
+        return File.ReadAllText(FilePathOf(slot));
+    }
+
+    private static void WriteRaw(SaveSlot slot, string text)
+    {
+        if (UseWebStorage)
+        {
+            PlayerPrefs.SetString(PrefsKeyOf(slot), text);
+            PlayerPrefs.Save();   // WebGL ではここでIndexedDBへ書き出される
+            return;
+        }
+        WriteAtomic(FilePathOf(slot), text);
+    }
+
+    private static void DeleteRaw(SaveSlot slot)
+    {
+        if (UseWebStorage)
+        {
+            PlayerPrefs.DeleteKey(PrefsKeyOf(slot));
+            PlayerPrefs.Save();
+            return;
+        }
+        string path = FilePathOf(slot);
+        if (File.Exists(path)) File.Delete(path);
+        if (File.Exists(path + ".tmp")) File.Delete(path + ".tmp");
+    }
+
     // ---- 有無・削除 ----
 
-    public static bool HasSave(SaveSlot slot) => File.Exists(FilePathOf(slot));
+    public static bool HasSave(SaveSlot slot) => ExistsRaw(slot);
 
     public static bool HasAnySave() => HasSave(SaveSlot.Auto) || HasSave(SaveSlot.Manual);
 
@@ -116,8 +163,8 @@ public static class SaveSystem
         string path = FilePathOf(slot);
         try
         {
-            if (File.Exists(path)) File.Delete(path);
-            if (File.Exists(path + ".tmp")) File.Delete(path + ".tmp");
+            DeleteRaw(slot);
+            
         }
         catch (Exception e)
         {
@@ -147,9 +194,9 @@ public static class SaveSystem
         try
         {
             string path = FilePathOf(slot);
-            if (!File.Exists(path)) return info;
+            if (!ExistsRaw(slot)) return info;
 
-            var data = JsonUtility.FromJson<SaveData>(File.ReadAllText(path));
+            var data = JsonUtility.FromJson<SaveData>(ReadRaw(slot));
             if (data == null) return info;
 
             info.exists = true;
@@ -206,7 +253,7 @@ public static class SaveSystem
         SaveData data;
         try
         {
-            data = JsonUtility.FromJson<SaveData>(File.ReadAllText(FilePathOf(slot)));
+            data = JsonUtility.FromJson<SaveData>(ReadRaw(slot));
         }
         catch (Exception e)
         {

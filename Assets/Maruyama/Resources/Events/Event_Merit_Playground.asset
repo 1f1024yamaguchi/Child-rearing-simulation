@@ -1,0 +1,46 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 463b3c7a53d14514babdcef341064d35, type: 3}
+  m_Name: Event_Merit_Playground
+  m_EditorClassIdentifier: Assembly-CSharp::Maruyama.Events.EventData
+  id: merit_playground
+  category: 1
+  title: "\u516C\u5712\u3067\u304A\u53CB\u9054\u304C\u3067\u304D\u305F"
+  description: "\u540C\u3058\u5E74\u3054\u308D\u306E\u5B50\u3068\u3001\u3059\u3063\u304B\u308A\u4EF2\u826F\u304F\u306A\u3063\u305F\u3002"
+  iconSprite: {fileID: 0}
+  choices:
+  - label: "\u305F\u304F\u3055\u3093\u904A\u3070\u305B\u308B"
+    effects:
+    - kind: 1
+      target: 3
+      value: -8
+      duration: 0
+      days: 0
+    - kind: 1
+      target: 4
+      value: 2
+      duration: 0
+      days: 0
+    ledgerCategory: 8
+    insuredMedicalExpense: 0
+  - label: "\u4ECA\u65E5\u306F\u65E9\u3081\u306B\u5E30\u308B"
+    effects:
+    - kind: 1
+      target: 3
+      value: 3
+      duration: 0
+      days: 0
+    ledgerCategory: 8
+    insuredMedicalExpense: 0
+  conditions:
+  - {fileID: 11400000, guid: e92b4f597f141ad4bbb717a80747c302, type: 2}
+  weight: 1

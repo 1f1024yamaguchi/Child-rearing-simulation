@@ -69,10 +69,14 @@ namespace Maruyama.Core
                     ApplyHealthEffect(e);
                     break;
 
-                case EffectKind.Grades:
-                case EffectKind.Hobby:
                 case EffectKind.GoodEventRate:
                 case EffectKind.BadEventRate:
+                    // 発生率の補正は EventRateModifiers に預け、EventManager が抽選のときに読む
+                    EventRateModifiers.Add(e);
+                    break;
+
+                case EffectKind.Grades:
+                case EffectKind.Hobby:
                     Debug.Log($"[EffectApplier] 効果 '{e.kind}' (Target: {e.target}, Value: {e.value}) を記録");
                     break;
 

@@ -41,4 +41,6 @@ MonoBehaviour:
       days: 0
     ledgerCategory: 7
     insuredMedicalExpense: 0
-  conditions: []
+  conditions:
+  - {fileID: 11400000, guid: 9b38343d68f173d4c910b98140a9889c, type: 2}
+  weight: 1

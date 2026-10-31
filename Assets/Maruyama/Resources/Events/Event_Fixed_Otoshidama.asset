@@ -1,0 +1,50 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 463b3c7a53d14514babdcef341064d35, type: 3}
+  m_Name: Event_Fixed_Otoshidama
+  m_EditorClassIdentifier: Assembly-CSharp::Maruyama.Events.EventData
+  id: fixed_otoshidama
+  category: 1
+  title: "\u304A\u5E74\u7389\u3092\u3082\u3089\u3063\u305F"
+  description: "\u89AA\u621A\u304B\u3089\u3001\u307F\u3089\u3044\u306B\u304A\u5E74\u7389\u3002\u3069\u3046\u4F7F\u304A\u3046\uFF1F"
+  iconSprite: {fileID: 0}
+  choices:
+  - label: "\u5168\u90E8\u8CAF\u91D1\u3059\u308B"
+    effects:
+    - kind: 0
+      target: 0
+      value: 10000
+      duration: 0
+      days: 0
+    ledgerCategory: 8
+    insuredMedicalExpense: 0
+  - label: "\u534A\u5206\u3067\u304A\u3082\u3061\u3083\u3092\u8CB7\u3046"
+    effects:
+    - kind: 0
+      target: 0
+      value: 5000
+      duration: 0
+      days: 0
+    - kind: 1
+      target: 3
+      value: -6
+      duration: 0
+      days: 0
+    ledgerCategory: 8
+    insuredMedicalExpense: 0
+  conditions: []
+  weight: 1
+  trigger: 1
+  fixedMonth: 1
+  fixedDay: 3
+  fixedMinAgeYears: 1
+  fixedMaxAgeYears: 5
