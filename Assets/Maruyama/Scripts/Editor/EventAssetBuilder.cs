@@ -72,14 +72,14 @@ namespace Maruyama.Editor
                     Fx(EffectKind.Stress, EffectTarget.Child, 8),
                     Fx(EffectKind.Stress, EffectTarget.Parents, 2))));
 
-            Create("Event_Demerit_SuddenExpense", Event("demerit_sudden_expense", EventCategory.Demerit,
+            Create("Event_Demerit_SuddenExpense", Cooldown(730, Event("demerit_sudden_expense", EventCategory.Demerit,
                 "洗濯機が壊れた", "毎日使うものが、突然動かなくなった。",
-                1f, new EventConditionSO[] { age0to5 },
+                0.25f, new EventConditionSO[] { age0to5 },
                 Choice("新しく買い替える", ExpenseCategory.その他, false,
                     Fx(EffectKind.Money, EffectTarget.Household, -40000)),
                 Choice("修理して、しばらく様子を見る", ExpenseCategory.その他, false,
                     Fx(EffectKind.Money, EffectTarget.Household, -12000),
-                    Fx(EffectKind.Stress, EffectTarget.Parents, 4))));
+                    Fx(EffectKind.Stress, EffectTarget.Parents, 4)))));
 
             // ---- メリット ----
             Create("Event_Merit_SupportCenter", Event("merit_support_center", EventCategory.Merit,
@@ -163,12 +163,12 @@ namespace Maruyama.Editor
             Create("Event_Fixed_Otoshidama", Fixed("fixed_otoshidama", EventCategory.Merit,
                 "お年玉をもらった", "親戚から、みらいにお年玉。どう使おう？",
                 1, 3, 1, 5,
-                Choice("全部貯金する", ExpenseCategory.その他, false,
-                    Fx(EffectKind.Money, EffectTarget.Household, 10000)),
-                Choice("半分でおもちゃを買う", ExpenseCategory.その他, false,
-                    Fx(EffectKind.Money, EffectTarget.Household, 5000),
-                    Fx(EffectKind.Stress, EffectTarget.Child, -6))));
-
+                Choice("全部貯金する", ExpenseCategory.その他, false,
+                    Fx(EffectKind.Money, EffectTarget.Household, 10000),
+                    Fx(EffectKind.Stress, EffectTarget.Child, 8)),
+                Choice("子どもに全部渡す", ExpenseCategory.その他, false,
+                    Fx(EffectKind.Stress, EffectTarget.Child, -12))));
+
             Create("Event_Fixed_Recital", Fixed("fixed_recital", EventCategory.Merit,
                 "お遊戯会の日", "練習の成果を見せる日。ステージの上で、みらいが堂々と踊っている。",
                 12, 15, 3, 5,
@@ -235,6 +235,13 @@ namespace Maruyama.Editor
             e.weight = weight;
             e.conditions = new List<EventConditionSO>(conditions);
             e.choices = new List<EventChoice>(choices);
+            return e;
+        }
+
+        /// <summary>同じイベントが続けて出ないよう、出てから days 日あける（365日 = 1歳）。</summary>
+        private static EventData Cooldown(int days, EventData e)
+        {
+            e.cooldownDays = days;
             return e;
         }
 

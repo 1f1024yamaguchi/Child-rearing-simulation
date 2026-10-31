@@ -90,6 +90,9 @@ namespace Maruyama.Events
         private string lastDemeritId = "";
         private string lastMeritId = "";
 
+        /// <summary>クールダウンのあるイベントが最後に出た日（通算日数）。id → 日</summary>
+        private readonly Dictionary<string, int> lastFiredDay = new Dictionary<string, int>();
+
         private readonly List<EventData> demeritPool = new List<EventData>();
         private readonly List<EventData> meritPool = new List<EventData>();
         private readonly List<EventData> fixedPool = new List<EventData>();
@@ -509,7 +512,7 @@ namespace Maruyama.Events
             var valid = new List<EventData>();
             foreach (var evt in pool)
             {
-                if (evt != null && evt.weight > 0f && evt.CheckConditions()) valid.Add(evt);
+                if (evt != null && evt.weight > 0f && evt.CheckConditions() && !IsCoolingDown(evt)) valid.Add(evt);
             }
             if (valid.Count == 0) return null;
 
@@ -531,7 +534,16 @@ namespace Maruyama.Events
             }
 
             lastId = picked.id;
+            if (picked.cooldownDays > 0 && GameState.I != null) lastFiredDay[picked.id] = (int)GameState.I.AgeDays;
             return picked;
+        }
+
+        /// <summary>クールダウン中（前回出てからの日数が cooldownDays に届いていない）か。</summary>
+        private bool IsCoolingDown(EventData evt)
+        {
+            if (evt.cooldownDays <= 0 || GameState.I == null) return false;
+            if (!lastFiredDay.TryGetValue(evt.id, out int last)) return false;
+            return (int)GameState.I.AgeDays - last < evt.cooldownDays;
         }
 
         // ---- セーブ・ロード（ISaveParticipant）----
@@ -551,6 +563,7 @@ namespace Maruyama.Events
             public List<SlotSave> slots = new List<SlotSave>();
             public string lastDemeritId = "";
             public string lastMeritId = "";
+            public List<string> cooldowns = new List<string>();   // "イベントid@最後に出た日"
             public List<EventRateModifiers.SavedEntry> rates = new List<EventRateModifiers.SavedEntry>();
         }
 
@@ -569,6 +582,7 @@ namespace Maruyama.Events
                 lastMeritId = lastMeritId,
                 rates = EventRateModifiers.Export(),
             };
+            foreach (var kv in lastFiredDay) d.cooldowns.Add($"{kv.Key}@{kv.Value}");
             foreach (var slot in scheduledSlots)
             {
                 d.slots.Add(new SlotSave { ageDay = slot.ageDay, category = (int)slot.category });
@@ -588,6 +602,16 @@ namespace Maruyama.Events
             lastRolledMonthKey = d.lastRolledMonthKey ?? "";
             lastDemeritId = d.lastDemeritId ?? "";
             lastMeritId = d.lastMeritId ?? "";
+
+            lastFiredDay.Clear();
+            if (d.cooldowns != null)
+            {
+                foreach (var c in d.cooldowns)
+                {
+                    int at = c.LastIndexOf('@');
+                    if (at > 0 && int.TryParse(c.Substring(at + 1), out int day)) lastFiredDay[c.Substring(0, at)] = day;
+                }
+            }
 
             scheduledSlots.Clear();
             if (d.slots != null)

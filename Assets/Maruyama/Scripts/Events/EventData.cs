@@ -31,6 +31,9 @@ namespace Maruyama.Events
         [Tooltip("抽選で選ばれやすさ。大きいほど選ばれやすい（条件を満たしたイベントの中での比率）。0 なら選ばれない。trigger = Random のときだけ使う。")]
         [Min(0f)] public float weight = 1f;
 
+        [Tooltip("一度起きたら、この日数のあいだは同じイベントを選ばない（0 なら制限なし。365日 = 1歳ぶん）。trigger = Random のときだけ使う。")]
+        [Min(0)] public int cooldownDays = 0;
+
         [Header("発生のしかた")]
         [Tooltip("Random = 月ごとの抽選。Fixed = 下の日付に必ず起きる。")]
         public EventTrigger trigger = EventTrigger.Random;

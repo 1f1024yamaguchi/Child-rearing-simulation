@@ -25,18 +25,18 @@ MonoBehaviour:
       value: 10000
       duration: 0
       days: 0
-    ledgerCategory: 8
-    insuredMedicalExpense: 0
-  - label: "\u534A\u5206\u3067\u304A\u3082\u3061\u3083\u3092\u8CB7\u3046"
-    effects:
-    - kind: 0
-      target: 0
-      value: 5000
-      duration: 0
-      days: 0
     - kind: 1
       target: 3
-      value: -6
+      value: 8
+      duration: 0
+      days: 0
+    ledgerCategory: 8
+    insuredMedicalExpense: 0
+  - label: "\u5B50\u3069\u3082\u306B\u5168\u90E8\u6E21\u3059"
+    effects:
+    - kind: 1
+      target: 3
+      value: -12
       duration: 0
       days: 0
     ledgerCategory: 8
