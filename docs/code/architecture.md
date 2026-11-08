@@ -1,6 +1,6 @@
 ---
 title: アーキテクチャ（時間・お金・親ステータス）
-updated: 2026-10-30
+updated: 2026-11-01
 status: 実装済み（一部未実装）
 related: [docs/design/rules-and-stats.md, docs/code/ui-main-test-hud.md, docs/design/taxes.md]
 ---
@@ -43,7 +43,7 @@ GameClock （実時間 1秒 = ゲーム内 1日）
 
 | クラス | 役割 |
 |---|---|
-| `GameClock` | 実時間 `secondsPerDay`（既定 1秒）ごとに1日進める。`SetRunning(bool)` で一時停止（ゲームオーバー用）。判断画面の一時停止は `PushPause()` / `PopPause()`（停止要求を数える）。`GameClock.I` でアクセス |
+| `GameClock` | 実時間 `secondsPerDay`（既定 1秒）ごとに1日進める。`SetRunning(bool)` で一時停止（ゲームオーバー用）。判断画面の一時停止は `PushPause()` / `PopPause()`（停止要求を数える）。止まっているかは `IsRunning`、停止要求の数は `PauseRequests` で読める。1フレームで複数日ぶん進めている途中で止められたら、残りの日はその場で進めない（2026-11-01）。`GameClock.I` でアクセス |
 | `GameDate` | 経過日数 ↔ 歳・月・日 を変換する static ユーティリティ。`FromAgeDays()` / `Format()` / `DaysInMonth()` / `ToAgeDays()` |
 | `DayTicker` | `OnDayPassed(int 通算日数)` |
 | `MonthTicker` | `OnMonthChanged(int 歳, int 月)` |

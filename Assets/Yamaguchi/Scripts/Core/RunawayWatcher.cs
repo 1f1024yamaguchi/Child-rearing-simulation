@@ -3,6 +3,7 @@ using UnityEngine;
 
 /// 子どものストレスが限界（91以上）のまま規定日数続いたら家出（ゲームオーバー）にする。
 /// child-status.md 4章「家出（ゲームオーバー）」の仕様を実装。
+/// 小学生まで（12歳3月31日まで）はルールを覚える期間として家出しない（decisions/0033）。
 public class RunawayWatcher : MonoBehaviour, ISaveParticipant
 {
     [Header("参照")]
@@ -16,6 +17,12 @@ public class RunawayWatcher : MonoBehaviour, ISaveParticipant
     [SerializeField] private float limitStress = 91f;
     [Tooltip("家出発生までの日数（仕様未定の仮値・たたき台）")]
     [SerializeField] private int runawayDays = 30;
+
+    [Header("家出が起きる時期")]
+    [Tooltip("この年齢（歳）の activeFromMonth 月1日から家出の判定を始める。それまではルールを覚える期間として家出しない（既定：中学入学＝12歳4月1日）")]
+    [SerializeField] private int activeFromAge = 12;
+    [Tooltip("判定を始める月（学年は4月始まり）")]
+    [Range(1, 12)][SerializeField] private int activeFromMonth = 4;
 
     // ─── 内部状態 ──────────────────────────────────────────────
     private int dangerDayCount = 0;
@@ -43,6 +50,12 @@ public class RunawayWatcher : MonoBehaviour, ISaveParticipant
 
     /// 家出が発生済みかどうか。発生後は判定を行わない。
     public bool HasRunAway => hasRunAway;
+
+    /// 家出の判定を始める日（通算日数）。既定は 12歳4月1日（中学入学）。
+    public int ActiveFromDay => GameDate.ToAgeDays(activeFromAge, activeFromMonth, 1);
+
+    /// いま家出が起きうる時期か（小学生まではルールを覚える期間なので false）。
+    public bool IsActive => GameState.I != null && Mathf.FloorToInt(GameState.I.AgeDays) >= ActiveFromDay;
 
     // ─── セーブ復元窓口 ─────────────────────────────────────
     public void RestoreDangerDays(int days)
@@ -86,6 +99,17 @@ public class RunawayWatcher : MonoBehaviour, ISaveParticipant
         {
             if (Household.I != null) child = Household.I.Child;
             if (child == null) return;
+        }
+
+        // 小学生まではルールを覚える期間。家出のカウントを進めない（警告の行も出ない）
+        if (day < ActiveFromDay)
+        {
+            if (dangerDayCount > 0)
+            {
+                dangerDayCount = 0;
+                OnDangerDaysChanged?.Invoke(dangerDayCount);
+            }
+            return;
         }
 
         if (child.Stress >= limitStress)

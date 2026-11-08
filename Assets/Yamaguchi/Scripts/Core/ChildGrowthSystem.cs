@@ -13,8 +13,10 @@ public class ChildGrowthSystem : MonoBehaviour
     [Header("成績 Lerp係数（1ヶ月あたり・たたき台）")]
     [Tooltip("勉強寄り(b=0)のときの成績変化")]
     [SerializeField] private float gradeAtStudy = 6f;
-    [Tooltip("遊び寄り(b=1)のときの成績変化")]
-    [SerializeField] private float gradeAtPlay = 0f;
+    [Tooltip("遊び寄り(b=1)のときの成績変化。マイナスにして、遊びに振ると成績が下がっていくようにする（0 だと遊び側で成績が全く動かなかった）")]
+    [SerializeField] private float gradePerMonthAtPlay = -3f;
+    [Tooltip("体調が 0 のときの成績の伸びの倍率（体調 100 で 1.0。伸びが止まりきらないよう下限を持たせる）")]
+    [Range(0f, 1f)][SerializeField] private float minHealthGradeFactor = 0.5f;
     [Tooltip("ライフ寄り(w=0)の親の影響（成績）")]
     [SerializeField] private float gradeParentLife = 2f;
     [Tooltip("ワーク寄り(w=1)の親の影響（成績）")]
@@ -48,7 +50,15 @@ public class ChildGrowthSystem : MonoBehaviour
 
     // ─── 体調の係数 ──────────────────────────────────────────
     [Header("体調（1ヶ月あたり・たたき台）")]
-    [Tooltip("毎日の自然回復量")]
+    [Tooltip("ゲーム開始時（0歳0日）の体調。赤ちゃんは低めから始まる")]
+    [Range(0f, 100f)][SerializeField] private float initialHealth = 40f;
+    [Tooltip("0歳のときの体調の目標値。体調はこの値まで自然に回復する（これより高くは引き下げない）")]
+    [Range(0f, 100f)][SerializeField] private float healthTargetAtBirth = 45f;
+    [Tooltip("安定したあとの体調の目標値")]
+    [Range(0f, 100f)][SerializeField] private float healthTargetStable = 85f;
+    [Tooltip("体調の目標値が安定値に届く歳。0歳→この歳にかけて目標値が直線で上がる（体調が安定していく）")]
+    [Min(0.1f)][SerializeField] private float healthStableAgeYears = 4f;
+    [Tooltip("体調が目標値より低いときの自然回復量（1ヶ月あたり）")]
     [SerializeField] private float healthRecovery = 2f;
     [Tooltip("子ストレスがこの値を超えたとき、体調への追加分（マイナス）")]
     [SerializeField] private float healthStressPenalty = -4f;
@@ -62,6 +72,10 @@ public class ChildGrowthSystem : MonoBehaviour
         // child が Inspector 未設定なら Household から自動取得
         if (child == null && Household.I != null)
             child = Household.I.Child;
+
+        // 新しいゲーム（0歳0日）の始まりは、赤ちゃんらしく体調を低めにする
+        if (child != null && GameState.I != null && GameState.I.AgeDays < 1f)
+            child.SetHealth(initialHealth);
 
         if (DayTicker.I == null)
         {
@@ -90,13 +104,17 @@ public class ChildGrowthSystem : MonoBehaviour
         float avgParentStress = AverageParentStress();
 
         // ─── 成績 ───────────────────────────────────────────
-        // Lerp(+6, 0, b) + Lerp(+2, -2, w) × 体調/100（プラスのときだけ）
-        float gradeDelta = (Mathf.Lerp(gradeAtStudy, gradeAtPlay, b)
-                          + Mathf.Lerp(gradeParentLife, gradeParentWork, w))
-                          / DaysPerMonth;
-        if (gradeDelta > 0f)
-            gradeDelta *= child.Health / 100f;
-        child.AddGrade(gradeDelta);
+        // Lerp(+6, -3, b) + Lerp(+2, -2, w) × 体調の係数（プラスのときだけ）
+        // 赤ちゃんの間（成績を扱う年齢になるまで）は成績を動かさない。
+        if (child.IsGradeActive)
+        {
+            float gradeDelta = (Mathf.Lerp(gradeAtStudy, gradePerMonthAtPlay, b)
+                              + Mathf.Lerp(gradeParentLife, gradeParentWork, w))
+                              / DaysPerMonth;
+            if (gradeDelta > 0f)
+                gradeDelta *= Mathf.Lerp(minHealthGradeFactor, 1f, child.Health / 100f);
+            child.AddGrade(gradeDelta);
+        }
 
         // ─── 趣味経験値 ─────────────────────────────────────
         // Lerp(0, +30, b) + Lerp(+2, -2, w)  マイナスにはしない
@@ -115,8 +133,11 @@ public class ChildGrowthSystem : MonoBehaviour
         child.AddStress(stressDelta);
 
         // ─── 体調 ────────────────────────────────────────────
-        // 自然回復 +2  子ストレス>70 なら -4
-        float healthDelta = healthRecovery / DaysPerMonth;
+        // 年齢で上がる目標値まで自然回復（目標より高いときは引き下げない）。子ストレス>70 なら -4
+        // → 赤ちゃんの間は低めで、育つにつれて安定していく。
+        float target = Mathf.Lerp(healthTargetAtBirth, healthTargetStable,
+                                  Mathf.Clamp01(child.AgeYears / healthStableAgeYears));
+        float healthDelta = (child.Health < target) ? healthRecovery / DaysPerMonth : 0f;
         if (child.Stress > childStressHealthThreshold)
             healthDelta += healthStressPenalty / DaysPerMonth;
         child.AddHealth(healthDelta);

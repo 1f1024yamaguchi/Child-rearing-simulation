@@ -60,6 +60,7 @@ Unity 製の子育てシミュレーションゲーム。**このファイルは
 | [company-support.md](docs/design/company-support.md) | 会社の制度（育休・時短）。親の働き方の状態と給料連動の支給、段階的な作り方 | 会社タブの制度や親の働き方を実装する |
 | [save-system.md](docs/design/save-system.md) | セーブ（保存するもの一覧・参加者の仕組み・ロードの順番・オート／手動の2枠） | セーブに関わる値を持つ機能を作る |
 | [title-screen.md](docs/design/title-screen.md) | タイトル画面（続きから／最初から／セーブ選択／育成記録） | タイトル画面・育成記録を作る |
+| [minigames.md](docs/design/minigames.md) | 半年ごとの30秒ミニゲーム（いつ出るか・出番表・3本の判定・結果の反映・ドット絵の差し替え） | ミニゲームを足す・調整する |
 
 ### 調査メモ — `docs/research/`（仕様ではない）
 
@@ -83,6 +84,7 @@ Unity 製の子育てシミュレーションゲーム。**このファイルは
 | [ui-start-scene.md](docs/code/ui-start-scene.md) | スタート画面（Start_scene）の GameObject 階層、OnClick 配線、設定手順 | スタート画面を構築・確認する |
 | [sound-system.md](docs/code/sound-system.md) | サウンド（SE・BGM・音量設定パネル）のスクリプト構成と Unity 設定手順 | SE・BGM・音量設定画面を設定・利用する |
 | [how-to-add-support-scheme.md](docs/code/how-to-add-support-scheme.md) | 支援制度（カード）の足し方と、制度アセットの各項目（年齢の日付・期限・支給表・条件）の意味 | 制度を追加・調整する |
+| [ui-tutorial.md](docs/code/ui-tutorial.md) | チュートリアル画面（画像＋見出し＋説明文・スワイプでページ送り）、新しいチュートリアルの足し方、編集ツール | チュートリアルを足す・画面を調整する |
 
 ### チーム — `docs/team/`
 
@@ -112,6 +114,10 @@ Unity 製の子育てシミュレーションゲーム。**このファイルは
 - [0029-event-rate-store-and-conditions.md](docs/decisions/0029-event-rate-store-and-conditions.md) — 発生率の補正を EventRateModifiers に預け、発生条件（年齢帯・ストレス段階）を部品にした理由
 - [0030-monthly-independent-event-lottery.md](docs/decisions/0030-monthly-independent-event-lottery.md) — イベントを悪い・良いで別々に月ごとに抽選し、確率をストレスと発生率補正で決めた理由
 - [0031-fixed-events-and-event-save.md](docs/decisions/0031-fixed-events-and-event-save.md) — 固定イベント（誕生日など）を抽選と別に持ち、イベントの状態（起きた記録・予約・補正）をセーブする理由
+- [0032-minigame-schedule-june-december.md](docs/decisions/0032-minigame-schedule-june-december.md) — ミニゲームを毎年6月1日・12月1日（0歳6月1日が1回目）に出し、取りこぼしても同じ月のうちに出す理由
+- [0033-no-runaway-until-elementary-ends.md](docs/decisions/0033-no-runaway-until-elementary-ends.md) — 小学生まではルールを覚える期間として家出させず、中学入学（12歳4月1日）から家出を判定する理由
+- [0034-tutorial-panel.md](docs/decisions/0034-tutorial-panel.md) — チュートリアルを「画像＋見出し＋説明文」のページのデータにして共通の画面で出す理由と、家出のチュートリアルを12歳4月1日に出す理由
+- [0035-tutorial-timing-in-data.md](docs/decisions/0035-tutorial-timing-in-data.md) — チュートリアルを出すタイミングをデータ（TutorialData）に持たせ、共通の TutorialScheduler で出す理由
 
 ---
 

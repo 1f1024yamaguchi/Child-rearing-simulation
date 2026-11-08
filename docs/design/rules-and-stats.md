@@ -1,6 +1,6 @@
 ---
 title: 基本ルールとステータス設計
-updated: 2026-10-19
+updated: 2026-11-01
 status: 設計中
 related: [docs/design/concept.md, docs/design/food-system.md, docs/design/ending.md, docs/code/architecture.md]
 ---
@@ -37,6 +37,7 @@ related: [docs/design/concept.md, docs/design/food-system.md, docs/design/ending
 ### 失敗条件：家出でゲームオーバー
 - **子ども自身のストレスが限界（最大）の状態が一定期間続くと、家出してしまい → ゲームオーバー**（巣立ちを待たずに終了）。
   - ※「一定期間」が何日かは **未決定**。判定自体も未実装（`IsGameOver` は `GoalAgeDays` 到達でしか立たない）。
+- **小学生まで（12歳3月31日まで）は家出しない**。ルールを覚える期間とし、中学入学（12歳4月1日）から判定する（2026-11-01 決定 → [decisions/0033](../decisions/0033-no-runaway-until-elementary-ends.md)）。
 - 巣立ち（エンディング）と家出（ゲームオーバー）が、成功と失敗の対になる。
 - → 子どものストレスを常に気にかける必要があり、子カードにも**ストレスメーター**を表示する。
 

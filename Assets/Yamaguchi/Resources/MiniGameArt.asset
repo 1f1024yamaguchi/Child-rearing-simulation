@@ -1,0 +1,55 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 90aaca7c45dbaa7428136ba66bc82e30, type: 3}
+  m_Name: MiniGameArt
+  m_EditorClassIdentifier: Assembly-CSharp::MiniGameArt
+  roomBackground: {fileID: 21300000, guid: e3a18b8a5ad320149a9d792a8091d149, type: 3}
+  bubbleCry: {fileID: 21300000, guid: 58be051caaa3cf1468d2480b3cd8ceeb, type: 3}
+  bubbleNote: {fileID: 21300000, guid: 0f1f36995ede25d42b5448203ad26150, type: 3}
+  bubbleZzz: {fileID: 21300000, guid: 7f70ab82748e2344184692f5e1f34c08, type: 3}
+  milkBottle: {fileID: 21300000, guid: de197bd56552ce7489ae49af6a12b5ab, type: 3}
+  steam:
+  - {fileID: 21300000, guid: e451152d0996fed4cb38ff4490ff86c1, type: 3}
+  - {fileID: 21300000, guid: 309065e2e51f2b74498e95760721be44, type: 3}
+  thermometerFrame: {fileID: 21300000, guid: 49c931906ac81534696dd593cffac7ed, type: 3}
+  thermometerFill: {fileID: 21300000, guid: 129be897dafcf034c94a57f01e72aa4c, type: 3}
+  zoneArrow: {fileID: 21300000, guid: 549c13c7480280b49b8774252c139e76, type: 3}
+  waterDrop: {fileID: 21300000, guid: 97c2b20adf950e6468a70a5b0b2627c1, type: 3}
+  hotDrop: {fileID: 21300000, guid: 4ed9822533888f6409c38d7ded7d9a86, type: 3}
+  faucetKnob: {fileID: 21300000, guid: 635dfa50fc36f7e4c8f52aa358823155, type: 3}
+  sliderTrack: {fileID: 21300000, guid: ea725edd720f9ad4b8c568235815c62e, type: 3}
+  milkBottleSide: {fileID: 21300000, guid: af10d50dcdffd3f42b6f723dfd7d7de5, type: 3}
+  faceHungry: {fileID: 21300000, guid: 5f22596463a6f824d9d326c29c5db91e, type: 3}
+  faceDrinking: {fileID: 21300000, guid: 8a609e60b889a8f4a8f112562f08235b, type: 3}
+  faceHappy: {fileID: 21300000, guid: d3ef9b99ccec20e49af6aba043b57ae3, type: 3}
+  faceFull: {fileID: 21300000, guid: 5134eac25f939674aa0e5d624389c7e8, type: 3}
+  faceVomit: {fileID: 21300000, guid: 3a55aafa61e509148a1ec6381d62a54d, type: 3}
+  faceChoke: {fileID: 21300000, guid: 334e1bdd6ab46f445be78ae513f29ec5, type: 3}
+  babyAwake:
+  - {fileID: 21300000, guid: 4e7176ade6db95e4cad9a0a3a1bcb5ff, type: 3}
+  - {fileID: 21300000, guid: 498aa7cc73bb2154eb472d9a05869b32, type: 3}
+  babyAsleep:
+  - {fileID: 21300000, guid: 12d6431fca6bce043b7d571e9b879ee6, type: 3}
+  - {fileID: 21300000, guid: 9fe68cab5d5d78e41b906a113fe76165, type: 3}
+  babyAwakeBounds:
+    x: 1
+    y: 0
+    width: 10
+    height: 13
+  babyAsleepBounds:
+    x: 0
+    y: 0
+    width: 23
+    height: 20
+  crib: {fileID: 21300000, guid: bda50cb6fbfcc434783c0a2ab60aa68c, type: 3}
+  ringTarget: {fileID: 21300000, guid: d0f8116ed48ce4e41b2b3b7c64b51314, type: 3}
+  ringApproach: {fileID: 21300000, guid: 1ba93d10631e2c346bc6c111dd9e60e7, type: 3}

@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>チュートリアル制作ツールの使い方</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  /* 色：ゲームの「わかった」ボタンの緑を主役に、紙っぽい明るいグレーの地。注釈の赤は画像の枠と同じ */
+  --paper: #f4f5f1;
+  --surface: #ffffff;
+  --ink: #23271f;
+  --muted: #5d6458;
+  --line: #d8dcd2;
+  --accent: #4f8f41;
+  --accent-soft: #e4efdf;
+  --mark: #e64833;
+  --code-bg: #2b2f28;
+  --code-ink: #e9eee4;
+  --font-display: "DotGothic16", "Zen Kaku Gothic New", sans-serif;
+  --font-body: "Zen Kaku Gothic New", "Hiragino Sans", "Yu Gothic", "Meiryo", sans-serif;
+  --font-mono: "JetBrains Mono", "Consolas", monospace;
+  /* レイアウト：本文は1カラム（最大 72ch）、図は本文より少し広く。番号付きの手順と画像を横並び、狭い画面では縦に積む */
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #1b1e19;
+    --surface: #242822;
+    --ink: #e6eae1;
+    --muted: #a3ab9c;
+    --line: #3a4036;
+    --accent: #7cc06b;
+    --accent-soft: #2c3a27;
+    --mark: #ff6a52;
+    --code-bg: #121410;
+    --code-ink: #e6eae1;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #1b1e19;
+  --surface: #242822;
+  --ink: #e6eae1;
+  --muted: #a3ab9c;
+  --line: #3a4036;
+  --accent: #7cc06b;
+  --accent-soft: #2c3a27;
+  --mark: #ff6a52;
+  --code-bg: #121410;
+  --code-ink: #e6eae1;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.8;
+}
+img { max-width: 100%; height: auto; display: block; }
+a { color: var(--accent); }
+a:focus-visible, button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+.wrap { max-width: 980px; margin: 0 auto; padding: 0 20px; }
+.prose { max-width: 72ch; }
+
+/* ヘッダー */
+header.top {
+  padding: 40px 0 28px;
+  border-bottom: 1px solid var(--line);
+}
+.top .grid {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 32px;
+  align-items: center;
+}
+.eyebrow {
+  font-family: var(--font-display);
+  color: var(--accent);
+  font-size: 15px;
+  letter-spacing: .04em;
+  margin: 0 0 6px;
+}
+h1 {
+  word-break: auto-phrase;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(30px, 4.4vw, 44px);
+  line-height: 1.25;
+  margin: 0 0 14px;
+  text-wrap: balance;
+}
+.lead { color: var(--muted); margin: 0 0 18px; }
+.menu-path {
+  display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px;
+  font-size: 14px;
+}
+.menu-path span {
+  background: var(--surface); border: 1px solid var(--line);
+  padding: 2px 10px; border-radius: 4px;
+}
+.menu-path i { font-style: normal; color: var(--muted); }
+.shot {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 6px;
+}
+.shot img { border-radius: 4px; image-rendering: auto; }
+.pixel img { image-rendering: pixelated; }
+figcaption { font-size: 13px; color: var(--muted); padding: 6px 4px 0; }
+
+/* 目次 */
+nav.toc {
+  display: flex; flex-wrap: wrap; gap: 8px;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--line);
+}
+nav.toc a {
+  text-decoration: none; color: var(--ink);
+  font-size: 14px;
+  padding: 4px 12px; border-radius: 999px;
+  border: 1px solid var(--line); background: var(--surface);
+}
+nav.toc a:hover { border-color: var(--accent); color: var(--accent); }
+
+/* セクション */
+section { padding: 44px 0 8px; }
+h2 {
+  word-break: auto-phrase;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 26px;
+  line-height: 1.35;
+  margin: 0 0 6px;
+  display: flex; align-items: baseline; gap: 12px;
+  text-wrap: balance;
+}
+h2 .no {
+  font-size: 15px; color: var(--surface); background: var(--accent);
+  padding: 0 8px; border-radius: 4px; line-height: 1.7;
+}
+h3 { font-size: 18px; margin: 28px 0 8px; }
+p { margin: 0 0 12px; }
+.sub { color: var(--muted); margin-bottom: 20px; }
+
+/* 全体の流れ */
+.flow {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr auto 1fr;
+  gap: 10px;
+  align-items: stretch;
+  margin: 18px 0 8px;
+}
+.flow .box {
+  background: var(--surface); border: 1px solid var(--line);
+  border-top: 4px solid var(--accent);
+  border-radius: 6px; padding: 14px 16px;
+}
+.flow .box b { display: block; font-size: 15px; }
+.flow .box code { font-size: 13px; }
+.flow .box p { font-size: 14px; color: var(--muted); margin: 6px 0 0; }
+.flow .arrow { align-self: center; color: var(--accent); font-family: var(--font-display); font-size: 22px; }
+
+/* 早見表 */
+.table-wrap { overflow-x: auto; margin: 14px 0; }
+table { border-collapse: collapse; width: 100%; min-width: 560px; background: var(--surface); font-size: 15px; }
+th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-weight: 700; background: var(--accent-soft); }
+td:first-child { font-weight: 500; white-space: nowrap; }
+
+/* 画像＋番号の説明 */
+.pair {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+  margin: 16px 0;
+}
+.pair.narrow { grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); }
+ol.marks { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+ol.marks li { display: grid; grid-template-columns: 28px 1fr; gap: 10px; align-items: start; }
+.badge {
+  width: 26px; height: 26px; border-radius: 50%;
+  background: var(--mark); color: #fff;
+  font-weight: 700; font-size: 14px; line-height: 26px; text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+ol.marks b { display: block; }
+ol.marks span.d { color: var(--muted); font-size: 14px; }
+
+/* 手順 */
+ol.steps { counter-reset: s; list-style: none; padding: 0; margin: 12px 0; display: grid; gap: 12px; }
+ol.steps > li {
+  counter-increment: s;
+  position: relative;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 6px;
+  padding: 12px 16px 12px 56px;
+}
+ol.steps > li::before {
+  content: counter(s);
+  position: absolute; left: 14px; top: 12px;
+  width: 28px; height: 28px; border-radius: 4px;
+  background: var(--accent); color: var(--surface);
+  font-family: var(--font-display); text-align: center; line-height: 28px;
+}
+
+/* 見る方法 3つ */
+.ways { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin: 16px 0; }
+.way { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 16px; }
+.way .tag { font-family: var(--font-display); color: var(--accent); font-size: 14px; }
+.way h3 { margin: 2px 0 8px; font-size: 17px; }
+.way ol { margin: 0; padding-left: 1.3em; font-size: 14.5px; }
+.way .use { font-size: 13px; color: var(--muted); margin-top: 8px; }
+
+/* スワイプの3コマ */
+.strip { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin: 16px 0; }
+
+/* 注意 */
+.note {
+  border-left: 4px solid var(--mark);
+  background: var(--surface);
+  padding: 12px 16px; border-radius: 0 6px 6px 0;
+  margin: 12px 0;
+}
+.note b { color: var(--mark); }
+.tip { border-left-color: var(--accent); }
+.tip b { color: var(--accent); }
+
+code { font-family: var(--font-mono); font-size: .9em; background: var(--accent-soft); padding: 1px 5px; border-radius: 3px; }
+pre {
+  background: var(--code-bg); color: var(--code-ink);
+  border-radius: 6px; padding: 16px 18px; overflow-x: auto;
+  font-family: var(--font-mono); font-size: 13.5px; line-height: 1.65;
+  margin: 12px 0;
+}
+pre code { background: none; padding: 0; color: inherit; }
+pre .c { color: #9fb594; }
+
+kbd {
+  font-family: var(--font-mono); font-size: 13px;
+  border: 1px solid var(--line); border-bottom-width: 2px;
+  padding: 0 6px; border-radius: 4px; background: var(--surface);
+}
+
+footer { padding: 40px 0 56px; color: var(--muted); font-size: 14px; border-top: 1px solid var(--line); margin-top: 40px; }
+footer ul { padding-left: 1.2em; margin: 6px 0 0; }
+
+@media (max-width: 760px) {
+  .top .grid, .pair, .pair.narrow { grid-template-columns: 1fr; }
+  .flow { grid-template-columns: 1fr; }
+  .flow .arrow { transform: rotate(90deg); justify-self: center; }
+  .ways, .strip { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+html { scroll-behavior: smooth; }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap grid">
+    <div>
+      <p class="eyebrow">子ども育成シミュレーション ／ Unity エディタ拡張</p>
+      <h1>チュートリアル制作ツールの使い方</h1>
+      <p class="lead">上に画像、下に見出しと説明文。画像を横にスワイプすると次のページへ進むチュートリアル画面を、スクリプトを書かずに作ったり直したりするための手引きです。</p>
+      <div class="menu-path" aria-label="メニューの場所">
+        <span>子育て</span><i>›</i><span>チュートリアル</span><i>›</i><span>編集ウィンドウ</span>
+      </div>
+    </div>
+    <figure class="shot pixel" style="margin:0">
+      <img src="img/game-runaway.png" alt="ゲーム画面に家出のチュートリアルが表示されている。上に夕日に向かって歩く子どものドット絵、下に見出し「家出」と説明文、「わかった」ボタン" width="695" height="521">
+      <figcaption>完成形：家出のチュートリアル（12歳4月1日に1回だけ出る）</figcaption>
+    </figure>
+  </div>
+</header>
+
+<div class="wrap">
+  <nav class="toc" aria-label="目次">
+    <a href="#overview">しくみ</a>
+    <a href="#where">どこで何をする</a>
+    <a href="#edit">既存のを編集</a>
+    <a href="#new">新しく作る</a>
+    <a href="#check">見て確かめる</a>
+    <a href="#layout">見た目を変える</a>
+    <a href="#swipe">スワイプの動き</a>
+    <a href="#timing">出すタイミング</a>
+    <a href="#caution">気をつけること</a>
+  </nav>
+
+  <!-- しくみ -->
+  <section id="overview">
+    <h2><span class="no">0</span>しくみは3つに分かれています</h2>
+    <p class="sub prose">中身（文と絵、いつ出すか）、画面（配置）、出す係が別々なので、文やタイミングを直すだけなら画面には触らず、画面を直しても中身は消えません。</p>
+    <div class="flow">
+      <div class="box">
+        <b>① 中身：TutorialData</b>
+        <code>Assets/Yamaguchi/Data/Tutorial/</code>
+        <p>「出すタイミング」とページのリスト。1ページ＝画像・絵の指示メモ・見出し・説明文。アセットを1つ足せば、チュートリアルが1本増えます。</p>
+      </div>
+      <div class="arrow" aria-hidden="true">→</div>
+      <div class="box">
+        <b>② 画面：TutorialCanvas</b>
+        <code>Main_test2 の Hierarchy</code>
+        <p>全チュートリアル共通の画面。位置・大きさ・色は Canvas 上で直接いじります。</p>
+      </div>
+      <div class="arrow" aria-hidden="true">→</div>
+      <div class="box">
+        <b>③ タイミング：TutorialScheduler</b>
+        <code>TutorialCanvas/Triggers</code>
+        <p>各チュートリアルの「出すタイミング」を毎日確かめて、条件を満たした日に1回だけ出す。チュートリアルごとのスクリプトは要りません。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 早見表 -->
+  <section id="where">
+    <h2><span class="no">1</span>どこで何をするか</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>やりたいこと</th><th>場所</th></tr></thead>
+        <tbody>
+          <tr><td>文・画像を直す</td><td>メニュー「子育て › チュートリアル › 編集ウィンドウ」でチュートリアルを選ぶ</td></tr>
+          <tr><td>いつ出すかを決める</td><td>同じく編集ウィンドウの「出すタイミング」</td></tr>
+          <tr><td>全部がいつ出るかを見る</td><td>編集ウィンドウの下の「すべてのチュートリアル（いつ出るか）」</td></tr>
+          <tr><td>ページを足す・並べ替える</td><td>同じく編集ウィンドウ（「＋ ページを追加」「↑ ↓」「削除」）</td></tr>
+          <tr><td>新しいチュートリアルを作る</td><td>編集ウィンドウの「新しく作る」</td></tr>
+          <tr><td>再生せずに見る</td><td>編集ウィンドウの各ページの「Canvas で見る」</td></tr>
+          <tr><td>再生中に本番どおり見る</td><td>再生中に編集ウィンドウの「今すぐ出す（テスト）」</td></tr>
+          <tr><td>画像の枠・文字の位置や大きさ</td><td>Hierarchy の <code>TutorialCanvas › TutorialPanel</code> の中を直接動かす</td></tr>
+          <tr><td>スライドの速さ・反応のしやすさ</td><td><code>TutorialPanel</code> の Inspector「動き」</td></tr>
+          <tr><td>ページの点の色・形</td><td><code>PageDots</code> の Inspector と、見本の点 <code>DotTemplate</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 編集 -->
+  <section id="edit">
+    <h2><span class="no">2</span>既存のチュートリアルを編集する</h2>
+    <p class="sub prose">メニュー「子育て › チュートリアル › 編集ウィンドウ」を開くか、Project で <code>Tutorial_Runaway</code> などのアセットを選んで Inspector の「編集ウィンドウで開く」を押します。</p>
+
+    <div class="pair">
+      <figure class="shot" style="margin:0">
+        <img src="img/editor-window.png" alt="チュートリアル編集ウィンドウ。チュートリアル選択欄、新しく作るボタン、出すタイミングの欄（いつ出すか・ずらす日数・説明と登録状態）、ページ1の画像・絵の指示メモ・見出し・説明文の欄、Canvasで見るボタン、並べ替えと削除ボタン、ページを追加ボタン、すべてのチュートリアルの一覧、スケジュールを選択ボタン" width="800" height="760">
+        <figcaption>編集ウィンドウ（家出のチュートリアルを開いたところ）</figcaption>
+      </figure>
+      <ol class="marks">
+        <li><span class="badge">1</span><div><b>チュートリアルを選ぶ</b><span class="d">編集したいアセットをここに入れる。下の一覧⑨の名前を押しても選べる。</span></div></li>
+        <li><span class="badge">2</span><div><b>新しく作る</b><span class="d">1ページだけのチュートリアルができ、スケジュールにも自動で登録される。</span></div></li>
+        <li><span class="badge">3</span><div><b>いつ出すか</b><span class="d">出すタイミングの種類を選ぶ（<a href="#timing">7章の表</a>）。</span></div></li>
+        <li><span class="badge">4</span><div><b>種類ごとの設定</b><span class="d">選んだ種類に合わせて欄が変わる。年齢なら「○歳○月○日」、ストレスなら「○以上」など。</span></div></li>
+        <li><span class="badge">5</span><div><b>いつ出るかの確認</b><span class="d">「→」の行に、設定した結果が日本語で出る。下の行がスケジュールへの登録状態。「まだ登録されていない」と出たら「登録する」を押す。</span></div></li>
+        <li><span class="badge">6</span><div><b>Canvas で見る</b><span class="d">再生しなくても、シーンの画面にこのページが出る。書き換えるとすぐ反映される。</span></div></li>
+        <li><span class="badge">7</span><div><b>↑ ↓ ／ 削除</b><span class="d">ページの順番を入れ替える・消す。左のページから順に表示される。</span></div></li>
+        <li><span class="badge">8</span><div><b>＋ ページを追加</b><span class="d">空のページが最後に増える。画像は Sprite をドラッグして入れる。</span></div></li>
+        <li><span class="badge">9</span><div><b>すべてのチュートリアル</b><span class="d">プロジェクトにある全チュートリアルが、出る順に並ぶ。「⚠ 未登録」のものは出ない。</span></div></li>
+        <li><span class="badge">10</span><div><b>スケジュールを選択</b><span class="d">シーンの TutorialScheduler を Inspector で開く。右の「プレビューを閉じる」は⑥で出した画面を隠す。</span></div></li>
+      </ol>
+    </div>
+
+    <div class="pair narrow">
+      <figure class="shot" style="margin:0">
+        <img src="img/inspector-data.png" alt="Tutorial_Runaway アセットの Inspector。上部に「編集ウィンドウで開く」ボタン、その下に Id と Pages" width="586" height="235">
+        <figcaption>アセットの Inspector からも開ける</figcaption>
+      </figure>
+      <div>
+        <p><span class="badge" style="display:inline-block">1</span>　アセットを選ぶと、Inspector の一番上に「編集ウィンドウで開く」が出ます。</p>
+        <p>Inspector の <b>Pages</b> を開いて直接書き換えても同じですが、並べ替えやプレビューは編集ウィンドウのほうが楽です。</p>
+        <div class="note"><b>ID は後から変えない</b><br>ID（家出なら <code>runaway</code>）は「もう見た」をセーブするときの名前です。変えると、見たはずのチュートリアルがもう一度出ます。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 新しく作る -->
+  <section id="new">
+    <h2><span class="no">3</span>新しいチュートリアルを作る</h2>
+    <ol class="steps prose">
+      <li>編集ウィンドウの <b>「新しく作る」</b> を押し、名前を決める（例：<code>Tutorial_Food</code>）。保存先は <code>Assets/Yamaguchi/Data/Tutorial/</code>。</li>
+      <li><b>ID</b> を決める（例：<code>food</code>）。空のままならファイル名が使われる。</li>
+      <li>各ページに <b>見出し・説明文</b> を入れる。絵がまだ無ければ <b>絵の指示メモ</b> に描いてほしい内容を書いておく。</li>
+      <li><b>「出すタイミング」</b> を選ぶ（例：「決まった年齢の日」で 6歳4月1日）。「→」の行で、いつ出るかを確かめる。</li>
+      <li><b>「Canvas で見る」</b> で見た目を確かめる。文が長すぎて枠からはみ出していないかをここで見る。</li>
+      <li>シーンを保存する。スケジュールへの登録はシーンに入るため。</li>
+    </ol>
+    <p class="prose">これだけで、その日になると自動で出ます。表にない場面（ボタンを押したとき、イベントが起きたとき など）で出したいときは、タイミングを「コードから呼んだときだけ」にして、その場面のスクリプトから1行呼びます。</p>
+<pre><code><span class="c">// まだ見ていなければ出す（「見た」はセーブに入る。二度は出ない）</span>
+TutorialManager.I.ShowOnce(tutorialData);
+
+<span class="c">// 見たかどうかに関係なく出す（設定画面から見返す、など）</span>
+TutorialManager.I.Show(tutorialData);</code></pre>
+  </section>
+
+  <!-- 見る -->
+  <section id="check">
+    <h2><span class="no">4</span>見て確かめる</h2>
+    <p class="sub prose">目的に合わせて3つの見方があります。</p>
+    <div class="ways">
+      <div class="way">
+        <div class="tag">A ／ 再生しない</div>
+        <h3>Canvas で見る</h3>
+        <ol>
+          <li>編集ウィンドウでチュートリアルを選ぶ</li>
+          <li>ページの「Canvas で見る」</li>
+          <li>Game ビューか Scene ビューで見る</li>
+          <li>終わったら「プレビューを閉じる」</li>
+        </ol>
+        <p class="use">配置や文の長さを直すとき</p>
+      </div>
+      <div class="way">
+        <div class="tag">B ／ 再生中</div>
+        <h3>今すぐ出す（テスト）</h3>
+        <ol>
+          <li>再生する</li>
+          <li>編集ウィンドウでチュートリアルを選ぶ</li>
+          <li>「出すタイミング」の下の「今すぐ出す（テスト）」</li>
+        </ol>
+        <p class="use">スワイプ・時間停止・「わかった」まで本番どおり見るとき</p>
+      </div>
+      <div class="way">
+        <div class="tag">C ／ 再生中</div>
+        <h3>その日まで早送り</h3>
+        <ol>
+          <li>「子育て › デバッグツール」を開く</li>
+          <li><b>全部オートを OFF</b> にする</li>
+          <li>出る日の少し前までジャンプ（家出なら12歳3月31日）</li>
+        </ol>
+        <p class="use">決まった日に本当に出るかを確かめるとき</p>
+      </div>
+    </div>
+
+    <div class="note"><b>早送りのときは全部オートを OFF に</b><br>オートが ON のままだと、チュートリアルが出た瞬間に自動で閉じられます（「見た」の記録だけ付きます）。もう一度見たいときは、再生中に編集ウィンドウの「見た記録を消す」。</div>
+  </section>
+
+  <!-- 見た目 -->
+  <section id="layout">
+    <h2><span class="no">5</span>画面の見た目を変える</h2>
+    <p class="sub prose">配置はすべて Canvas 上のオブジェクトで決まっています。コードでは位置を決めていないので、RectTransform を動かせばそのまま反映されます。</p>
+
+    <div class="pair narrow">
+      <figure class="shot" style="margin:0">
+        <img src="img/hierarchy.png" alt="Hierarchy の TutorialCanvas を展開したところ。TutorialPanel の下に Dim、Sheet、ImageFrame、Viewport、Track、Slot_Prev、Slot_Current、Slot_Next、Arrow_Left、Arrow_Right、PageDots、DotTemplate、Dot_1、TextBlock、Heading、Body、Btn_OK、その下に Triggers" width="549" height="585">
+        <figcaption>Main_test2 の Hierarchy</figcaption>
+      </figure>
+      <ol class="marks">
+        <li><span class="badge">1</span><div><b>TutorialCanvas</b><span class="d">一番上。並び順 100 で他の画面より手前。<code>TutorialManager</code> が付いている。</span></div></li>
+        <li><span class="badge">2</span><div><b>ImageFrame</b><span class="d">黒い画像の枠（560×290）。ここをスワイプする。中の Slot_Prev / Current / Next が前・今・次の画像。</span></div></li>
+        <li><span class="badge">3</span><div><b>PageDots</b><span class="d">ページの点。点はすべて Image で、見本の <code>DotTemplate</code> を複製して並べる。見本の大きさや画像を変えると全部の点が変わる。</span></div></li>
+        <li><span class="badge">4</span><div><b>TextBlock</b><span class="d">見出し（Heading）と説明文（Body）。文字の大きさ・色はそれぞれの TextMeshPro で変える。</span></div></li>
+        <li><span class="badge">5</span><div><b>Triggers</b><span class="d"><code>TutorialScheduler</code> が付いている。自動で出すチュートリアルの一覧（登録は編集ウィンドウから）。</span></div></li>
+      </ol>
+    </div>
+
+    <h3>スライドの速さ・反応のしやすさ</h3>
+    <div class="pair narrow">
+      <figure class="shot" style="margin:0">
+        <img src="img/inspector-panel.png" alt="TutorialPanel の Inspector。Tutorial Panel UI の参照欄と、下の「動き」の欄（Slide Seconds 0.25、Swipe Threshold 0.2、Flick Speed 800、Edge Resistance 0.3）に枠" width="586" height="618">
+        <figcaption><code>TutorialPanel</code> の Inspector</figcaption>
+      </figure>
+      <div class="table-wrap" style="margin:0">
+        <table style="min-width:0">
+          <thead><tr><th>項目</th><th>いまの値</th><th>意味</th></tr></thead>
+          <tbody>
+            <tr><td>Slide Seconds</td><td>0.25</td><td>ページが滑りきるまでの秒数</td></tr>
+            <tr><td>Swipe Threshold</td><td>0.2</td><td>枠の幅の何割ドラッグしたら次へ進むか</td></tr>
+            <tr><td>Flick Speed</td><td>800</td><td>この速さ以上ではじけば、短くても次へ</td></tr>
+            <tr><td>Edge Resistance</td><td>0.3</td><td>最初・最後のページでさらに引っぱったときの動きやすさ</td></tr>
+            <tr><td>Text Fade Seconds</td><td>0.2</td><td>ページが変わったとき文字がふわっと出る秒数</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="note"><b>「画面をシーンに作る」はもう押さない</b><br>メニュー「子育て › チュートリアル › 画面をシーンに作る」は、画面を最初に作るためのものです。もう一度実行すると作り直しになり、Canvas で調整した位置や大きさが元に戻ります（実行前に確認が出ます）。</div>
+  </section>
+
+  <!-- スワイプ -->
+  <section id="swipe">
+    <h2><span class="no">6</span>スワイプの動き</h2>
+    <p class="sub prose">3ページの見本で、左へスワイプしたときの様子です。指（iPad）でもマウスのドラッグでも動きます。矢印ボタンやキーボードの <kbd>←</kbd> <kbd>→</kbd> でも進めます。</p>
+    <div class="strip">
+      <figure class="shot pixel" style="margin:0">
+        <img src="img/game-swipe.png" alt="1ページ目のドット絵を左へドラッグしている途中。右から2ページ目の灰色の差し替え枠が見えている" width="695" height="521">
+        <figcaption>① ドラッグ中：画像が指についてきて、右から次のページが見える</figcaption>
+      </figure>
+      <figure class="shot" style="margin:0">
+        <img src="img/game-page2.png" alt="2ページ目。灰色の差し替え枠に絵の指示メモ、見出し「ストレスの見方」、左右の矢印、真ん中の点が緑" width="695" height="521">
+        <figcaption>② 離すと2ページ目へ。見出し・説明文・点も切り替わる</figcaption>
+      </figure>
+      <figure class="shot" style="margin:0">
+        <img src="img/game-page3.png" alt="3ページ目。右の矢印が消え、下に「わかった」ボタン、右端の点が緑" width="695" height="521">
+        <figcaption>③ 最後のページだけ「わかった」が出る</figcaption>
+      </figure>
+    </div>
+    <p class="prose">画像が未設定のページは、灰色の差し替え枠に「絵の指示メモ」が出ます（②③）。ドット絵ができたら編集ウィンドウで Sprite を入れるだけで、①のように絵に変わります。</p>
+  </section>
+
+  <!-- タイミング -->
+  <section id="timing">
+    <h2><span class="no">7</span>出るタイミング</h2>
+    <p class="sub prose">編集ウィンドウの「いつ出すか」で選べる種類です。どれも、条件を満たした最初の日に1回だけ出ます。</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>いつ出すか</th><th>設定する欄</th><th>使いどころの例</th></tr></thead>
+        <tbody>
+          <tr><td>ゲームを始めてすぐ</td><td>なし</td><td>操作のしかた、スライダーの意味</td></tr>
+          <tr><td>決まった年齢の日</td><td>○歳○月○日</td><td>小学校入学（6歳4月1日）で塾・習い事の説明</td></tr>
+          <tr><td>家出の判定が始まる日（ずらせる）</td><td>ずらす日数（−30 で30日前）</td><td>家出（いまは当日＝12歳4月1日）</td></tr>
+          <tr><td>子どものストレスが ○ 以上になったら</td><td>ストレス、判定を始める日</td><td>ストレスが危険域（71〜）に入ったときの注意</td></tr>
+          <tr><td>お金が ○ 円より少なくなったら</td><td>金額、判定を始める日</td><td>貯金が減ってきたときの支援制度の案内</td></tr>
+          <tr><td>コードから呼んだときだけ</td><td>なし（スクリプトで <code>ShowOnce</code>）</td><td>表にない場面。ボタンやイベントの直後など</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note tip"><b>種類を増やしたいとき</b>　「入学したら」「ミニゲームの前に」など、表にない種類が必要になったら、<code>TutorialTiming.cs</code> の種類に1つ足し、<code>TutorialScheduler.IsDue</code> に判定を1行足します。チュートリアルごとのスクリプトは作りません。</div>
+
+    <h3>共通のルール</h3>
+    <div class="pair narrow">
+      <figure class="shot" style="margin:0">
+        <img src="img/game-queue.png" alt="今月の食事選択の画面が開いている。この画面を閉じるまでチュートリアルは順番待ちになる" width="695" height="521">
+        <figcaption>食事の選択が開いている間は順番待ち</figcaption>
+      </figure>
+      <ul class="prose" style="margin:0; padding-left:1.2em; display:grid; gap:8px">
+        <li><b>表示中は時間が止まる。</b>「わかった」で閉じると再開。</li>
+        <li><b>他の判断画面が開いている間は待つ。</b>食事の選択・イベント・税金などを全部閉じてから、少し（3フレーム）待って出る。月初めは食事の選択画面が少し遅れて開くため。</li>
+        <li><b>同じチュートリアルは二度出ない</b>（<code>ShowOnce</code> のとき）。「見た」はセーブに入るので、続きから遊んでも出ない。</li>
+        <li><b>ゲームが終わったあとは出ない</b>（家出・家計破綻・ゴール）。</li>
+        <li><b>条件の日を過ぎたセーブをロードしたとき</b>は、まだ見ていなければ次の日に出る。</li>
+        <li>家出のチュートリアルは「家出の判定が始まる日」なので、<code>RunawayWatcher</code> の開始年齢を変えると一緒に動く。</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 注意 -->
+  <section id="caution">
+    <h2><span class="no">8</span>気をつけること</h2>
+    <div class="note"><b>ID を変えない</b>　「見た」の記録が別物になり、もう一度出てしまう。</div>
+    <div class="note"><b>画面を作り直さない</b>　「画面をシーンに作る」を再実行すると、Canvas での調整が消える。</div>
+    <div class="note"><b>早送りはオート OFF で</b>　ON だとチュートリアルが一瞬で閉じられる。</div>
+    <div class="note"><b>「⚠ 未登録」は出ない</b>　すべてのチュートリアルの一覧で「⚠ 未登録」になっていたら、そのチュートリアルを選んで「登録する」を押し、シーンを保存する。</div>
+    <div class="note tip"><b>長い説明文はページを分ける</b>　説明文の欄は4行くらいまで。それより長いときは、ページを足してスワイプで読ませるほうが読みやすい。</div>
+  </section>
+</div>
+
+<footer>
+  <div class="wrap">
+    <b>関係するファイル</b>（<code>Assets/Yamaguchi/Scripts/</code>）
+    <ul>
+      <li>中身・窓口：<code>Core/Tutorial/</code> TutorialPage・TutorialData・TutorialTiming・TutorialScheduler・TutorialManager</li>
+      <li>画面：<code>UI/Tutorial/</code> TutorialPanelUI・TutorialImageSlot・TutorialSwipeArea・TutorialPageDots</li>
+      <li>ツール：<code>Editor/</code> TutorialUIBuilder（画面をシーンに作る）・TutorialEditorWindow（編集ウィンドウ）</li>
+      <li>詳しい仕様：<code>docs/code/ui-tutorial.md</code>、決めたことの記録：<code>docs/decisions/0034-tutorial-panel.md</code></li>
+    </ul>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -38,10 +38,12 @@ public class ChildCardUI : MonoBehaviour
     // ─── 内部 ─────────────────────────────────────────────
     private ChildStatus child;
     private bool isSubscribed = false;
+    private bool? gradeShown = null;   // 成績欄を出しているか（変わったときだけ切り替える）
 
     private const string KeyHobby    = "hobby";
     private const string KeyPassLine = "passLine";
     private const string KeyRunaway  = "runaway";
+    private const string KeyGradeNotice = "gradeNotice";
 
     // ─── 初期化 ───────────────────────────────────────────
     private void Start()
@@ -60,13 +62,22 @@ public class ChildCardUI : MonoBehaviour
         // 特性行のバインド
         traitRows?.Bind(child);
 
+        // 体調メーターは「体調」（高い＝元気）で表示する。
+        // 「体調不良」だとラベルが折り返すため。バーは左が赤・右が緑（低いところから改善していく見た目）。
+        if (healthMeter != null)
+        {
+            healthMeter.SetLabel("体調");
+            healthMeter.SetInvertDisplay(false);
+            healthMeter.UseHighIsGoodGradient();
+        }
+
         // 初期表示
         ShowProfile();
         ShowGrade(child.Grade);
         ShowStress(child.Stress);
         ShowHealth(child.Health);
         ShowHobby(child.Hobby, child.HobbyLevel);
-        ShowPassLine();
+        RefreshGradeVisibility();
 
         // 購読開始
         Subscribe();
@@ -143,6 +154,30 @@ public class ChildCardUI : MonoBehaviour
     private void HandleAgeChanged(float _)
     {
         ShowProfile();
+        RefreshGradeVisibility();
+    }
+
+    /// 赤ちゃんの間は成績メーターと合格ラインを隠し、代わりに「成績　2歳から」の説明行を出す。
+    /// 成績を扱う年齢になったら、説明行を消してメーターと合格ラインを出す。
+    private void RefreshGradeVisibility()
+    {
+        if (child == null) return;
+        bool active = child.IsGradeActive;
+        if (gradeShown == active) return;
+        gradeShown = active;
+
+        if (gradeMeter != null) gradeMeter.gameObject.SetActive(active);
+        if (active)
+        {
+            statusList?.RemoveStatus(KeyGradeNotice);
+            ShowPassLine();
+        }
+        else
+        {
+            statusList?.RemoveStatus(KeyPassLine);
+            int startAge = Mathf.CeilToInt(child.GradeStartAgeYears);
+            statusList?.SetStatus(KeyGradeNotice, "成績", $"{startAge}歳から");
+        }
     }
 
     // ─── 表示メソッド ─────────────────────────────────────
@@ -194,6 +229,7 @@ public class ChildCardUI : MonoBehaviour
     private void ShowPassLine()
     {
         if (statusList == null || child == null) return;
+        if (!child.IsGradeActive) return;   // 赤ちゃんの間は合格ラインを出さない
         string suffix = child.IsAbovePassLine ? "" : " 不足";
         statusList.SetStatus(KeyPassLine, "合格ライン", $"{Mathf.RoundToInt(child.PassLine)}%{suffix}");
     }

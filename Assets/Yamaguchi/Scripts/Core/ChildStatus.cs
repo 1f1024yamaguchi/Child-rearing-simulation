@@ -17,6 +17,9 @@ public class ChildStatus : PersonStatus
     [Range(0f, 100f)][SerializeField] private float grade = 50f;
     [Range(0f, 100f)][SerializeField] private float health = 80f;
 
+    [Tooltip("この歳（満年齢）から成績を扱う。それまでは赤ちゃんとして成績を隠し、伸びも止める（受験などが無い設定のため）。")]
+    [Min(0f)][SerializeField] private float gradeStartAgeYears = 2f;
+
     [Header("趣味")]
     [SerializeField] private HobbyKind hobby = HobbyKind.なし;
     [SerializeField] private float hobbyExp = 0f;
@@ -49,6 +52,12 @@ public class ChildStatus : PersonStatus
 
     /// 現在の趣味の種類。
     public HobbyKind Hobby => hobby;
+
+    /// 成績を扱い始める歳。
+    public float GradeStartAgeYears => gradeStartAgeYears;
+
+    /// 成績を扱う年齢になっているか（赤ちゃんの間は false。UI は隠し、成長も止める）。
+    public bool IsGradeActive => AgeYears >= gradeStartAgeYears;
 
     /// 趣味の習熟レベル（hobbyExp ÷ expPerLevel の整数部分）。
     public int HobbyLevel => Mathf.FloorToInt(hobbyExp / Mathf.Max(expPerLevel, 1f));
@@ -112,6 +121,16 @@ public class ChildStatus : PersonStatus
             delta = (delta + addSum) * (1f + mulSum);
         }
         health = Mathf.Clamp(health + delta, 0f, 100f);
+        if (Health != prev)
+            OnHealthChanged?.Invoke(Health);
+    }
+
+    /// 体調を指定値にセットする（ゲーム開始時の初期値用）。0〜100 にクランプ。
+    /// 補正は掛けない。表示が変わるときだけ通知する。
+    public void SetHealth(float value)
+    {
+        int prev = Health;
+        health = Mathf.Clamp(value, 0f, 100f);
         if (Health != prev)
             OnHealthChanged?.Invoke(Health);
     }

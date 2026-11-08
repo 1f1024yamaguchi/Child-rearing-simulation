@@ -1,6 +1,6 @@
 ---
 title: 子どものステータスと子どもカード
-updated: 2026-10-19
+updated: 2026-11-01
 status: 設計中（たたき台・要合意）
 related: [docs/design/rules-and-stats.md, docs/design/ending.md, docs/design/traits.md, docs/design/effects.md, docs/code/architecture.md]
 ---
@@ -114,6 +114,8 @@ AGENTS.md ルール4「`GameState` を経由する」と同じ考え方を、人
 ---
 
 ## 4. 家出（ゲームオーバー）
+
+> **小学生まで（12歳3月31日まで）は家出しない。** この期間はルールを覚える期間とし、ストレスが限界でも家出のカウントを進めない（「家出まで ○日」の行も出ない）。中学入学（12歳4月1日）から判定を始める。開始日は `RunawayWatcher` の Inspector（`activeFromAge` / `activeFromMonth`）で変えられる。（2026-11-01 決定 → [../decisions/0033-no-runaway-until-elementary-ends.md](../decisions/0033-no-runaway-until-elementary-ends.md)）
 
 - 子のストレスが **91 以上（＝限界）** の日を数える。
 - 限界を下回ったらカウントは **0 に戻す**。

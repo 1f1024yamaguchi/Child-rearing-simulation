@@ -43,4 +43,5 @@ MonoBehaviour:
     insuredMedicalExpense: 0
   conditions:
   - {fileID: 11400000, guid: 9b38343d68f173d4c910b98140a9889c, type: 2}
+  - {fileID: 11400000, guid: e6b9b5f7e04c47879a94eb3d2427aade, type: 2}
   weight: 1

@@ -33,6 +33,11 @@ public class GameClock : MonoBehaviour
 
     public void SetRunning(bool value) => running = value;
 
+    /// 時間が進んでいるか（判断画面が開いている・ゲームオーバーのときは false）。
+    public bool IsRunning => running;
+    /// いま出ている一時停止の要求の数（開いている判断画面の数）。
+    public int PauseRequests => pauseRequests;
+
     /// <summary>
     /// 判断画面等を開いたときに一時停止を要求する。
     /// カウント管理を行うため、複数画面が開いた場合でもすべての画面が閉じるまで再開しない。
@@ -59,7 +64,8 @@ public class GameClock : MonoBehaviour
 
         timer += Time.deltaTime;
         // 1フレームで複数日ぶんたまっても取りこぼさないよう while で消化
-        while (timer >= secondsPerDay)
+        // 途中で判断画面が開いて PushPause されたら、同じフレームの残りの日も進めない
+        while (running && timer >= secondsPerDay)
         {
             timer -= secondsPerDay;
             Tick();
