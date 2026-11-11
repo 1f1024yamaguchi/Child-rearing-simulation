@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using Maruyama.Core;
 
 /// <summary>制度の中身を日本語の文章にする（まとめ表示・一覧の「種類」判定に使う）。</summary>
@@ -45,7 +45,7 @@ public static class SupportSchemeDescriber
         if (e == null) return "（空）";
         int k = (int)e.kind;
         int t = (int)e.target;
-        string kind = k >= 0 && k < SupportEditorGUI.KindNames.Length ? SupportEditorGUI.KindNames[k] : e.kind.ToString();
+        string kind = k >= 0 && k < SupportEditorGUI.EventKindNames.Length ? SupportEditorGUI.EventKindNames[k] : e.kind.ToString();
         string target = t >= 0 && t < SupportEditorGUI.TargetNames.Length ? SupportEditorGUI.TargetNames[t] : e.target.ToString();
         string value = e.kind == EffectKind.Money ? SupportEditorGUI.Yen(e.value) : e.value.ToString("+0.##;-0.##;0");
         string dur = e.duration == EffectDuration.Days ? $"（{e.days}日のあいだ）" : e.duration == EffectDuration.ThisMonth ? "（今月のあいだ）" : "";

@@ -20,6 +20,7 @@ public class TutorialData : ScriptableObject
 
     public string Id => string.IsNullOrEmpty(id) ? name : id;
     public int PageCount => pages.Count;
+    public IReadOnlyList<TutorialPage> Pages => pages;
     public TutorialTiming Timing => timing;
 
     /// 範囲外なら null。

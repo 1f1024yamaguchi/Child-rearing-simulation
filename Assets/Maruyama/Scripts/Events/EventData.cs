@@ -12,8 +12,11 @@ namespace Maruyama.Events
     /// <summary>イベントの起き方。</summary>
     public enum EventTrigger
     {
-        Random, // 月ごとの抽選で起きる（悪い・良いを別々に抽選）
-        Fixed,  // 決まった日付に必ず起きる（誕生日・初めての言葉など）
+        Random,      // 月ごとの抽選で起きる（悪い・良いを別々に抽選）
+        Fixed,       // 決まった日付に必ず起きる（誕生日・初めての言葉など）
+        FollowUp,    // 続き（別のイベントから予約されたときだけ出る）
+        OnCondition, // 条件を満たしたら（1回だけ出る）
+        Manual,      // コードから呼んだときだけ
     }
 
     [CreateAssetMenu(fileName = "NewEventData", menuName = "ChildRearing/Event Data")]
@@ -25,6 +28,9 @@ namespace Maruyama.Events
         [TextArea(2, 5)]
         public string description;                  // 説明文
         public Sprite iconSprite;                   // アイコン画像
+        [Tooltip("絵を描く人向けの指示メモ。画像が未設定のときに参照される")]
+        [TextArea(2, 4)]
+        public string imageNote;                    // 絵の指示メモ
         public List<EventChoice> choices = new List<EventChoice>(); // 選択肢リスト
         public List<EventConditionSO> conditions = new List<EventConditionSO>(); // 発生条件リスト
 

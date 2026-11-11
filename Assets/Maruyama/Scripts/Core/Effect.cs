@@ -1,4 +1,5 @@
 using System;
+using UnityEngine;
 
 namespace Maruyama.Core
 {
@@ -27,5 +28,8 @@ namespace Maruyama.Core
         public float value;      // 増減量
         public EffectDuration duration = EffectDuration.Instant;
         public int days;       // duration == Days のとき
+
+        [Tooltip("フラグ・特性・状態・イベント・チュートリアルを入れる。種類に合わないものは無視")]
+        public UnityEngine.Object asset;
     }
 }

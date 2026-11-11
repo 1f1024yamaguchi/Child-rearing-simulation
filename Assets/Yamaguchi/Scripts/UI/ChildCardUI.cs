@@ -123,6 +123,13 @@ public class ChildCardUI : MonoBehaviour
         if (runawayWatcher != null)
             runawayWatcher.OnDangerDaysChanged += ShowRunaway;
 
+        // ストーリーフラグの変更（趣味の呼び名等）
+        if (StoryState.I != null)
+        {
+            StoryState.I.OnFlagChanged += HandleFlagChanged;
+            StoryState.I.OnRestored    += HandleStoryRestored;
+        }
+
         isSubscribed = true;
     }
 
@@ -148,7 +155,25 @@ public class ChildCardUI : MonoBehaviour
         if (runawayWatcher != null)
             runawayWatcher.OnDangerDaysChanged -= ShowRunaway;
 
+        if (StoryState.I != null)
+        {
+            StoryState.I.OnFlagChanged -= HandleFlagChanged;
+            StoryState.I.OnRestored    -= HandleStoryRestored;
+        }
+
         isSubscribed = false;
+    }
+
+    /// <summary>ロードでフラグがまとめて入れ替わったとき（趣味の呼び名を描き直す）</summary>
+    private void HandleStoryRestored() => HandleFlagChanged(null, true);
+
+    private void HandleFlagChanged(StoryFlag flag, bool set)
+    {
+        ShowProfile();
+        if (child != null)
+        {
+            ShowHobby(child.Hobby, child.HobbyLevel);
+        }
     }
 
     private void HandleAgeChanged(float _)
@@ -223,7 +248,10 @@ public class ChildCardUI : MonoBehaviour
         if (hobby == HobbyKind.なし)
             statusList.RemoveStatus(KeyHobby);
         else
-            statusList.SetStatus(KeyHobby, "趣味", $"{hobby} Lv{level}");
+        {
+            string hobbyName = HobbyDisplayName.Get(hobby);
+            statusList.SetStatus(KeyHobby, "趣味", $"{hobbyName} Lv{level}");
+        }
     }
 
     private void ShowPassLine()

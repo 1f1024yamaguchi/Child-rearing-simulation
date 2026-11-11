@@ -116,6 +116,38 @@ public static class SupportSchemeValidator
         }
         if (s.icon == null) Warn(list, "アイコン（icon）が入っていません");
 
+        if (s.effects != null)
+        {
+            for (int i = 0; i < s.effects.Count; i++)
+            {
+                var ef = s.effects[i];
+                if (ef != null && (int)ef.kind >= SupportEditorGUI.SupportKindNames.Length)
+                {
+                    string kName = (int)ef.kind < SupportEditorGUI.EventKindNames.Length ? SupportEditorGUI.EventKindNames[(int)ef.kind] : ef.kind.ToString();
+                    Warn(list, $"申請時の効果{i + 1}：この種類「{kName}」は支援制度では使えません（効果は起きません）");
+                }
+            }
+        }
+        if (s.monthlyTiers != null)
+        {
+            for (int i = 0; i < s.monthlyTiers.Count; i++)
+            {
+                var t = s.monthlyTiers[i];
+                if (t != null && t.monthlyEffects != null)
+                {
+                    for (int j = 0; j < t.monthlyEffects.Count; j++)
+                    {
+                        var ef = t.monthlyEffects[j];
+                        if (ef != null && (int)ef.kind >= SupportEditorGUI.SupportKindNames.Length)
+                        {
+                            string kName = (int)ef.kind < SupportEditorGUI.EventKindNames.Length ? SupportEditorGUI.EventKindNames[(int)ef.kind] : ef.kind.ToString();
+                            Warn(list, $"支給表の段{i + 1}の効果{j + 1}：この種類「{kName}」は支援制度では使えません（効果は起きません）");
+                        }
+                    }
+                }
+            }
+        }
+
         if (SupportRegistry.FindManager() != null && !SupportRegistry.IsRegistered(s))
             Warn(list, "SupportManager に登録されていません（サポート画面に出ません）");
 

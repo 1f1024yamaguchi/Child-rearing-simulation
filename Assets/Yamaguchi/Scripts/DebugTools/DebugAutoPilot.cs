@@ -18,6 +18,16 @@ public class DebugAutoPilot : MonoBehaviour
     [Tooltip("画面が開いてから処理するまでの待ち（実時間・秒）。ジャンプ中は 0 になる")]
     [SerializeField] private float waitSeconds = 0.3f;
 
+    [System.Serializable]
+    public class FixedChoiceEntry
+    {
+        public string eventId;
+        public string choiceId;
+    }
+
+    [Header("選択肢の固定（イベントID → 選択肢ID）")]
+    [SerializeField] private System.Collections.Generic.List<FixedChoiceEntry> fixedChoices = new System.Collections.Generic.List<FixedChoiceEntry>();
+
     [Header("支援制度")]
     [Tooltip("申請できる制度を自動で申請し、毎年の手続き・再開も自動で行う")]
     [SerializeField] private bool autoApplySupports = true;
@@ -31,6 +41,40 @@ public class DebugAutoPilot : MonoBehaviour
     public DebugDialogResolver.ChoicePolicy EventChoice { get => eventChoice; set => eventChoice = value; }
     public bool AutoApplySupports { get => autoApplySupports; set => autoApplySupports = value; }
     public bool IncludeWorkModeSchemes { get => includeWorkModeSchemes; set => includeWorkModeSchemes = value; }
+
+    public System.Collections.Generic.IReadOnlyList<FixedChoiceEntry> FixedChoices => fixedChoices;
+
+    public void SetFixedChoice(string eventId, string choiceId)
+    {
+        if (string.IsNullOrEmpty(eventId)) return;
+        var existing = fixedChoices.Find(e => e.eventId == eventId);
+        if (existing != null)
+        {
+            existing.choiceId = choiceId;
+        }
+        else
+        {
+            fixedChoices.Add(new FixedChoiceEntry { eventId = eventId, choiceId = choiceId });
+        }
+    }
+
+    public void ClearFixedChoice(string eventId)
+    {
+        if (string.IsNullOrEmpty(eventId)) return;
+        fixedChoices.RemoveAll(e => e.eventId == eventId);
+    }
+
+    public void ClearAllFixedChoices()
+    {
+        fixedChoices.Clear();
+    }
+
+    public string GetFixedChoice(string eventId)
+    {
+        if (string.IsNullOrEmpty(eventId)) return null;
+        var entry = fixedChoices.Find(e => e.eventId == eventId);
+        return entry?.choiceId;
+    }
 
     /// ジャンプ中は、オートの ON/OFF に関係なく判断画面を処理する（DebugTimeJump が立てる）。
     public bool ForcedByJump { get; set; }

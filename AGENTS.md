@@ -87,6 +87,7 @@ Unity 製の子育てシミュレーションゲーム。**このファイルは
 | [how-to-add-support-scheme.md](docs/code/how-to-add-support-scheme.md) | 支援制度（カード）の足し方と、制度アセットの各項目（年齢の日付・期限・支給表・条件）の意味 | 制度を追加・調整する |
 | [ui-tutorial.md](docs/code/ui-tutorial.md) | チュートリアル画面（画像＋見出し＋説明文・スワイプでページ送り）、新しいチュートリアルの足し方、編集ツール | チュートリアルを足す・画面を調整する |
 | [support-editor.md](docs/code/support-editor.md) | 支援制度の編集ウィンドウ（メニュー「子育て/支援制度/編集ウィンドウ」）の使い方、各欄の仕様、チェック項目、テンプレ | 制度を作る・直す・登録する／編集ウィンドウを直す |
+| [event-editor-window.md](docs/code/event-editor-window.md) | イベントの編集ウィンドウ（メニュー「子育て/イベント/編集ウィンドウ」）の使い方、出方・条件・選択肢、チェック項目 | イベントを作る・直す／条件部品を足す |
 
 ### チーム — `docs/team/`
 

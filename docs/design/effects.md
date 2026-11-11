@@ -1,6 +1,6 @@
 ---
 title: 効果（Effect）の共通モデル
-updated: 2026-10-30
+updated: 2026-11-11
 status: 設計中（たたき台・要合意）
 related: [docs/design/food-system.md, docs/design/events.md, docs/design/support-systems.md, docs/design/traits.md, docs/code/architecture.md]
 ---
@@ -45,6 +45,11 @@ public enum EffectKind
     BadEventRate,   // Badイベントの発生率補正（％）
     AddTrait,       // 特性（永続）を付ける → traits.md
     AddCondition,   // 状態（一時）を付ける → traits.md
+    SetFlag,        // フラグを立てる
+    ClearFlag,      // フラグを消す
+    SetHobby,       // 趣味を決める
+    ScheduleEvent,  // 続きを予約
+    ShowStory,      // ストーリーを出す
     // ここに足していく（例：Fatigue, Relationship, JobRankProgress …）
 }
 

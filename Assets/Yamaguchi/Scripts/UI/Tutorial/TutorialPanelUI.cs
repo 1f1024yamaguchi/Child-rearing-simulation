@@ -62,6 +62,7 @@ public class TutorialPanelUI : MonoBehaviour
     [SerializeField] private float textFadeSeconds = 0.2f;
 
     private TutorialData data;
+    private readonly System.Collections.Generic.List<TutorialPage> activePages = new System.Collections.Generic.List<TutorialPage>();
     private int index;
     private Action onClosed;
     private bool isPausing;
@@ -78,17 +79,29 @@ public class TutorialPanelUI : MonoBehaviour
     /// 表示中のページ番号（0 始まり）。
     public int PageIndex => index;
 
-    private int LastIndex => data != null ? data.PageCount - 1 : 0;
+    private int LastIndex => activePages.Count > 0 ? activePages.Count - 1 : 0;
     private float PageWidth => viewport != null ? viewport.rect.width : 0f;
+
+    private TutorialPage GetActivePage(int i) => (i >= 0 && i < activePages.Count) ? activePages[i] : null;
 
     // ─── 開閉 ──────────────────────────────────────────────
 
     /// チュートリアルを1ページ目から表示する。閉じたら onClosed を呼ぶ。
     public void Open(TutorialData tutorial, Action closed = null)
     {
-        if (tutorial == null || tutorial.PageCount == 0)
+        activePages.Clear();
+        if (tutorial != null)
         {
-            Debug.LogWarning("[TutorialPanelUI] ページの無いチュートリアルは開けません", this);
+            for (int i = 0; i < tutorial.PageCount; i++)
+            {
+                var p = tutorial.GetPage(i);
+                if (p != null && p.IsAvailable()) activePages.Add(p);
+            }
+        }
+
+        if (activePages.Count == 0)
+        {
+            Debug.Log($"[TutorialPanelUI] チュートリアル「{tutorial?.name}」は条件を満たすページが無いためスキップします。");
             closed?.Invoke();
             return;
         }
@@ -108,6 +121,7 @@ public class TutorialPanelUI : MonoBehaviour
         var cb = onClosed;
         onClosed = null;
         data = null;
+        activePages.Clear();
         gameObject.SetActive(false);
         cb?.Invoke();
     }
@@ -203,17 +217,17 @@ public class TutorialPanelUI : MonoBehaviour
     // 今のページと、その前後のページを並べ直す
     private void ShowPage()
     {
-        if (data == null) return;
+        if (data == null || activePages.Count == 0) return;
 
-        if (prevSlot != null) prevSlot.Set(data.GetPage(index - 1));
-        if (currentSlot != null) currentSlot.Set(data.GetPage(index));
-        if (nextSlot != null) nextSlot.Set(data.GetPage(index + 1));
+        if (prevSlot != null) prevSlot.Set(GetActivePage(index - 1));
+        if (currentSlot != null) currentSlot.Set(GetActivePage(index));
+        if (nextSlot != null) nextSlot.Set(GetActivePage(index + 1));
         PlaceSlots();
         SetTrackX(0f);
 
-        var page = data.GetPage(index);
-        if (headingText != null) headingText.text = page.heading ?? "";
-        if (bodyText != null) bodyText.text = page.body ?? "";
+        var page = GetActivePage(index);
+        if (headingText != null) headingText.text = page != null ? StoryTextFormatter.Format(page.heading) : "";
+        if (bodyText != null) bodyText.text = page != null ? StoryTextFormatter.Format(page.body) : "";
 
         bool first = index <= 0;
         bool last = index >= LastIndex;
@@ -223,7 +237,7 @@ public class TutorialPanelUI : MonoBehaviour
 
         if (pageDots != null)
         {
-            pageDots.Build(data.PageCount);
+            pageDots.Build(activePages.Count);
             pageDots.SetCurrent(index);
         }
     }

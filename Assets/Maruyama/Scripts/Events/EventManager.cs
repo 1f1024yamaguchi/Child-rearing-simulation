@@ -43,6 +43,35 @@ namespace Maruyama.Events
     {
         public static EventManager Instance { get; private set; }
 
+        /// <summary>
+        /// イベントで選択肢が選ばれ、その Effect を適用し終えたときに1回呼ばれる。
+        /// 振り返りの「できごとの記録」（LifeRecorder）や StoryState が購読する。
+        /// static なので、購読した側は OnDisable で必ず解除すること。
+        /// </summary>
+        public static event System.Action<EventResolvedInfo> OnEventResolved;
+
+        /// <summary>EventCardUI から呼ぶ。EventData と選んだ選択肢から情報を組み立てて通知する。</summary>
+        public static void NotifyResolved(EventData data, EventChoice choice, int choiceIndex)
+        {
+            if (data == null || choice == null) return;
+
+            int money = 0;
+            if (choice.effects != null)
+            {
+                foreach (var e in choice.effects)
+                {
+                    if (e != null && e.kind == EffectKind.Money) money += Mathf.RoundToInt(e.value);
+                }
+            }
+
+            int ageDays = GameState.I != null ? Mathf.FloorToInt(GameState.I.AgeDays) : 0;
+            string choiceId = choice.GetOrFallbackId(choiceIndex);
+
+            var info = new EventResolvedInfo(data.id, data.title, data.category, data.IsFixed,
+                                             choice.label, choiceIndex, choiceId, money, ageDays);
+            OnEventResolved?.Invoke(info);
+        }
+
         [Header("登録イベント一覧（シーンに直接登録したもの）")]
         [SerializeField] private List<EventData> demeritEvents = new List<EventData>();
         [SerializeField] private List<EventData> meritEvents = new List<EventData>();
@@ -201,6 +230,8 @@ namespace Maruyama.Events
         private void AddToPool(EventData e)
         {
             if (e == null) return;
+            // 続き（FollowUp）、条件（OnCondition）、コードから（Manual）は月ごとの抽選・固定プールに入れない
+            if (e.trigger != EventTrigger.Random && e.trigger != EventTrigger.Fixed) return;
             var pool = e.IsFixed ? fixedPool : (e.category == EventCategory.Demerit ? demeritPool : meritPool);
             if (!pool.Contains(e)) pool.Add(e);
         }
@@ -396,6 +427,21 @@ namespace Maruyama.Events
         }
 
         // ---- ダイアログの順番待ち ----
+
+        /// <summary>
+        /// 指定したイベントをカテゴリに合わせて出番待ちに入れ、可能なら表示する。
+        /// 条件の判定は行わない（呼出元が判定済みであることを前提とする）。
+        /// </summary>
+        public void Enqueue(EventData e)
+        {
+            if (e == null) return;
+            pendingDialogs.Enqueue(new DialogRequest
+            {
+                demerit = e.category == EventCategory.Demerit ? e : null,
+                merit = e.category == EventCategory.Merit ? e : null,
+            });
+            TryShowNext();
+        }
 
         /// <summary>
         /// 悪い1・良い1を1組にして順番待ちに入れ、開けるなら先頭を出す。

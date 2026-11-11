@@ -13,7 +13,15 @@ public static class SupportEditorGUI
 
     // ─── enum の日本語ラベル（enum の並び順と同じ） ─────────────────
     public static readonly string[] CategoryNames = { "政府（国）", "地方自治体", "会社・仕事", "アプリ・民間" };
-    public static readonly string[] KindNames = { "お金", "ストレス", "体調", "成績", "趣味", "いいイベント率(%)", "悪いイベント率(%)", "特性を付ける", "状態を付ける" };
+    /// <summary>支援制度用（従来の9種類）。支援制度ではストーリー関連の効果は使わない。</summary>
+    public static readonly string[] SupportKindNames = { "お金", "ストレス", "体調", "成績", "趣味", "いいイベント率(%)", "悪いイベント率(%)", "特性を付ける", "状態を付ける" };
+    /// <summary>イベント用（全14種類）。ストーリー関連（フラグ・趣味・予約・チュートリアル）を含む。</summary>
+    public static readonly string[] EventKindNames = {
+        "お金", "ストレス", "体調", "成績", "趣味", "いいイベント率(%)", "悪いイベント率(%)", "特性を付ける", "状態を付ける",
+        "フラグを立てる", "フラグを消す", "趣味を決める", "続きを予約", "ストーリーを出す"
+    };
+    /// <summary>従来の参照用エイリアス（支援制度の9種類）。</summary>
+    public static readonly string[] KindNames = SupportKindNames;
     public static readonly string[] TargetNames = { "世帯", "母親", "父親", "子ども", "両親", "家族全員" };
     public static readonly string[] DurationNames = { "その場で1回", "今月のあいだ", "日数のあいだ" };
     public static readonly string[] DeadlineNames = { "なし", "1回きり", "毎年" };
@@ -97,8 +105,12 @@ public static class SupportEditorGUI
     /// <summary>MonthDay（毎年の○月○日）を「[月▼] [日▼]」で入力する。</summary>
     public static void DrawMonthDay(SerializedProperty monthDay, string label)
     {
-        var m = monthDay.FindPropertyRelative("month");
-        var d = monthDay.FindPropertyRelative("day");
+        DrawMonthDay(monthDay.FindPropertyRelative("month"), monthDay.FindPropertyRelative("day"), label);
+    }
+
+    /// <summary>月と日が別々のフィールド（EventData の fixedMonth / fixedDay など）のときの「[月▼] [日▼]」入力。</summary>
+    public static void DrawMonthDay(SerializedProperty m, SerializedProperty d, string label)
+    {
         using (new EditorGUILayout.HorizontalScope())
         {
             EditorGUILayout.PrefixLabel(label);

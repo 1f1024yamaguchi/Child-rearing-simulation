@@ -11,5 +11,10 @@ public enum EffectKind
     BadEventRate,   // Badイベントの発生率補正（％）
     AddTrait,       // 特性（永続）を付ける → traits.md
     AddCondition,   // 状態（一時）を付ける → traits.md
+    SetFlag,        // フラグを立てる
+    ClearFlag,      // フラグを消す
+    SetHobby,       // 趣味を決める
+    ScheduleEvent,  // 続きを予約
+    ShowStory,      // ストーリーを出す
     // ここに足していく（例：Fatigue, Relationship, JobRankProgress …）
 }

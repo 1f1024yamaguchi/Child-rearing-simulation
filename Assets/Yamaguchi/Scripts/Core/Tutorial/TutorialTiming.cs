@@ -14,6 +14,7 @@ public enum TutorialTimingKind
     [InspectorName("家出の判定が始まる日（ずらせる）")] RunawayStart = 3,
     [InspectorName("子どものストレスが ○ 以上になったら")] ChildStressAtLeast = 4,
     [InspectorName("お金が ○ 円より少なくなったら")] MoneyBelow = 5,
+    [InspectorName("フラグが立った日（ずらせる）")] FlagSet = 6,
 }
 
 /// <summary>
@@ -32,8 +33,11 @@ public class TutorialTiming
     [Range(1, 12)] public int ageMonth = 1;
     [Range(1, 31)] public int ageDay = 1;
 
-    [Tooltip("「家出の判定が始まる日」からずらす日数。-30 なら30日前（予告）、+10 なら10日後")]
+    [Tooltip("「家出の判定が始まる日」や「フラグが立った日」からずらす日数。-30 なら30日前（予告）、+10 なら10日後")]
     public int offsetDays = 0;
+
+    [Tooltip("「フラグが立った日」の判定対象フラグ")]
+    public StoryFlag targetFlag;
 
     [Tooltip("ストレスのときは 0〜100、お金のときは円")]
     public int threshold = 0;
@@ -65,6 +69,12 @@ public class TutorialTiming
                 return $"子どものストレスが {threshold} 以上になったとき{AgeLimitText()}";
             case TutorialTimingKind.MoneyBelow:
                 return $"お金が {threshold:N0} 円より少なくなったとき{AgeLimitText()}";
+            case TutorialTimingKind.FlagSet:
+            {
+                string flagName = targetFlag != null ? targetFlag.displayName : "（フラグ未指定）";
+                string shift = offsetDays < 0 ? $"の{-offsetDays}日前" : offsetDays > 0 ? $"の{offsetDays}日後" : "";
+                return $"フラグ「{flagName}」が立った日{shift}";
+            }
             default:
                 return kind.ToString();
         }

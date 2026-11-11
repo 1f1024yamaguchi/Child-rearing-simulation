@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using Maruyama.Events;
 using UnityEngine;
 
 /// <summary>
@@ -19,4 +21,20 @@ public class TutorialPage
 
     [Tooltip("見出しの下に出す説明文。改行できる")]
     [TextArea(3, 6)] public string body;
+
+    [Tooltip("このページを出す条件（すべて満たしたときだけ表示。空ならいつでも表示）")]
+    public List<EventConditionSO> showConditions = new List<EventConditionSO>();
+
+    /// <summary>
+    /// 条件を満たしてこのページを表示できるか判定する。
+    /// </summary>
+    public bool IsAvailable()
+    {
+        if (showConditions == null || showConditions.Count == 0) return true;
+        foreach (var cond in showConditions)
+        {
+            if (cond != null && !cond.IsSatisfied()) return false;
+        }
+        return true;
+    }
 }

@@ -15,17 +15,26 @@ namespace Maruyama.UI
     {
         [SerializeField] private Button button;
         [SerializeField] private TextMeshProUGUI labelText;
+        [Tooltip("選択肢が無効な場合の理由表示用テキスト（未設定時はボタンラベルに小さく付与）")]
+        [SerializeField] private TextMeshProUGUI disabledReasonText;
 
         private EventChoice currentChoice;
         private Action onChosenCallback;
         private string eventTitle = string.Empty;
 
+        public EventChoice CurrentChoice => currentChoice;
+
         public void Setup(EventChoice choice, Action onChosen)
         {
-            Setup(choice, string.Empty, onChosen);
+            Setup(choice, string.Empty, onChosen, true, string.Empty);
         }
 
         public void Setup(EventChoice choice, string title, Action onChosen)
+        {
+            Setup(choice, title, onChosen, true, string.Empty);
+        }
+
+        public void Setup(EventChoice choice, string title, Action onChosen, bool canChoose, string disabledReason)
         {
             currentChoice = choice;
             onChosenCallback = onChosen;
@@ -34,7 +43,7 @@ namespace Maruyama.UI
             if (labelText != null && choice != null)
             {
                 // お金効果が含まれている場合は費用表記を自動補完する（手動ラベル優先）
-                string label = choice.label;
+                string label = StoryTextFormatter.Format(choice.label);
                 var moneyEffect = choice.effects?.Find(e => e.kind == EffectKind.Money);
                 if (moneyEffect != null && !label.Contains("円"))
                 {
@@ -42,11 +51,33 @@ namespace Maruyama.UI
                         ? $" (医療費 {Mathf.Abs(moneyEffect.value):#,0}円・助成適用前)"
                         : $" ({moneyEffect.value:+#,0;-#,0;0}円)";
                 }
+
+                if (!canChoose && !string.IsNullOrEmpty(disabledReason))
+                {
+                    if (disabledReasonText != null)
+                    {
+                        disabledReasonText.text = disabledReason;
+                        disabledReasonText.gameObject.SetActive(true);
+                    }
+                    else
+                    {
+                        label += $"\n<size=70%><color=#888888>（{disabledReason}）</color></size>";
+                    }
+                }
+                else
+                {
+                    if (disabledReasonText != null)
+                    {
+                        disabledReasonText.gameObject.SetActive(false);
+                    }
+                }
+
                 labelText.text = label;
             }
 
             if (button != null)
             {
+                button.interactable = canChoose;
                 button.onClick.RemoveAllListeners();
                 button.onClick.AddListener(OnButtonClicked);
             }

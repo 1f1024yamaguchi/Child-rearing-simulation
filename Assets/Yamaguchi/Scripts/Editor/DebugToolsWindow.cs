@@ -65,6 +65,9 @@ public class DebugToolsWindow : EditorWindow
         if (gs.IsGameOver) EditorGUILayout.HelpBox("ゲームは終了しています。", MessageType.Warning);
     }
 
+    private string inputEventId = "";
+    private string inputChoiceId = "";
+
     private void DrawAuto(DebugAutoPilot pilot)
     {
         EditorGUILayout.LabelField("全部オート", EditorStyles.boldLabel);
@@ -80,6 +83,53 @@ public class DebugToolsWindow : EditorWindow
         }
         EditorGUILayout.LabelField("処理した画面", $"{pilot.ResolvedCount} 回　／　制度の操作 {pilot.SupportActionCount} 回");
         EditorGUILayout.HelpBox("食事＝先月と同じ（初回は普通）、税金＝提出、赤字警告＝閉じる、ミニゲーム＝スキップ（効果なし）。", MessageType.None);
+
+        DrawFixedChoices(pilot);
+    }
+
+    private void DrawFixedChoices(DebugAutoPilot pilot)
+    {
+        using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
+        {
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                EditorGUILayout.LabelField($"選択肢の固定（{pilot.FixedChoices.Count}件）", EditorStyles.boldLabel);
+                if (pilot.FixedChoices.Count > 0 && GUILayout.Button("全解除", EditorStyles.miniButton, GUILayout.Width(60)))
+                {
+                    pilot.ClearAllFixedChoices();
+                }
+            }
+
+            for (int i = 0; i < pilot.FixedChoices.Count; i++)
+            {
+                var entry = pilot.FixedChoices[i];
+                using (new EditorGUILayout.HorizontalScope())
+                {
+                    EditorGUILayout.LabelField($"イベント: {entry.eventId} → 選択肢: {entry.choiceId}", EditorStyles.miniLabel);
+                    if (GUILayout.Button("✕", EditorStyles.miniButton, GUILayout.Width(24)))
+                    {
+                        pilot.ClearFixedChoice(entry.eventId);
+                        break;
+                    }
+                }
+            }
+
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                inputEventId = EditorGUILayout.TextField(inputEventId, GUILayout.Width(100));
+                GUILayout.Label("→", GUILayout.Width(18));
+                inputChoiceId = EditorGUILayout.TextField(inputChoiceId, GUILayout.Width(60));
+                using (new EditorGUI.DisabledScope(string.IsNullOrEmpty(inputEventId) || string.IsNullOrEmpty(inputChoiceId)))
+                {
+                    if (GUILayout.Button("固定を追加", EditorStyles.miniButton))
+                    {
+                        pilot.SetFixedChoice(inputEventId, inputChoiceId);
+                        inputEventId = "";
+                        inputChoiceId = "";
+                    }
+                }
+            }
+        }
     }
 
     private void DrawJump(GameState gs, DebugTimeJump jump)

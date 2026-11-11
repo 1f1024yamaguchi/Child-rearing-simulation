@@ -83,7 +83,8 @@ public class ChildStatus : PersonStatus
             int age = Mathf.FloorToInt(AgeYears);
             if (hobby == HobbyKind.なし)
                 return $"{age}歳・好きなことを探し中";
-            return $"{age}歳・{hobby}が好き";
+            string hobbyName = HobbyDisplayName.Get(hobby);
+            return $"{age}歳・{hobbyName}が好き";
         }
     }
 

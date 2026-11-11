@@ -103,6 +103,33 @@ public class DebugDialogResolver
 
     private Button PickChoiceButton(EventCardUI card)
     {
+        // オートパイロットによる選択肢固定の優先適用
+        if (card != null && card.BoundData != null && DebugAutoPilot.I != null)
+        {
+            string fixedChoiceId = DebugAutoPilot.I.GetFixedChoice(card.BoundData.id);
+            if (!string.IsNullOrEmpty(fixedChoiceId))
+            {
+                var choiceUIs = card.GetComponentsInChildren<EventChoiceButtonUI>(false);
+                for (int i = 0; i < choiceUIs.Length; i++)
+                {
+                    var cui = choiceUIs[i];
+                    if (cui != null && cui.CurrentChoice != null)
+                    {
+                        string id = cui.CurrentChoice.GetOrFallbackId(i);
+                        if (id == fixedChoiceId)
+                        {
+                            var b = cui.GetComponentInChildren<Button>();
+                            if (b != null && b.interactable && b.gameObject.activeInHierarchy)
+                            {
+                                Debug.Log($"[DebugDialogResolver] 固定選択肢 '{fixedChoiceId}'（イベント '{card.BoundData.id}'）を選択します。");
+                                return b;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         var buttons = new List<Button>();
         foreach (var choice in card.GetComponentsInChildren<EventChoiceButtonUI>(false))
         {

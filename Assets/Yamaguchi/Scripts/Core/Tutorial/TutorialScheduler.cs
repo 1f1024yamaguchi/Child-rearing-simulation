@@ -94,6 +94,15 @@ public class TutorialScheduler : MonoBehaviour
                 if (day < timing.AgeDays) return false;
                 return GameState.I != null && GameState.I.Money < timing.threshold;
 
+            case TutorialTimingKind.FlagSet:
+            {
+                if (timing.targetFlag == null || string.IsNullOrEmpty(timing.targetFlag.id)) return false;
+                if (StoryState.I == null || !StoryState.I.HasFlag(timing.targetFlag)) return false;
+                int setDay = StoryState.I.GetFlagSetDay(timing.targetFlag.id);
+                if (setDay < 0) return false;
+                return day >= setDay + timing.offsetDays;
+            }
+
             default:
                 return false;
         }

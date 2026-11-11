@@ -132,6 +132,12 @@ public class TutorialEditorWindow : EditorWindow
                     EditorGUILayout.PropertyField(timing.FindPropertyRelative("threshold"), new GUIContent("金額（円・これより少ない）"));
                     DrawAge(timing, "この日から判定（0歳1月1日＝制限なし）");
                     break;
+
+                case TutorialTimingKind.FlagSet:
+                    EditorGUILayout.PropertyField(timing.FindPropertyRelative("targetFlag"), new GUIContent("対象フラグ"));
+                    EditorGUILayout.PropertyField(timing.FindPropertyRelative("offsetDays"),
+                        new GUIContent("ずらす日数", "-30 なら30日前、+10 なら10日後。0 でフラグが立った当日"));
+                    break;
             }
 
             // 説明と、スケジュールに入っているか
@@ -244,6 +250,13 @@ public class TutorialEditorWindow : EditorWindow
             }
             EditorGUILayout.PropertyField(p.FindPropertyRelative("heading"), new GUIContent("見出し"));
             EditorGUILayout.PropertyField(p.FindPropertyRelative("body"), new GUIContent("説明文"));
+
+            var showConds = p.FindPropertyRelative("showConditions");
+            if (showConds != null)
+            {
+                var host = pages.serializedObject.targetObject;
+                EventConditionList.Draw(showConds, host, "このページを出す条件（任意・すべて満たしたとき表示）");
+            }
         }
         return false;
     }

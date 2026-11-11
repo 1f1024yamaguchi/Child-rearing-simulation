@@ -59,9 +59,20 @@ public static class SupportPaymentSection
             var duration = e.FindPropertyRelative("duration");
 
             bool remove;
+            bool isUnsupported = kind.intValue >= SupportEditorGUI.SupportKindNames.Length;
             using (new EditorGUILayout.HorizontalScope())
             {
-                SupportEditorGUI.EnumPopup(kind, null, SupportEditorGUI.KindNames, GUILayout.Width(120));
+                if (!isUnsupported)
+                {
+                    SupportEditorGUI.EnumPopup(kind, null, SupportEditorGUI.SupportKindNames, GUILayout.Width(120));
+                }
+                else
+                {
+                    string unsuppName = kind.intValue < SupportEditorGUI.EventKindNames.Length
+                        ? SupportEditorGUI.EventKindNames[kind.intValue]
+                        : ((EffectKind)kind.intValue).ToString();
+                    GUILayout.Label(unsuppName, EditorStyles.boldLabel, GUILayout.Width(120));
+                }
                 SupportEditorGUI.EnumPopup(e.FindPropertyRelative("target"), null, SupportEditorGUI.TargetNames, GUILayout.Width(80));
                 EditorGUILayout.PropertyField(value, GUIContent.none, GUILayout.Width(80));
                 if (kind.intValue == (int)EffectKind.Money)
@@ -74,6 +85,12 @@ public static class SupportPaymentSection
                 }
                 GUILayout.FlexibleSpace();
                 remove = GUILayout.Button("✕", GUILayout.Width(24));
+            }
+            if (isUnsupported)
+            {
+                var redStyle = new GUIStyle(EditorStyles.miniLabel);
+                redStyle.normal.textColor = Color.red;
+                EditorGUILayout.LabelField("この種類は支援制度では使えません（効果は起きません）", redStyle);
             }
             if (remove)
             {
