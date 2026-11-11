@@ -83,6 +83,13 @@ public class LedgerPanelUI : MonoBehaviour
         }
     }
 
+    /// <summary>画面を［年］タブで開く（リザルト画面から、1年ずつのお金の使い方を見るため）。</summary>
+    public void OpenYearTab()
+    {
+        gameObject.SetActive(true);
+        SwitchTab(TabType.Year);
+    }
+
     /// <summary>画面を閉じる。</summary>
     public void Close()
     {

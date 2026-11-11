@@ -33,6 +33,7 @@ related: [docs/design/support-apply.md, docs/design/calendar-system.md, docs/des
 | M1 | `EffectApplier` に `Apply(effects, LedgerSource source)` を追加し、お金が動いたら `Ledger.Record` を呼ぶ。今の `Apply(effects)` は残す | `EffectApplier.cs` を少し変更 | expenses.md 5.6 || 2026-10-28（山口が実施。E1b・2026-10-22 動作確認） |
 | M2 | `EventChoice` に家計簿の種類（`ledgerCategory`）を足し、`EventChoiceButtonUI` 56行目でイベント名・選択肢名と一緒に渡す（`EventCardUI` → `ChoiceBlockUI` → ボタンへイベント名を渡す） | 4ファイル変更。お金が動く選択肢を作るときに種類を入れる | antigravity-expenses.md 2.6・依頼E1b || 2026-10-28（山口が実施。E1b・2026-10-22 動作確認） |
 | M3 | 支援制度・支出の条件は `RequirementSO`（山口）として作り、`EventConditionSO` とはまとめない | 影響なし（共有の連絡のみ） | support-apply.md 10章 | |
+| M4 | イベントで選択肢を選んだことを外に知らせる通知 `EventManager.OnEventResolved` を足してもらう（振り返りの「できごとの記録」用。受け取る側は山口が作る） | `EventManager.cs` に追加、`EventCardUI.cs` を少し変更、`EventResolvedInfo.cs` を新規 | [request-maruyama-event-notify.md](request-maruyama-event-notify.md)・review-records.md 5章 | |
 
 **順番**：山口が `Ledger` と `LedgerSource` を先に Core に作る → M1・M2 も **山口が行う**（2026-10-21 変更。[antigravity-expenses.md](antigravity-expenses.md) 依頼E1b）。作業前に丸山さんへ一言伝える。
 

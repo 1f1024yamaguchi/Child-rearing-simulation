@@ -89,6 +89,8 @@ end シーン
 
 > 合計は Ledger に窓口がすでにある（`TotalChildCost`・`TotalSupport`）。`totalIncome` だけ足し算が要る。Ledger に窓口を足すのではなく、Builder の中で足す。
 
+> **2026-11-09 追加**：家庭の結末（`mother` / `father` / `familyLine` / `deficitMonths`）と振り返り用の記録（`monthly` / `lifeLog` / `ledgerYears`）を足す。→ [review-records.md](review-records.md) 6.1
+
 ### 3.2 きっかけ（家出・破綻のときだけ）
 
 | 項目 | 家出 | 家計破綻 |
@@ -135,6 +137,8 @@ end シーン
 ---
 
 ## 5. 育成記録への保存（RecordStore）
+
+> **2026-11-09 変更**：記録が入って1件が大きくなるので、`records.json` は一覧用の概要だけにし、1件ぶんの全部は `records/<id>.json` に分ける。→ [review-records.md](review-records.md) 6.2。下の表は概要のファイルの話として読む。
 
 [title-screen.md](title-screen.md) 6章のとおり、**セーブとは別のファイル** に、終わるたびに1件足す。
 

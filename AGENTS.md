@@ -47,6 +47,7 @@ Unity 製の子育てシミュレーションゲーム。**このファイルは
 | [concept.md](docs/design/concept.md) | コンセプト、親子UI、決まっていること／未決定の一覧 | 企画の全体像を掴みたい |
 | [rules-and-stats.md](docs/design/rules-and-stats.md) | 時間の流れ、ゴール／ゲームオーバー条件、全ステータス定義と数値 | ゲームロジックを実装する |
 | [ending.md](docs/design/ending.md) | 進路と巣立ちエンディング（テスト・受験の時期、進路ごとの合格ライン、奨学金・修学支援、職業の判定、将来の夢、リザルト） | 進路・受験・エンディング・リザルトを作る |
+| [review-records.md](docs/design/review-records.md) | 振り返り（成長グラフ・できごとの記録）と家庭の結末（家計・親の一文） | リザルト・育成記録・プレイ中の記録を作る |
 | [food-system.md](docs/design/food-system.md) | 食事グレードの効果、安い／高い食事のリアルな影響 | 食事まわりを実装する（有坂） |
 | [events.md](docs/design/events.md) | メリット／デメリットイベントの一覧と発生条件 | イベントの発生を実装する（丸山） |
 | [calendar-system.md](docs/design/calendar-system.md) | カレンダー画面、申請期限の管理、予定の種類と状態 | カレンダー機能を実装する（草尾） |
@@ -85,6 +86,7 @@ Unity 製の子育てシミュレーションゲーム。**このファイルは
 | [sound-system.md](docs/code/sound-system.md) | サウンド（SE・BGM・音量設定パネル）のスクリプト構成と Unity 設定手順 | SE・BGM・音量設定画面を設定・利用する |
 | [how-to-add-support-scheme.md](docs/code/how-to-add-support-scheme.md) | 支援制度（カード）の足し方と、制度アセットの各項目（年齢の日付・期限・支給表・条件）の意味 | 制度を追加・調整する |
 | [ui-tutorial.md](docs/code/ui-tutorial.md) | チュートリアル画面（画像＋見出し＋説明文・スワイプでページ送り）、新しいチュートリアルの足し方、編集ツール | チュートリアルを足す・画面を調整する |
+| [support-editor.md](docs/code/support-editor.md) | 支援制度の編集ウィンドウ（メニュー「子育て/支援制度/編集ウィンドウ」）の使い方、各欄の仕様、チェック項目、テンプレ | 制度を作る・直す・登録する／編集ウィンドウを直す |
 
 ### チーム — `docs/team/`
 

@@ -229,6 +229,7 @@ TitleMenuUI / SaveSelectPanelUI    GameStartup（GameManager に付ける）
 
 ### 画面
 - タイトルの「育成記録」ボタン → 一覧（縦スクロール。既存の `status_scroll` と同じ作り）→ 1件を押すと詳細。
+- **詳細は振り返りの画面（`ReviewScreenUI`）をそのまま使う**（2026-11-09 決定。成長グラフ・家計・親・できごと）。→ [review-records.md](review-records.md)
 - 並び順は **終わった日時の新しい順**（2026-10-14 決定）。
 - 一覧の行は件数が決まらないので、**行のプレハブ（Button＋TMP）を Inspector で作っておき、それを件数分 Instantiate する**。行の中の固定の文字はプレハブの TMP に書く。
 - 記録が0件のときは「まだ記録がありません」（シーンの TMP）。
