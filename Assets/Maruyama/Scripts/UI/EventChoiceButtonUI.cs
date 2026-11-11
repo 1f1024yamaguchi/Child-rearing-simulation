@@ -33,16 +33,53 @@ namespace Maruyama.UI
 
             if (labelText != null && choice != null)
             {
-                // お金効果が含まれている場合は費用表記を自動補完する（手動ラベル優先）
-                string label = choice.label;
-                var moneyEffect = choice.effects?.Find(e => e.kind == EffectKind.Money);
-                if (moneyEffect != null && !label.Contains("円"))
-                {
-                    label += choice.insuredMedicalExpense && moneyEffect.value < 0f
-                        ? $" (医療費 {Mathf.Abs(moneyEffect.value):#,0}円・助成適用前)"
-                        : $" ({moneyEffect.value:+#,0;-#,0;0}円)";
-                }
-                labelText.text = label;
+                
+// お金効果が含まれている場合は費用表記を自動補完する（手動ラベル優先）
+string label = choice.label;
+var moneyEffect = choice.effects?.Find(e => e.kind == EffectKind.Money);
+
+if (moneyEffect != null && !label.Contains("円"))
+{
+    if (choice.insuredMedicalExpense && moneyEffect.value < 0f)
+    {
+        int copay = Mathf.RoundToInt(Mathf.Abs(moneyEffect.value));
+
+        // 助成状況を確認する（必要なManagerが存在しない場合は0円扱い）
+        int covered = (SupportManager.I != null && GameState.I != null)
+            ? SupportManager.I.MedicalExpenseCoverage(
+                copay,
+                Mathf.FloorToInt(GameState.I.AgeDays))
+            : 0;
+
+        if (SupportManager.I != null && GameState.I != null)
+        {
+            if (covered >= copay)
+            {
+                label += $" (医療費 → 助成申請しているため 0円!)";
+            }
+            else if (covered > 0)
+            {
+                int actualCost = copay - covered;
+                label += $" (医療費 {copay:#,0}円 → 助成で {actualCost:#,0}円（助成 {covered:#,0}円）)";
+            }
+            else
+            {
+                label += $" (医療費 {copay:#,0}円（助成の申請で軽くなります）)";
+            }
+        }
+        else
+        {
+            label += $" (医療費 {copay:#,0}円・助成適用前)";
+        }
+    }
+    else
+    {
+        label += $" ({moneyEffect.value:+#,0;-#,0;0}円)";
+    }
+}
+
+labelText.text = label;
+
             }
 
             if (button != null)
