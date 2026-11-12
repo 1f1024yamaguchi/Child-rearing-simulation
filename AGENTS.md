@@ -86,6 +86,7 @@ Unity 製の子育てシミュレーションゲーム。**このファイルは
 | [sound-system.md](docs/code/sound-system.md) | サウンド（SE・BGM・音量設定パネル）のスクリプト構成と Unity 設定手順 | SE・BGM・音量設定画面を設定・利用する |
 | [how-to-add-support-scheme.md](docs/code/how-to-add-support-scheme.md) | 支援制度（カード）の足し方と、制度アセットの各項目（年齢の日付・期限・支給表・条件）の意味 | 制度を追加・調整する |
 | [ui-tutorial.md](docs/code/ui-tutorial.md) | チュートリアル画面（画像＋見出し＋説明文・スワイプでページ送り）、新しいチュートリアルの足し方、編集ツール | チュートリアルを足す・画面を調整する |
+| [ui-tutorial-guide.md](docs/code/ui-tutorial-guide.md) | スポットライト型スタートガイド（暗幕くり抜き・操作誘導・画面解説チュートリアル） | スタート直後のチュートリアルを調整する（草尾） |
 | [support-editor.md](docs/code/support-editor.md) | 支援制度の編集ウィンドウ（メニュー「子育て/支援制度/編集ウィンドウ」）の使い方、各欄の仕様、チェック項目、テンプレ | 制度を作る・直す・登録する／編集ウィンドウを直す |
 
 ### チーム — `docs/team/`
@@ -120,6 +121,8 @@ Unity 製の子育てシミュレーションゲーム。**このファイルは
 - [0033-no-runaway-until-elementary-ends.md](docs/decisions/0033-no-runaway-until-elementary-ends.md) — 小学生まではルールを覚える期間として家出させず、中学入学（12歳4月1日）から家出を判定する理由
 - [0034-tutorial-panel.md](docs/decisions/0034-tutorial-panel.md) — チュートリアルを「画像＋見出し＋説明文」のページのデータにして共通の画面で出す理由と、家出のチュートリアルを12歳4月1日に出す理由
 - [0035-tutorial-timing-in-data.md](docs/decisions/0035-tutorial-timing-in-data.md) — チュートリアルを出すタイミングをデータ（TutorialData）に持たせ、共通の TutorialScheduler で出す理由
+- [0036-review-records-and-family-ending.md](docs/decisions/0036-review-records-and-family-ending.md) — 振り返り（成長グラフ・できごとの記録）と家庭の結末（家計・親の一文）の記録仕様
+- [0037-spotlight-interactive-system-tutorial.md](docs/decisions/0037-spotlight-interactive-system-tutorial.md) — スポットライト型システムチュートリアル（暗幕くり抜きとプレイヤー操作誘導）の導入理由
 
 ---
 
