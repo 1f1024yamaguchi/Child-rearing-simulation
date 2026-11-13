@@ -22,6 +22,9 @@ public class TutorialManager : MonoBehaviour, ISaveParticipant
 
     // もう見せたチュートリアルの ID
     private readonly HashSet<string> seen = new HashSet<string>();
+
+    /// 「出せるページが無いので見送った」ログを出し済みのもの（毎日同じログが出ないように）。
+    private readonly HashSet<string> skippedLogged = new HashSet<string>();
     // 出す順番待ち（重複は queuedIds で防ぐ）
     private readonly Queue<TutorialData> queue = new Queue<TutorialData>();
     private readonly HashSet<string> queuedIds = new HashSet<string>();
@@ -107,6 +110,17 @@ public class TutorialManager : MonoBehaviour, ISaveParticipant
 
         var next = queue.Dequeue();
         queuedIds.Remove(next.Id);
+
+        // ページの出す条件を1枚も満たさないときは、開かず「見た」にもしない。
+        // 「見た」にすると、あとで条件を満たしても二度と出なくなるため。
+        // 決まったタイミング（フラグが立った日など）のものは、TutorialScheduler が翌日以降にまた渡してくる。
+        if (!next.HasAvailablePage())
+        {
+            if (skippedLogged.Add(next.Id))
+                Debug.Log($"[TutorialManager] 「{next.name}」は今の状態で出せるページが無いので見送ります（見た記録は付けません）。");
+            return;
+        }
+
         seen.Add(next.Id);   // 開いた時点で「見た」にする（閉じる前にセーブされても二度出さない）
         panel.Open(next, () => OnTutorialClosed?.Invoke(next));
         OnTutorialOpened?.Invoke(next);

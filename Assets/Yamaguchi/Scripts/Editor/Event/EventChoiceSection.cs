@@ -18,7 +18,13 @@ public static class EventChoiceSection
         {
             for (int i = 0; i < choices.arraySize; i++)
             {
-                if (DrawChoice(choices, i)) break; // 並べ替え・削除をしたので、この回の描画はやめる
+                if (DrawChoice(choices, i))
+                {
+                    // 並べ替え・削除をしたので、この回の描画はやめる。
+                    // 削除した選択肢の「出す条件」がアセットの中に残らないよう、反映後に掃除する
+                    EventConditionList.CleanupUnreferencedLater(so.targetObject);
+                    break;
+                }
             }
 
             if (GUILayout.Button("＋選択肢", GUILayout.Width(90)))

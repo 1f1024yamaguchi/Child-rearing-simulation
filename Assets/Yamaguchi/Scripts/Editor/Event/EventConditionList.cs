@@ -169,6 +169,68 @@ public static class EventConditionList
         }
     }
 
+    /// <summary>
+    /// host（イベント・チュートリアル）の中にある条件のサブアセットのうち、どこからも参照されていないものを消す。
+    /// 選択肢やページを ✕ で消すと、その「出す条件」のサブアセットがアセットの中に取り残されるため。
+    /// 消す操作が反映された後（ApplyModifiedProperties の後）に呼ぶこと。EditorApplication.delayCall から呼ぶのが安全。
+    /// </summary>
+    public static void CleanupUnreferenced(Object host)
+    {
+        if (host == null) return;
+        string path = AssetDatabase.GetAssetPath(host);
+        if (string.IsNullOrEmpty(path)) return;
+
+        // host と、そのファイルの中のすべてのオブジェクトから参照されている条件を集める
+        var referenced = new HashSet<Object>();
+        var all = AssetDatabase.LoadAllAssetsAtPath(path);
+        foreach (var obj in all)
+        {
+            if (obj == null) continue;
+            var so = new SerializedObject(obj);
+            var it = so.GetIterator();
+            while (it.Next(true))
+            {
+                if (it.propertyType == SerializedPropertyType.ObjectReference &&
+                    it.objectReferenceValue is EventConditionSO c && c != obj)
+                    referenced.Add(c);
+            }
+        }
+
+        var evHost = host as EventData;
+        int removed = 0;
+        foreach (var obj in all)
+        {
+            if (!(obj is EventConditionSO cond) || !AssetDatabase.IsSubAsset(cond)) continue;
+            if (referenced.Contains(cond)) continue;
+            // ほかのイベントが参照していたら消さない
+            if (evHost != null && EventRegistry.ConditionUsers(cond, evHost).Count > 0) continue;
+
+            if (editors.TryGetValue(cond, out var ed))
+            {
+                if (ed != null) Object.DestroyImmediate(ed);
+                editors.Remove(cond);
+            }
+            AssetDatabase.RemoveObjectFromAsset(cond);
+            Object.DestroyImmediate(cond, true);
+            removed++;
+        }
+
+        if (removed > 0)
+        {
+            EditorUtility.SetDirty(host);
+            AssetDatabase.SaveAssets();
+            EventRegistry.Invalidate();
+            Debug.Log($"[EventConditionList] 「{host.name}」の中の使われていない条件を {removed} 個消しました。");
+        }
+    }
+
+    /// <summary>次のエディタ更新で CleanupUnreferenced を呼ぶ（削除の反映を待つため）。</summary>
+    public static void CleanupUnreferencedLater(Object host)
+    {
+        if (host == null) return;
+        EditorApplication.delayCall += () => CleanupUnreferenced(host);
+    }
+
     private static bool IsOwnSubAsset(Object cond, Object host)
     {
         if (cond == null || host == null) return false;

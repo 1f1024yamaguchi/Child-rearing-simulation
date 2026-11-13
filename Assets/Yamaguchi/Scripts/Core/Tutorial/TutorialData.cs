@@ -25,4 +25,16 @@ public class TutorialData : ScriptableObject
 
     /// 範囲外なら null。
     public TutorialPage GetPage(int index) => (index >= 0 && index < pages.Count) ? pages[index] : null;
+
+    /// 今の状態で出せるページ（出す条件を満たすページ）が1枚でもあるか。
+    /// 1枚も無いときは開かない（TutorialManager が「見た」にしないで見送る）。
+    public bool HasAvailablePage()
+    {
+        for (int i = 0; i < pages.Count; i++)
+        {
+            var p = pages[i];
+            if (p != null && p.IsAvailable()) return true;
+        }
+        return false;
+    }
 }

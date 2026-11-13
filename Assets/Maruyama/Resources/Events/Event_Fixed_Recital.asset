@@ -17,23 +17,29 @@ MonoBehaviour:
   title: "\u304A\u904A\u622F\u4F1A\u306E\u65E5"
   description: "\u7DF4\u7FD2\u306E\u6210\u679C\u3092\u898B\u305B\u308B\u65E5\u3002\u30B9\u30C6\u30FC\u30B8\u306E\u4E0A\u3067\u3001\u307F\u3089\u3044\u304C\u5802\u3005\u3068\u8E0A\u3063\u3066\u3044\u308B\u3002"
   iconSprite: {fileID: 0}
+  imageNote: 
   choices:
-  - label: "\u5BA2\u5E2D\u304B\u3089\u898B\u5B88\u308B"
+  - id: c1
+    label: "\u5BA2\u5E2D\u304B\u3089\u898B\u5B88\u308B"
     effects:
     - kind: 1
       target: 4
       value: -6
       duration: 0
       days: 0
+      asset: {fileID: 0}
     - kind: 1
       target: 3
       value: -4
       duration: 0
       days: 0
+      asset: {fileID: 0}
     ledgerCategory: 8
     insuredMedicalExpense: 0
+    showConditions: []
   conditions: []
   weight: 1
+  cooldownDays: 0
   trigger: 1
   fixedMonth: 12
   fixedDay: 15

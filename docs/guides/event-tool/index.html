@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>イベント制作ツールの使い方</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  /* 色：ゲームの「わかった」ボタンの緑を主役に、紙っぽい明るいグレーの地。注釈の赤は画像の枠と同じ */
+  --paper: #f4f5f1;
+  --surface: #ffffff;
+  --ink: #23271f;
+  --muted: #5d6458;
+  --line: #d8dcd2;
+  --accent: #4f8f41;
+  --accent-soft: #e4efdf;
+  --mark: #e64833;
+  --code-bg: #2b2f28;
+  --code-ink: #e9eee4;
+  --font-display: "DotGothic16", "Zen Kaku Gothic New", sans-serif;
+  --font-body: "Zen Kaku Gothic New", "Hiragino Sans", "Yu Gothic", "Meiryo", sans-serif;
+  --font-mono: "JetBrains Mono", "Consolas", monospace;
+  /* レイアウト：本文は1カラム（最大 72ch）、図は本文より少し広く。番号付きの手順と画像を横並び、狭い画面では縦に積む */
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #1b1e19;
+    --surface: #242822;
+    --ink: #e6eae1;
+    --muted: #a3ab9c;
+    --line: #3a4036;
+    --accent: #7cc06b;
+    --accent-soft: #2c3a27;
+    --mark: #ff6a52;
+    --code-bg: #121410;
+    --code-ink: #e6eae1;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #1b1e19;
+  --surface: #242822;
+  --ink: #e6eae1;
+  --muted: #a3ab9c;
+  --line: #3a4036;
+  --accent: #7cc06b;
+  --accent-soft: #2c3a27;
+  --mark: #ff6a52;
+  --code-bg: #121410;
+  --code-ink: #e6eae1;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.8;
+}
+img { max-width: 100%; height: auto; display: block; }
+a { color: var(--accent); }
+a:focus-visible, button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+.wrap { max-width: 980px; margin: 0 auto; padding: 0 20px; }
+.prose { max-width: 72ch; }
+
+/* ヘッダー */
+header.top {
+  padding: 40px 0 28px;
+  border-bottom: 1px solid var(--line);
+}
+.top .grid {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 32px;
+  align-items: center;
+}
+.eyebrow {
+  font-family: var(--font-display);
+  color: var(--accent);
+  font-size: 15px;
+  letter-spacing: .04em;
+  margin: 0 0 6px;
+}
+h1 {
+  word-break: auto-phrase;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(30px, 4.4vw, 44px);
+  line-height: 1.25;
+  margin: 0 0 14px;
+  text-wrap: balance;
+}
+.lead { color: var(--muted); margin: 0 0 18px; }
+.menu-path {
+  display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px;
+  font-size: 14px;
+}
+.menu-path span {
+  background: var(--surface); border: 1px solid var(--line);
+  padding: 2px 10px; border-radius: 4px;
+}
+.menu-path i { font-style: normal; color: var(--muted); }
+.shot {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 6px;
+}
+.shot img { border-radius: 4px; image-rendering: auto; }
+.pixel img { image-rendering: pixelated; }
+figcaption { font-size: 13px; color: var(--muted); padding: 6px 4px 0; }
+
+/* 目次 */
+nav.toc {
+  display: flex; flex-wrap: wrap; gap: 8px;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--line);
+}
+nav.toc a {
+  text-decoration: none; color: var(--ink);
+  font-size: 14px;
+  padding: 4px 12px; border-radius: 999px;
+  border: 1px solid var(--line); background: var(--surface);
+}
+nav.toc a:hover { border-color: var(--accent); color: var(--accent); }
+
+/* セクション */
+section { padding: 44px 0 8px; }
+h2 {
+  word-break: auto-phrase;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 26px;
+  line-height: 1.35;
+  margin: 0 0 6px;
+  display: flex; align-items: baseline; gap: 12px;
+  text-wrap: balance;
+}
+h2 .no {
+  font-size: 15px; color: var(--surface); background: var(--accent);
+  padding: 0 8px; border-radius: 4px; line-height: 1.7;
+}
+h3 { font-size: 18px; margin: 28px 0 8px; }
+p { margin: 0 0 12px; }
+.sub { color: var(--muted); margin-bottom: 20px; }
+
+/* 全体の流れ */
+.flow {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr auto 1fr;
+  gap: 10px;
+  align-items: stretch;
+  margin: 18px 0 8px;
+}
+.flow .box {
+  background: var(--surface); border: 1px solid var(--line);
+  border-top: 4px solid var(--accent);
+  border-radius: 6px; padding: 14px 16px;
+}
+.flow .box b { display: block; font-size: 15px; }
+.flow .box code { font-size: 13px; }
+.flow .box p { font-size: 14px; color: var(--muted); margin: 6px 0 0; }
+.flow .arrow { align-self: center; color: var(--accent); font-family: var(--font-display); font-size: 22px; }
+
+/* 早見表 */
+.table-wrap { overflow-x: auto; margin: 14px 0; }
+table { border-collapse: collapse; width: 100%; min-width: 560px; background: var(--surface); font-size: 15px; }
+th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-weight: 700; background: var(--accent-soft); }
+td:first-child { font-weight: 500; white-space: nowrap; }
+
+/* 画像＋番号の説明 */
+.pair {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+  margin: 16px 0;
+}
+.pair.narrow { grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); }
+ol.marks { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+ol.marks li { display: grid; grid-template-columns: 28px 1fr; gap: 10px; align-items: start; }
+.badge {
+  width: 26px; height: 26px; border-radius: 50%;
+  background: var(--mark); color: #fff;
+  font-weight: 700; font-size: 14px; line-height: 26px; text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+ol.marks b { display: block; }
+ol.marks span.d { color: var(--muted); font-size: 14px; }
+
+/* 手順 */
+ol.steps { counter-reset: s; list-style: none; padding: 0; margin: 12px 0; display: grid; gap: 12px; }
+ol.steps > li {
+  counter-increment: s;
+  position: relative;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 6px;
+  padding: 12px 16px 12px 56px;
+}
+ol.steps > li::before {
+  content: counter(s);
+  position: absolute; left: 14px; top: 12px;
+  width: 28px; height: 28px; border-radius: 4px;
+  background: var(--accent); color: var(--surface);
+  font-family: var(--font-display); text-align: center; line-height: 28px;
+}
+
+/* 見る方法 3つ */
+.ways { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin: 16px 0; }
+.way { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 16px; }
+.way .tag { font-family: var(--font-display); color: var(--accent); font-size: 14px; }
+.way h3 { margin: 2px 0 8px; font-size: 17px; }
+.way ol { margin: 0; padding-left: 1.3em; font-size: 14.5px; }
+.way .use { font-size: 13px; color: var(--muted); margin-top: 8px; }
+
+/* スワイプの3コマ */
+.strip { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin: 16px 0; }
+
+/* 注意 */
+.note {
+  border-left: 4px solid var(--mark);
+  background: var(--surface);
+  padding: 12px 16px; border-radius: 0 6px 6px 0;
+  margin: 12px 0;
+}
+.note b { color: var(--mark); }
+.tip { border-left-color: var(--accent); }
+.tip b { color: var(--accent); }
+
+code { font-family: var(--font-mono); font-size: .9em; background: var(--accent-soft); padding: 1px 5px; border-radius: 3px; }
+pre {
+  background: var(--code-bg); color: var(--code-ink);
+  border-radius: 6px; padding: 16px 18px; overflow-x: auto;
+  font-family: var(--font-mono); font-size: 13.5px; line-height: 1.65;
+  margin: 12px 0;
+}
+pre code { background: none; padding: 0; color: inherit; }
+pre .c { color: #9fb594; }
+
+kbd {
+  font-family: var(--font-mono); font-size: 13px;
+  border: 1px solid var(--line); border-bottom-width: 2px;
+  padding: 0 6px; border-radius: 4px; background: var(--surface);
+}
+
+footer { padding: 40px 0 56px; color: var(--muted); font-size: 14px; border-top: 1px solid var(--line); margin-top: 40px; }
+footer ul { padding-left: 1.2em; margin: 6px 0 0; }
+
+@media (max-width: 760px) {
+  .top .grid, .pair, .pair.narrow { grid-template-columns: 1fr; }
+  .flow { grid-template-columns: 1fr; }
+  .flow .arrow { transform: rotate(90deg); justify-self: center; }
+  .ways, .strip { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+html { scroll-behavior: smooth; }
+
+/* イベントツール用の追加 */
+.shots2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin: 16px 0; }
+.chain { display: grid; grid-template-columns: 1fr auto 1fr auto 1fr; gap: 10px; align-items: stretch; margin: 16px 0; }
+.chain .box { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 12px 14px; font-size: 14.5px; }
+.chain .box b { display: block; font-size: 15px; margin-bottom: 4px; }
+.chain .box ul { margin: 4px 0 0; padding-left: 1.2em; color: var(--muted); }
+.chain .arrow { align-self: center; color: var(--accent); font-family: var(--font-display); font-size: 22px; }
+@media (max-width: 760px) {
+  .shots2 { grid-template-columns: 1fr; }
+  .chain { grid-template-columns: 1fr; }
+  .chain .arrow { transform: rotate(90deg); justify-self: center; }
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap grid">
+    <div>
+      <p class="eyebrow">子ども育成シミュレーション ／ Unity エディタ拡張</p>
+      <h1>イベント制作ツールの使い方</h1>
+      <p class="lead">メリット／デメリットのイベントを、スクリプトを書かずに作ったり直したりするための手引きです。いつ出すか（年月日・条件）、選択肢（1〜4つ）、選んだあとの展開（ストーリー分岐）まで、1つのウィンドウで決められます。</p>
+      <div class="menu-path" aria-label="メニューの場所">
+        <span>子育て</span><i>›</i><span>イベント</span><i>›</i><span>編集ウィンドウ</span>
+      </div>
+    </div>
+    <figure class="shot pixel" style="margin:0">
+      <img src="img/game-trial.png" alt="ゲーム画面にメリットイベント「野球教室の体験会」のカードが出ている。説明文の下に、通わせる（−5,000円）・今回はやめておく・みらいに聞いてみる の3つの選択肢と、それぞれの効果のチップ" width="590" height="521">
+      <figcaption>このガイドで作るサンプル：「野球教室の体験会」（画像なし・3択）</figcaption>
+    </figure>
+  </div>
+</header>
+
+<div class="wrap">
+  <nav class="toc" aria-label="目次">
+    <a href="#overview">しくみ</a>
+    <a href="#where">どこで何をする</a>
+    <a href="#window">ウィンドウの見方</a>
+    <a href="#new">新しく作る</a>
+    <a href="#timing">いつ出すか</a>
+    <a href="#choices">選択肢</a>
+    <a href="#story">ストーリー分岐</a>
+    <a href="#check">見て確かめる</a>
+    <a href="#tutorial">ストーリーの文章</a>
+    <a href="#caution">気をつけること</a>
+  </nav>
+
+  <!-- しくみ -->
+  <section id="overview">
+    <h2><span class="no">0</span>しくみ</h2>
+    <p class="sub prose">イベント1つ＝アセット1つ（<code>EventData</code>）です。<code>Resources/Events</code> に置いたアセットは、ゲームが自動で読み込みます。登録の作業はありません。</p>
+    <div class="flow">
+      <div class="box">
+        <b>① 中身：EventData</b>
+        <code>Assets/Maruyama/Resources/Events/</code>
+        <p>タイトル・説明・画像、いつ出すか（出方と条件）、選択肢（ラベルと効果）。編集ウィンドウで作ります。</p>
+      </div>
+      <div class="arrow" aria-hidden="true">→</div>
+      <div class="box">
+        <b>② 出す係</b>
+        <code>EventManager / StoryEventScheduler</code>
+        <p>抽選と決まった日は EventManager、「続き」と「条件を満たしたら」は StoryEventScheduler が毎日確かめて、カードを順番待ちに入れます。</p>
+      </div>
+      <div class="arrow" aria-hidden="true">→</div>
+      <div class="box">
+        <b>③ 記録：StoryState</b>
+        <code>本編シーンの「Story」</code>
+        <p>起きたイベント・選んだ選択肢・フラグ・予約中の続きを覚えます。セーブされます。本編シーンを開くと自動でできます。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 早見表 -->
+  <section id="where">
+    <h2><span class="no">1</span>どこで何をするか</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>やりたいこと</th><th>場所</th></tr></thead>
+        <tbody>
+          <tr><td>イベントを作る・直す</td><td>メニュー「子育て › イベント › 編集ウィンドウ」。<code>EventData</code> の Inspector の「編集ウィンドウで開く」からも開けます</td></tr>
+          <tr><td>いつ出すかを決める</td><td>編集ウィンドウの「いつ出るか」と「出る条件」</td></tr>
+          <tr><td>選択肢と効果を決める</td><td>編集ウィンドウの「選択肢」</td></tr>
+          <tr><td>選んだあとの展開をつなぐ</td><td>選択肢の中の「ストーリー」欄（フラグ・趣味・特性・続き・ストーリーを出す）</td></tr>
+          <tr><td>フラグを作る</td><td>Project で右クリック › 作成 › 子育て › ストーリー › フラグ</td></tr>
+          <tr><td>全部のイベントがいつ出るかを見る</td><td>編集ウィンドウのいちばん下「すべてのイベント」の［年表］</td></tr>
+          <tr><td>直すところを探す</td><td>編集ウィンドウの「チェック」（✕＝直す、⚠＝確かめる）</td></tr>
+          <tr><td>再生中に出してみる</td><td>再生中に編集ウィンドウの「今すぐ出す」</td></tr>
+          <tr><td>分岐の先を早送りで確かめる</td><td>メニュー「子育て › デバッグツール」の「選択肢の固定」＋年齢ジャンプ</td></tr>
+          <tr><td>古いイベントに選択肢 ID を付ける</td><td>メニュー「子育て › イベント › 選択肢に ID を付ける」（1回だけ）</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ウィンドウ -->
+  <section id="window">
+    <h2><span class="no">2</span>ウィンドウの見方</h2>
+    <p class="sub prose">上から順に埋めていけば1つのイベントができます。値はその場でアセットに書き込まれ、<kbd>Ctrl</kbd>+<kbd>Z</kbd> で戻せます。</p>
+
+    <h3>上半分：基本・いつ出るか・出る条件</h3>
+    <div class="pair">
+      <figure class="shot" style="margin:0">
+        <img src="img/editor-top.png" alt="イベント編集ウィンドウの上半分。まとめの文、基本（ID・種類・タイトル・説明・画像・絵の指示メモ）、いつ出るか（出方の5択・重み・クールダウン・一生に1回だけ）、出る条件（日付の範囲、前の選択・履歴）の欄に赤い枠と番号" width="758" height="700">
+      </figure>
+      <ol class="marks">
+        <li><span class="badge">1</span><div><b>まとめ</b><span class="d">中身を1〜2行の文にしたもの。「メリット・抽選。6〜9歳。一生に1回…選択肢3つ：通わせる（−5,000円・趣味+20…）」のように出ます。入れたものが思いどおりか、ここで読んで確かめます。</span></div></li>
+        <li><span class="badge">2</span><div><b>基本</b><span class="d">ID・メリット／デメリット・タイトル・説明・画像。説明に <code>{name}</code> と書くと、ゲームでは子どもの名前（みらい）に置き換わります。画像は空でもかまいません。描いてほしい絵があれば「絵の指示メモ」に書きます。</span></div></li>
+        <li><span class="badge">3</span><div><b>いつ出るか</b><span class="d">出方を5つから選びます（<a href="#timing">4章</a>）。抽選なら重み・クールダウン・「一生に1回だけ」。</span></div></li>
+        <li><span class="badge">4</span><div><b>出る条件</b><span class="d">すべて満たしたときだけ出ます。［＋条件を足す ▼］から選ぶと、その場で中身を入れられます。新しく作った条件はイベントのアセットの中に入るので、ファイルは増えません。</span></div></li>
+      </ol>
+    </div>
+
+    <h3>選択肢</h3>
+    <div class="pair">
+      <figure class="shot" style="margin:0">
+        <img src="img/editor-choices.png" alt="選択肢1「通わせる」を開いたところ。出す条件（所持金が50,000円以上）、効果（お金 世帯 −5000、趣味 子ども 20）、ストーリー欄（フラグを立てる、趣味を決める、特性を付ける、続きを予約 180日後、ストーリーを出す）、カードのチップのプレビューに赤い枠と番号" width="758" height="545">
+      </figure>
+      <ol class="marks">
+        <li><span class="badge">1</span><div><b>出す条件（任意）</b><span class="d">満たさないと、その選択肢は灰色になって押せません。空ならいつでも押せます。</span></div></li>
+        <li><span class="badge">2</span><div><b>効果</b><span class="d">1行＝種類・だれに・どれだけ・長さ。お金は円で入れます（−5000）。</span></div></li>
+        <li><span class="badge">3</span><div><b>ストーリー</b><span class="d">フラグを立てる／消す、趣味を決める、特性を付ける、続きを予約（○日後）、ストーリーを出す。使うものだけ入れます（<a href="#story">6章</a>）。</span></div></li>
+        <li><span class="badge">4</span><div><b>カードのチップ</b><span class="d">ゲームのボタンの上に出る小さな札のプレビュー。お金はチップではなくボタンの文字に「（−5,000円）」と付きます。</span></div></li>
+      </ol>
+    </div>
+
+    <h3>下半分：つながり・チェック・置き場所</h3>
+    <div class="pair">
+      <figure class="shot" style="margin:0">
+        <img src="img/editor-bottom.png" alt="ウィンドウの下半分。ストーリーのつながり（このイベントに来る道・行く道・条件にしているもの・使っているフラグ）、チェック（画像がありません）、置き場所（Resources/Events にあります）、すべてのイベントの一覧に赤い枠と番号" width="758" height="638">
+      </figure>
+      <ol class="marks">
+        <li><span class="badge">1</span><div><b>ストーリーのつながり</b><span class="d">このイベントの前後。「来る道」「行く道」「このイベントを条件にしているもの」「使っているフラグ」。［移動］でそのイベントへ移れます。</span></div></li>
+        <li><span class="badge">2</span><div><b>チェック</b><span class="d">✕ は直さないと正しく動かないもの、⚠ は確かめてほしいもの。保存はどちらでもできます。</span></div></li>
+        <li><span class="badge">3</span><div><b>置き場所</b><span class="d"><code>Resources/Events</code> の外にあるとゲームに出ません。そのときは［移動する］が出ます。</span></div></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- 新しく作る -->
+  <section id="new">
+    <h2><span class="no">3</span>新しく作る</h2>
+    <ol class="steps">
+      <li>編集ウィンドウの［新しく作る ▼］からテンプレートを選び、ファイル名を決めます（例：<code>Event_Merit_Baseball</code>）。ID はファイル名から自動で付きます（<code>merit_baseball</code>）。</li>
+      <li>「基本」にタイトルと説明を書きます。</li>
+      <li>「いつ出るか」と「出る条件」を決めます。</li>
+      <li>選択肢のラベルと効果を入れます。分岐させるなら「ストーリー」欄も。</li>
+      <li>「チェック」に ✕ が無いことを確かめます。</li>
+      <li>再生して「今すぐ出す」で見てみます（<a href="#check">7章</a>）。</li>
+    </ol>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>テンプレート</th><th>最初に入る内容</th></tr></thead>
+        <tbody>
+          <tr><td>空</td><td>何もなし</td></tr>
+          <tr><td>抽選のメリット／デメリット</td><td>出方＝抽選、選択肢2つ</td></tr>
+          <tr><td>決まった日</td><td>出方＝決まった日（1回）、選択肢1つ「わかった」</td></tr>
+          <tr><td>続き</td><td>出方＝続き、選択肢1つ</td></tr>
+          <tr><td>条件を満たしたら</td><td>出方＝条件を満たしたら、「一生に1回」の条件つき</td></tr>
+          <tr><td>分岐の入口（2択）</td><td>抽選・一生に1回、選択肢2つそれぞれに「続きを予約」（180日後）</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="prose">［複製して作る］は、今のイベントをコピーして ID だけ付け直します。似たイベントを作るときに便利です。</p>
+  </section>
+
+  <!-- いつ出すか -->
+  <section id="timing">
+    <h2><span class="no">4</span>いつ出すか</h2>
+    <h3>出方（5つ）</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>出方</th><th>出るとき</th><th>向いているもの</th></tr></thead>
+        <tbody>
+          <tr><td>抽選</td><td>月ごとの抽選で、出る条件を満たすものから重みで選ばれる</td><td>風邪・急な出費・地域のイベント</td></tr>
+          <tr><td>決まった日</td><td>「○歳○月○日に1回だけ」か「毎年○月○日（○歳〜○歳）」に必ず</td><td>誕生日・お年玉・入学</td></tr>
+          <tr><td>続き</td><td>別のイベントの選択肢が「○日後に続きを予約」したときだけ。抽選には入らない</td><td>体験会 → 初めての試合</td></tr>
+          <tr><td>条件を満たしたら</td><td>出る条件を満たした最初の日に1回だけ</td><td>ストレスが限界になったら、野球をやめたい</td></tr>
+          <tr><td>コードから</td><td>コードから <code>EventManager.Instance.Enqueue</code> を呼んだときだけ</td><td>ミニゲームの結果など</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note tip"><b>ポイント</b>　「続き」は予約された日が来た時点で、そのイベントの「出る条件」をもう一度確かめます。満たしていなければ出ずに捨てられます（例：その日までに野球をやめていたら試合は来ない）。</div>
+
+    <h3>出る条件の部品</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>部品</th><th>決められること</th><th>説明の例</th></tr></thead>
+        <tbody>
+          <tr><td>年齢</td><td>満年齢の範囲</td><td>3〜5歳</td></tr>
+          <tr><td>日付の範囲</td><td>○歳○月○日〜○歳○月○日</td><td>6歳4月1日〜6歳7月31日</td></tr>
+          <tr><td>月</td><td>1〜12月のチェック</td><td>冬（12・1・2月）</td></tr>
+          <tr><td>学年</td><td>年少〜高3などの範囲（4月1日時点の年齢から）</td><td>小3〜小6</td></tr>
+          <tr><td>ストレス段階</td><td>子・母・父・親の平均の段階</td><td>子のストレスが危険〜限界</td></tr>
+          <tr><td>子の体調／子どもの値</td><td>体調・成績・趣味Lv の範囲、趣味の種類</td><td>趣味「スポーツ」</td></tr>
+          <tr><td>所持金</td><td>○円以上／以下</td><td>所持金が 100,000円以下</td></tr>
+          <tr><td>支援制度</td><td>制度を受給中／受けていない</td><td>予防接種の補助を受けていない</td></tr>
+          <tr><td>特性・状態</td><td>だれかが特性・状態を持っている／いない</td><td>子が「風邪気味」</td></tr>
+          <tr><td>支援条件の流用</td><td>支援制度の申請条件をそのまま使う</td><td>年収 960万円以下</td></tr>
+          <tr><td>前の選択・履歴</td><td>イベントが起きた／起きていない、選択肢を選んだ／選ばなかった</td><td>「野球教室の体験会」で「通わせる」を選んだ</td></tr>
+          <tr><td>フラグ</td><td>フラグが立っている／いない</td><td>「野球をやっている」が立っている</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="prose">「選ばなかった」は「起きていて、別の選択肢を選んだ」という意味です。まだ起きていないときは満たしません。</p>
+  </section>
+
+  <!-- 選択肢 -->
+  <section id="choices">
+    <h2><span class="no">5</span>選択肢</h2>
+    <p class="sub prose">基本は2つ。必要なときだけ1・3・4つにします（5つ以上は ✕）。4つのときは 2×2 で並ぶので、ラベルは短めに（10文字を超えると ⚠）。</p>
+    <div class="shots2">
+      <figure class="shot pixel" style="margin:0">
+        <img src="img/game-gray.png" alt="同じカードで「通わせる」のボタンが灰色になり、押せない理由が小さく書かれている。チップは「野球 +20」「趣味：野球」" width="590" height="521">
+        <figcaption>出す条件を満たさないと灰色になり、理由が小さく出る。全部押せないときは、ゲームが止まらないよう1つ目だけ押せるようにします</figcaption>
+      </figure>
+      <figure class="shot pixel" style="margin:0">
+        <img src="img/game-followup.png" alt="続きのイベント「初めての試合」のカード。応援に行く（親ストレス−5・子ストレス−10）と、仕事で行けない（＋10,000円・子ストレス＋5）の2択" width="590" height="521">
+        <figcaption>「続き」で出た「初めての試合」。説明の {name} は「みらい」に置き換わっています</figcaption>
+      </figure>
+    </div>
+    <ul class="prose">
+      <li><b>選択肢 ID</b>（<code>go</code> <code>later</code> など）は、「何を選んだか」の記録に使います。新しく足すと <code>c1</code>, <code>c2</code> … が自動で付きます。ゲームに出したあとは変えないでください（セーブの記録と合わなくなります）。</li>
+      <li><b>家計簿の種類</b>：お金が動くとき家計簿に載せる種類（病院なら「医療」）。</li>
+      <li><b>保険診療の自己負担</b>：オンにすると、医療費助成の対象になり、ボタンに「助成で ○円」などと出ます。</li>
+    </ul>
+  </section>
+
+  <!-- ストーリー -->
+  <section id="story">
+    <h2><span class="no">6</span>ストーリー分岐を作る</h2>
+    <p class="sub prose">選んだ選択肢でその後が変わるようにします。例として「野球教室の体験会」で「通わせる」を選ぶと野球が趣味になり、半年後に試合が来る流れを作ります。</p>
+
+    <div class="chain">
+      <div class="box"><b>野球教室の体験会</b>抽選・6〜9歳・一生に1回<ul><li>通わせる → フラグ・趣味・続きを予約</li><li>今回はやめておく</li></ul></div>
+      <div class="arrow" aria-hidden="true">→</div>
+      <div class="box"><b>初めての試合</b>続き（180日後）<ul><li>応援に行く</li><li>仕事で行けない</li></ul></div>
+      <div class="arrow" aria-hidden="true">→</div>
+      <div class="box"><b>少年野球の大会 など</b>抽選・条件：フラグ「野球をやっている」<ul><li>職業「プロ野球選手」の条件にも使える</li></ul></div>
+    </div>
+
+    <ol class="steps">
+      <li><b>フラグを作る</b>：Project で右クリック › 作成 › 子育て › ストーリー › フラグ。ID（<code>baseball</code>）と表示名（野球をやっている）を入れます。趣味の呼び名を使うなら「趣味の呼び名」をオンにして「野球」、分類を「スポーツ」に。</li>
+      <li><b>入口のイベントを作る</b>：テンプレート「分岐の入口（2択）」で作り、選択肢1を「通わせる」に。</li>
+      <li><b>ストーリー欄を埋める</b>：フラグを立てる＝野球をやっている、趣味を決める＝スポーツ、続きを予約の［＋新しく作る］で「初めての試合」を作り、日後を 180 に。</li>
+      <li><b>その先のイベント</b>：「少年野球の大会」などの出る条件に「フラグ」を足して「野球をやっている」を選びます。</li>
+      <li><b>やめる道も作る</b>：「野球をやめたい」の選択肢で「フラグを消す」を使うと、それ以降の野球のイベントは出なくなります。</li>
+    </ol>
+
+    <h3>趣味の呼び名（プレイヤーにどう見えるか）</h3>
+    <p class="prose">趣味の種類は「スポーツ」のままですが、呼び名つきのフラグが立っていると画面では「野球」と出ます。子どもカードのプロフィール（8歳・野球が好き）、趣味の行、効果のチップ（野球 +20／趣味：野球）が置き換わります。フラグを消すと「スポーツ」に戻ります。</p>
+
+    <div class="note tip"><b>フラグを使うか、前の選択を使うか</b>　1つのイベントの結果だけで決まるなら「前の選択・履歴」の条件で足ります（フラグ不要）。いくつものイベントで立てたり消したりする状態（今も野球を続けているか）はフラグにします。</div>
+  </section>
+
+  <!-- 確かめる -->
+  <section id="check">
+    <h2><span class="no">7</span>見て確かめる</h2>
+
+    <h3>再生中だけの欄</h3>
+    <div class="pair">
+      <figure class="shot" style="margin:0">
+        <img src="img/editor-play.png" alt="再生中の編集ウィンドウ。今の条件の判定（6歳4月1日〜9歳3月31日 ×、起きていない ×）、今すぐ出す（条件を無視）ボタン、ストーリーの状態（立っているフラグ、選んだ選択肢の履歴、予約中の続き）" width="758" height="338">
+      </figure>
+      <div>
+        <p>本編シーンを再生すると、ウィンドウに「再生中だけ」の欄が出ます。</p>
+        <ul>
+          <li><b>今の条件の判定</b>：出る条件の1つずつに ✓／×。出ない理由がすぐ分かります。</li>
+          <li><b>今すぐ出す（条件を無視）</b>：カードを本番どおり出します。</li>
+          <li><b>ストーリーの状態</b>：立っているフラグ、選んだ選択肢の履歴、予約中の続き（○歳○月○日／あと○日）。</li>
+        </ul>
+        <div class="note"><b>注意</b>　再生中に変えた値は、アセットにそのまま残ります（再生を止めても戻りません）。</div>
+      </div>
+    </div>
+
+    <h3>年表</h3>
+    <figure class="shot" style="margin:0">
+      <img src="img/editor-timeline.png" alt="すべてのイベントの年表。横軸0〜22歳に、抽選イベントは年齢の範囲を横棒、決まった日は点で表示。緑がメリット、赤がデメリット" width="758" height="365">
+      <figcaption>「すべてのイベント」の［年表］。どの年齢にイベントが少ないかが一目で分かります（緑＝メリット、赤＝デメリット、点＝決まった日）</figcaption>
+    </figure>
+
+    <h3>分岐の先を早送りで確かめる</h3>
+    <div class="pair narrow">
+      <figure class="shot" style="margin:0">
+        <img src="img/debug-fixed.png" alt="デバッグツールのウィンドウ。全部オートの設定の下に「選択肢の固定（1件）」の欄があり、野球教室の体験会 → 通わせる が登録されている。下にイベントと選択肢のドロップダウンと「固定を追加」ボタン" width="518" height="458">
+      </figure>
+      <ol class="steps" style="margin-top:0">
+        <li>メニュー「子育て › デバッグツール」を開きます（再生中）。</li>
+        <li>「選択肢の固定」でイベントと選択肢をドロップダウンから選び、［固定を追加］。再生を止めても残ります。</li>
+        <li>「オート」をオンにして、年齢ジャンプで早送りします。固定したイベントでは必ずその選択肢が選ばれます。</li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- チュートリアル -->
+  <section id="tutorial">
+    <h2><span class="no">8</span>ストーリーの文章（チュートリアル形式）</h2>
+    <p class="sub prose">選んだあとに、画像と説明文のページで「お話」を見せられます。作り方はチュートリアル制作ツールと同じです（<a href="../tutorial-tool/index.html">チュートリアル制作ツールの使い方</a>）。</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>出し方</th><th>設定する場所</th></tr></thead>
+        <tbody>
+          <tr><td>選んだ直後に出す</td><td>イベントの選択肢のストーリー欄「ストーリーを出す」にチュートリアルを入れる</td></tr>
+          <tr><td>日をおいて出す</td><td>チュートリアルの「出すタイミング」を「フラグが立った日（ずらせる）」にして、フラグと日数を入れる</td></tr>
+          <tr><td>選んだもので文章を変える</td><td>チュートリアルの各ページの「このページを出す条件」（イベントと同じ条件の部品）。満たさないページは飛ばされます</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note"><b>注意</b>　出せるページが1枚も無いときは、出さずに見送ります（「見た」にもしません）。「フラグが立った日」で出すものは、あとで条件を満たした日に出ます。「ストーリーを出す」はその場で1回だけ試すので、日をおいて出したいものは「フラグが立った日」にしてください。</div>
+  </section>
+
+  <!-- 注意 -->
+  <section id="caution">
+    <h2><span class="no">9</span>気をつけること</h2>
+    <ul class="prose">
+      <li><b>置き場所</b>：<code>Resources/Events</code> の外に置いたイベントはゲームに出ません（チェックで ⚠）。</li>
+      <li><b>ID は変えない</b>：イベント ID・選択肢 ID・フラグ ID はセーブの記録に使います。ゲームに出したあとに変えると、前の選択やフラグの条件が合わなくなります。名前（タイトル・ラベル・表示名）は変えてかまいません。</li>
+      <li><b>共有の条件</b>：別アセットの条件をほかのイベントも使っていると「ほかでも使っています」と出ます。このイベントだけ変えたいときは［このイベント専用にコピー］。</li>
+      <li><b>選択肢・ページを消したとき</b>：そこに付けていた条件も、アセットの中から自動で消えます。</li>
+      <li><b>カードの見た目（調整中）</b>：<code>EventCard.prefab</code> の並べ方はまだ前のままです。いまは画像なしだと上が空き、3つ目の選択肢はカードの下にはみ出し、押せない理由の文字は小さく重なります（このガイドの画像もその状態）。プレハブを直すと、画像なしで文章が詰まり、4つは 2×2 で並びます。</li>
+      <li><b>古いイベント</b>：選択肢 ID が空のイベントは、メニュー「子育て › イベント › 選択肢に ID を付ける」で一度に付けられます。</li>
+    </ul>
+  </section>
+</div>
+
+<footer>
+  <div class="wrap">
+    <p>関連ドキュメント</p>
+    <ul>
+      <li><code>docs/design/event-editor.md</code>（設計）</li>
+      <li><code>docs/code/event-editor-window.md</code>（コードの説明）</li>
+      <li><code>docs/design/story-tool.md</code>（ストーリーウィンドウの設計・これから）</li>
+      <li><a href="../tutorial-tool/index.html">チュートリアル制作ツールの使い方</a></li>
+    </ul>
+  </div>
+</footer>
+</body>
+</html>

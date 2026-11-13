@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 9169578630163260300}
   - component: {fileID: 3977387002743646226}
   - component: {fileID: 1183250116757866164}
+  - component: {fileID: 7926664919881542797}
   m_Layer: 0
   m_Name: ChoiceBlock
   m_TagString: Untagged
@@ -57,11 +58,11 @@ MonoBehaviour:
     m_Top: 0
     m_Bottom: 0
   m_ChildAlignment: 4
-  m_Spacing: 6
+  m_Spacing: 4
   m_ChildForceExpandWidth: 1
-  m_ChildForceExpandHeight: 1
-  m_ChildControlWidth: 0
-  m_ChildControlHeight: 0
+  m_ChildForceExpandHeight: 0
+  m_ChildControlWidth: 1
+  m_ChildControlHeight: 1
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
@@ -77,9 +78,33 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 83139448f84dc0b4486687ab645bd2c9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Maruyama.UI.ChoiceBlockUI
+  heightFor1To2: 100
+  heightFor3: 86
+  heightFor4: 118
+  layoutElement: {fileID: 7926664919881542797}
   chipsContainer: {fileID: 2058882127758492707}
   chipPrefab: {fileID: 6921908524878173617, guid: 438ad7a750c87ff4c9d332cb3d1cc2d1, type: 3}
   choiceButton: {fileID: 1277989215342509}
+--- !u!114 &7926664919881542797
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5053592663959092574}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 306cc8c2b49d7114eaa3623786fc2126, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.LayoutElement
+  m_IgnoreLayout: 0
+  m_MinWidth: -1
+  m_MinHeight: -1
+  m_PreferredWidth: -1
+  m_PreferredHeight: 100
+  m_FlexibleWidth: -1
+  m_FlexibleHeight: -1
+  m_LayoutPriority: 1
 --- !u!1 &7671990088096091635
 GameObject:
   m_ObjectHideFlags: 0
@@ -90,6 +115,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2058882127758492707}
   - component: {fileID: 3040418795782802153}
+  - component: {fileID: 8809774198370840911}
   m_Layer: 0
   m_Name: ChipsContainer
   m_TagString: Untagged
@@ -134,14 +160,34 @@ MonoBehaviour:
     m_Top: 0
     m_Bottom: 0
   m_ChildAlignment: 4
-  m_Spacing: 8
-  m_ChildForceExpandWidth: 1
+  m_Spacing: 6
+  m_ChildForceExpandWidth: 0
   m_ChildForceExpandHeight: 1
-  m_ChildControlWidth: 0
-  m_ChildControlHeight: 0
+  m_ChildControlWidth: 1
+  m_ChildControlHeight: 1
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
+--- !u!114 &8809774198370840911
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7671990088096091635}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 306cc8c2b49d7114eaa3623786fc2126, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.LayoutElement
+  m_IgnoreLayout: 0
+  m_MinWidth: -1
+  m_MinHeight: 28
+  m_PreferredWidth: -1
+  m_PreferredHeight: 28
+  m_FlexibleWidth: -1
+  m_FlexibleHeight: -1
+  m_LayoutPriority: 1
 --- !u!1001 &6775206644379508024
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -241,19 +287,47 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 6898780587432110369, guid: ea2b38848f87d9f4088c467ebe9e5d7d, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7669700029747479757}
   m_SourcePrefab: {fileID: 100100000, guid: ea2b38848f87d9f4088c467ebe9e5d7d, type: 3}
 --- !u!114 &1277989215342509 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 6774210817642353301, guid: ea2b38848f87d9f4088c467ebe9e5d7d, type: 3}
   m_PrefabInstance: {fileID: 6775206644379508024}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
+  m_GameObject: {fileID: 124758214991098905}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: aa57298703e616d4882396ee433e5561, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Maruyama.UI.EventChoiceButtonUI
+--- !u!1 &124758214991098905 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6898780587432110369, guid: ea2b38848f87d9f4088c467ebe9e5d7d, type: 3}
+  m_PrefabInstance: {fileID: 6775206644379508024}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &7669700029747479757
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 124758214991098905}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 306cc8c2b49d7114eaa3623786fc2126, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.LayoutElement
+  m_IgnoreLayout: 0
+  m_MinWidth: -1
+  m_MinHeight: 46
+  m_PreferredWidth: -1
+  m_PreferredHeight: 52
+  m_FlexibleWidth: -1
+  m_FlexibleHeight: 1
+  m_LayoutPriority: 1
 --- !u!224 &167520358841126587 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 6653356425991181187, guid: ea2b38848f87d9f4088c467ebe9e5d7d, type: 3}

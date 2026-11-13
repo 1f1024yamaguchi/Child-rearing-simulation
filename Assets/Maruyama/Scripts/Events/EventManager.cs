@@ -464,8 +464,28 @@ namespace Maruyama.Events
         private void TryShowNext()
         {
             if (isDialogOpen || pendingDialogs.Count == 0) return;
+            // 食事選択が開いている間は待つ（食事を選び終えたあとに出す。Update が閉じたのを見て出す）
+            if (IsMealDialogOpen()) return;
             var req = pendingDialogs.Dequeue();
             ShowDialog(req.demerit, req.merit);
+        }
+
+        private MealSelectionDialogUI mealDialog;
+
+        /// <summary>食事選択のダイアログが開いているか。</summary>
+        private bool IsMealDialogOpen()
+        {
+            if (mealDialog == null)
+            {
+                mealDialog = FindFirstObjectByType<MealSelectionDialogUI>(FindObjectsInactive.Include);
+            }
+            return mealDialog != null && mealDialog.gameObject.activeInHierarchy;
+        }
+
+        private void Update()
+        {
+            // 食事選択で待たされていたイベントを、閉じたあとに出す
+            if (!isDialogOpen && pendingDialogs.Count > 0) TryShowNext();
         }
 
         private System.Collections.IEnumerator ShowNextNextFrame()

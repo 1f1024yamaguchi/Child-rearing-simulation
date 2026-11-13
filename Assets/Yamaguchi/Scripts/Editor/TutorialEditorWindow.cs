@@ -225,6 +225,8 @@ public class TutorialEditorWindow : EditorWindow
                     {
                         pages.DeleteArrayElementAtIndex(i);
                         if (previewIndex >= pages.arraySize) previewIndex = pages.arraySize - 1;
+                        // 消したページの「出す条件」がアセットの中に残らないよう、反映後に掃除する
+                        EventConditionList.CleanupUnreferencedLater(pages.serializedObject.targetObject);
                         return true;
                     }
                 }

@@ -1,6 +1,8 @@
 using System;
 using Maruyama.Events;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 namespace Maruyama.UI
 {
@@ -17,6 +19,72 @@ namespace Maruyama.UI
     /// </summary>
     public class EventDialogUI : MonoBehaviour
     {
+        // ---- 最前面表示 ----
+        // 食事選択（950）・カレンダー（999）・HUD（100）など、他の画面より必ず手前に出すため、
+        // ゲーム起動時に、シーン内のイベントダイアログを専用の最前面 Canvas に移す。
+
+        /// <summary>イベントダイアログ専用 Canvas の描画順（他のどの画面より大きい値）。</summary>
+        public const int TopCanvasSortingOrder = 1100;
+        private const string TopCanvasName = "EventDialogCanvas";
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+        private static void RegisterSceneHook()
+        {
+            SceneManager.sceneLoaded -= OnSceneLoadedMoveToTop;
+            SceneManager.sceneLoaded += OnSceneLoadedMoveToTop;
+        }
+
+        private static void OnSceneLoadedMoveToTop(Scene scene, LoadSceneMode mode)
+        {
+            // 非表示（inactive）のダイアログも対象にするため FindObjectsOfTypeAll を使う
+            foreach (var dialog in Resources.FindObjectsOfTypeAll<EventDialogUI>())
+            {
+                if (dialog == null || !dialog.gameObject.scene.IsValid() || dialog.gameObject.scene != scene) continue;
+                dialog.MoveToTopCanvas();
+            }
+        }
+
+        /// <summary>このダイアログを、最前面の専用 Canvas の下へ移す（すでに移動済みなら何もしない）。</summary>
+        public void MoveToTopCanvas()
+        {
+            var current = GetComponentInParent<Canvas>(true);
+            if (current != null && current.gameObject.name == TopCanvasName) return;
+
+            var scene = gameObject.scene;
+            var canvasGo = new GameObject(TopCanvasName, typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
+            SceneManager.MoveGameObjectToScene(canvasGo, scene);
+
+            var canvas = canvasGo.GetComponent<Canvas>();
+            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            canvas.sortingOrder = TopCanvasSortingOrder;
+
+            // 元の Canvas と同じ拡大縮小の設定にそろえる（見た目の大きさが変わらないように）
+            var scaler = canvasGo.GetComponent<CanvasScaler>();
+            var srcScaler = current != null ? current.rootCanvas.GetComponent<CanvasScaler>() : null;
+            if (srcScaler != null)
+            {
+                scaler.uiScaleMode = srcScaler.uiScaleMode;
+                scaler.referenceResolution = srcScaler.referenceResolution;
+                scaler.screenMatchMode = srcScaler.screenMatchMode;
+                scaler.matchWidthOrHeight = srcScaler.matchWidthOrHeight;
+                scaler.referencePixelsPerUnit = srcScaler.referencePixelsPerUnit;
+            }
+            else
+            {
+                scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+                scaler.referenceResolution = new Vector2(800f, 600f);
+                scaler.matchWidthOrHeight = 0f;
+            }
+
+            transform.SetParent(canvasGo.transform, false);
+            var rect = (RectTransform)transform;
+            rect.anchorMin = Vector2.zero;
+            rect.anchorMax = Vector2.one;
+            rect.offsetMin = Vector2.zero;
+            rect.offsetMax = Vector2.zero;
+            transform.SetAsLastSibling();
+        }
+
         [Header("カード参照")]
         [SerializeField] private EventCardUI demeritCardUI;
         [SerializeField] private EventCardUI meritCardUI;

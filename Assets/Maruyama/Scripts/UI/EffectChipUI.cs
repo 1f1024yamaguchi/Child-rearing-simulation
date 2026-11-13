@@ -48,6 +48,7 @@ namespace Maruyama.UI
         private string GetTargetName(EffectTarget target, EffectKind kind)
         {
             if (kind == EffectKind.Health) return ""; // 体調の場合はプレフィックスなし ("体調 -15")
+            if (kind == EffectKind.Hobby) return "";  // 趣味は子どもだけが持つのでプレフィックスなし ("野球 +20")
 
             switch (target)
             {
@@ -60,6 +61,17 @@ namespace Maruyama.UI
             }
         }
 
+        /// <summary>
+        /// 趣味のチップの名前。子どもの趣味が決まっていれば、その呼び名（スポーツ＋フラグ「野球」なら「野球」）。
+        /// まだ「なし」のとき（同じ選択肢で趣味を決める場合など）は「趣味」。
+        /// </summary>
+        private static string HobbyChipName()
+        {
+            var child = Household.I != null ? Household.I.Child : null;
+            if (child == null || child.Hobby == HobbyKind.なし) return "趣味";
+            return HobbyDisplayName.Get(child.Hobby);
+        }
+
         private string GetKindName(EffectKind kind)
         {
             switch (kind)
@@ -68,7 +80,7 @@ namespace Maruyama.UI
                 case EffectKind.Stress: return "ストレス";
                 case EffectKind.Health: return "体調";
                 case EffectKind.Grades: return "成績";
-                case EffectKind.Hobby: return "趣味";
+                case EffectKind.Hobby: return HobbyChipName();
                 default: return kind.ToString();
             }
         }

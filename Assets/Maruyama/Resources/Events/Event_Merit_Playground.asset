@@ -17,30 +17,44 @@ MonoBehaviour:
   title: "\u516C\u5712\u3067\u304A\u53CB\u9054\u304C\u3067\u304D\u305F"
   description: "\u540C\u3058\u5E74\u3054\u308D\u306E\u5B50\u3068\u3001\u3059\u3063\u304B\u308A\u4EF2\u826F\u304F\u306A\u3063\u305F\u3002"
   iconSprite: {fileID: 0}
+  imageNote: 
   choices:
-  - label: "\u305F\u304F\u3055\u3093\u904A\u3070\u305B\u308B"
+  - id: c1
+    label: "\u305F\u304F\u3055\u3093\u904A\u3070\u305B\u308B"
     effects:
     - kind: 1
       target: 3
       value: -8
       duration: 0
       days: 0
+      asset: {fileID: 0}
     - kind: 1
       target: 4
       value: 2
       duration: 0
       days: 0
+      asset: {fileID: 0}
     ledgerCategory: 8
     insuredMedicalExpense: 0
-  - label: "\u4ECA\u65E5\u306F\u65E9\u3081\u306B\u5E30\u308B"
+    showConditions: []
+  - id: c2
+    label: "\u4ECA\u65E5\u306F\u65E9\u3081\u306B\u5E30\u308B"
     effects:
     - kind: 1
       target: 3
       value: 3
       duration: 0
       days: 0
+      asset: {fileID: 0}
     ledgerCategory: 8
     insuredMedicalExpense: 0
+    showConditions: []
   conditions:
   - {fileID: 11400000, guid: e92b4f597f141ad4bbb717a80747c302, type: 2}
   weight: 1
+  cooldownDays: 0
+  trigger: 0
+  fixedMonth: 1
+  fixedDay: 1
+  fixedMinAgeYears: 0
+  fixedMaxAgeYears: 0

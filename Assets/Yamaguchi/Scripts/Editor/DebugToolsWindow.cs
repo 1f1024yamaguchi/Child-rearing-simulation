@@ -65,8 +65,6 @@ public class DebugToolsWindow : EditorWindow
         if (gs.IsGameOver) EditorGUILayout.HelpBox("ゲームは終了しています。", MessageType.Warning);
     }
 
-    private string inputEventId = "";
-    private string inputChoiceId = "";
 
     private void DrawAuto(DebugAutoPilot pilot)
     {
@@ -87,8 +85,71 @@ public class DebugToolsWindow : EditorWindow
         DrawFixedChoices(pilot);
     }
 
+    // ─── 選択肢の固定 ─────────────────────────────────────────────
+    // 表は EditorPrefs に保存し、再生のたびに DebugAutoPilot へ入れ直す（再生を止めても消えない）。
+    // イベントと選択肢はドロップダウンで選ぶ（ID の打ち間違いで黙って効かない、を防ぐ）。
+
+    private const string FixedChoicesPrefKey = "Kosodate.Debug.FixedChoices";
+
+    [System.Serializable]
+    private class FixedChoiceSave
+    {
+        public System.Collections.Generic.List<DebugAutoPilot.FixedChoiceEntry> entries =
+            new System.Collections.Generic.List<DebugAutoPilot.FixedChoiceEntry>();
+    }
+
+    private int loadedPilotId;              // どの DebugAutoPilot に読み込み済みか（再生のたびに作り直されるため）
+    private int pickEventIndex = -1;
+    private int pickChoiceIndex;
+
+    /// 保存してある表を、この再生の DebugAutoPilot に入れる（再生ごとに1回）。
+    private void LoadFixedChoicesInto(DebugAutoPilot pilot)
+    {
+        if (pilot == null || loadedPilotId == pilot.GetInstanceID()) return;
+        loadedPilotId = pilot.GetInstanceID();
+
+        pilot.ClearAllFixedChoices();
+        string json = EditorPrefs.GetString(FixedChoicesPrefKey, "");
+        if (string.IsNullOrEmpty(json)) return;
+        var data = JsonUtility.FromJson<FixedChoiceSave>(json);
+        if (data?.entries == null) return;
+        foreach (var e in data.entries)
+            if (e != null) pilot.SetFixedChoice(e.eventId, e.choiceId);
+    }
+
+    private static void SaveFixedChoices(DebugAutoPilot pilot)
+    {
+        var data = new FixedChoiceSave();
+        foreach (var e in pilot.FixedChoices)
+            data.entries.Add(new DebugAutoPilot.FixedChoiceEntry { eventId = e.eventId, choiceId = e.choiceId });
+        EditorPrefs.SetString(FixedChoicesPrefKey, JsonUtility.ToJson(data));
+    }
+
+    private static string EventTitleOf(string eventId)
+    {
+        foreach (var e in EventRegistry.All())
+            if (e != null && e.id == eventId) return string.IsNullOrEmpty(e.title) ? e.name : e.title;
+        return null;
+    }
+
+    private static string ChoiceLabelOf(string eventId, string choiceId)
+    {
+        foreach (var e in EventRegistry.All())
+        {
+            if (e == null || e.id != eventId || e.choices == null) continue;
+            for (int i = 0; i < e.choices.Count; i++)
+            {
+                var c = e.choices[i];
+                if (c != null && c.GetOrFallbackId(i) == choiceId) return c.label;
+            }
+        }
+        return null;
+    }
+
     private void DrawFixedChoices(DebugAutoPilot pilot)
     {
+        LoadFixedChoicesInto(pilot);
+
         using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
         {
             using (new EditorGUILayout.HorizontalScope())
@@ -97,35 +158,70 @@ public class DebugToolsWindow : EditorWindow
                 if (pilot.FixedChoices.Count > 0 && GUILayout.Button("全解除", EditorStyles.miniButton, GUILayout.Width(60)))
                 {
                     pilot.ClearAllFixedChoices();
+                    SaveFixedChoices(pilot);
                 }
             }
+            EditorGUILayout.LabelField("オートのとき、このイベントでは必ずこの選択肢を選びます（再生を止めても残ります）。", EditorStyles.wordWrappedMiniLabel);
 
             for (int i = 0; i < pilot.FixedChoices.Count; i++)
             {
                 var entry = pilot.FixedChoices[i];
+                string title = EventTitleOf(entry.eventId);
+                string label = ChoiceLabelOf(entry.eventId, entry.choiceId);
                 using (new EditorGUILayout.HorizontalScope())
                 {
-                    EditorGUILayout.LabelField($"イベント: {entry.eventId} → 選択肢: {entry.choiceId}", EditorStyles.miniLabel);
+                    if (title == null || label == null)
+                    {
+                        // イベントか選択肢が見つからない（ID が変わった・消えた）
+                        var red = new GUIStyle(EditorStyles.miniLabel) { normal = { textColor = Color.red } };
+                        EditorGUILayout.LabelField($"⚠ {entry.eventId} → {entry.choiceId}（見つかりません。効きません）", red);
+                    }
+                    else
+                    {
+                        EditorGUILayout.LabelField($"{title} → {label}", EditorStyles.miniLabel);
+                    }
                     if (GUILayout.Button("✕", EditorStyles.miniButton, GUILayout.Width(24)))
                     {
                         pilot.ClearFixedChoice(entry.eventId);
+                        SaveFixedChoices(pilot);
                         break;
                     }
                 }
             }
 
+            // 追加：イベント → 選択肢 をドロップダウンで選ぶ
+            var events = EventRegistry.All().FindAll(e => e != null && e.choices != null && e.choices.Count > 0);
+            if (events.Count == 0)
+            {
+                EditorGUILayout.LabelField("選択肢のあるイベントがありません。", EditorStyles.miniLabel);
+                return;
+            }
+            var eventNames = new string[events.Count];
+            for (int i = 0; i < events.Count; i++)
+                eventNames[i] = (string.IsNullOrEmpty(events[i].title) ? events[i].name : events[i].title).Replace('/', '／');
+
             using (new EditorGUILayout.HorizontalScope())
             {
-                inputEventId = EditorGUILayout.TextField(inputEventId, GUILayout.Width(100));
-                GUILayout.Label("→", GUILayout.Width(18));
-                inputChoiceId = EditorGUILayout.TextField(inputChoiceId, GUILayout.Width(60));
-                using (new EditorGUI.DisabledScope(string.IsNullOrEmpty(inputEventId) || string.IsNullOrEmpty(inputChoiceId)))
+                int ev = EditorGUILayout.Popup(pickEventIndex, eventNames);
+                if (ev != pickEventIndex) { pickEventIndex = ev; pickChoiceIndex = 0; }
+
+                var picked = (pickEventIndex >= 0 && pickEventIndex < events.Count) ? events[pickEventIndex] : null;
+                string[] choiceNames = new string[picked != null ? picked.choices.Count : 0];
+                for (int i = 0; i < choiceNames.Length; i++)
                 {
-                    if (GUILayout.Button("固定を追加", EditorStyles.miniButton))
+                    var c = picked.choices[i];
+                    choiceNames[i] = (c != null ? c.label : "（空）").Replace('/', '／');
+                }
+                using (new EditorGUI.DisabledScope(picked == null))
+                {
+                    pickChoiceIndex = EditorGUILayout.Popup(pickChoiceIndex, choiceNames, GUILayout.Width(110));
+                    if (GUILayout.Button("固定を追加", EditorStyles.miniButton, GUILayout.Width(70)) &&
+                        picked != null && pickChoiceIndex >= 0 && pickChoiceIndex < picked.choices.Count &&
+                        picked.choices[pickChoiceIndex] != null)
                     {
-                        pilot.SetFixedChoice(inputEventId, inputChoiceId);
-                        inputEventId = "";
-                        inputChoiceId = "";
+                        string choiceId = picked.choices[pickChoiceIndex].GetOrFallbackId(pickChoiceIndex);
+                        pilot.SetFixedChoice(picked.id, choiceId);
+                        SaveFixedChoices(pilot);
                     }
                 }
             }
