@@ -5,8 +5,6 @@ using UnityEngine;
 /// <summary>編集ウィンドウの「いつ出るか」欄：抽選（重み・クールダウン）／決まった日（1回だけ・毎年）。</summary>
 public static class EventTimingSection
 {
-    private const int HalfYearDays = 182;
-    private const int YearDays = 365;
     private const int MaxAge = 19; // GameDate のユーティリティ（SupportEditorGUI.DrawGameDay）と同じ上限
 
     public static void Draw(SerializedObject so)
@@ -59,23 +57,110 @@ public static class EventTimingSection
     }
 
     // ─── 抽選 ────────────────────────────────────────────────────
+    private static readonly int[] CooldownPresetDays = { 0, 30, 91, 182, 365, 730 };
+    private static readonly string[] CooldownPresetNames =
+    {
+        "なし（制限しない）", "1ヶ月", "3ヶ月", "半年", "1年", "2年", "日数を自分で決める",
+    };
+    private static readonly System.Collections.Generic.HashSet<int> customCooldown = new System.Collections.Generic.HashSet<int>();
+
     private static void DrawRandom(SerializedObject so, EventData e)
     {
-        var weight = so.FindProperty("weight");
-        float w = EditorGUILayout.FloatField(new GUIContent("重み", "大きいほど選ばれやすい。0 なら選ばれない。"), weight.floatValue);
-        if (w != weight.floatValue) weight.floatValue = Mathf.Max(0f, w);
+        EditorGUILayout.LabelField("毎月の抽選で、条件を満たす候補の中から「重み」に比例して1つ選ばれます。", EditorStyles.wordWrappedMiniLabel);
 
-        var cooldown = so.FindProperty("cooldownDays");
+        DrawWeight(so, e);
+        EditorGUILayout.Space(2);
+        DrawCooldown(so, e);
+        EditorGUILayout.Space(2);
+        DrawOnceInLifetime(so, e);
+    }
+
+    private static void DrawWeight(SerializedObject so, EventData e)
+    {
+        var weight = so.FindProperty("weight");
         using (new EditorGUILayout.HorizontalScope())
         {
-            int c = EditorGUILayout.IntField(new GUIContent("クールダウン（日）", "一度起きたら、この日数のあいだは同じイベントを選ばない。0 なら制限なし。"), cooldown.intValue);
-            if (c != cooldown.intValue) cooldown.intValue = Mathf.Max(0, c);
-            if (GUILayout.Button("半年", GUILayout.Width(44))) cooldown.intValue = HalfYearDays;
-            if (GUILayout.Button("1年", GUILayout.Width(44))) cooldown.intValue = YearDays;
+            EditorGUILayout.PrefixLabel(new GUIContent("出やすさ（重み）", "同じ種類（良い／悪い）の候補どうしで比べた、選ばれやすさ。大きいほど選ばれやすい。0 なら選ばれない。ふつうは 1。"));
+            float w = EditorGUILayout.FloatField(weight.floatValue, GUILayout.Width(60));
+            if (w != weight.floatValue) weight.floatValue = Mathf.Max(0f, w);
+            if (GUILayout.Button("めったに出ない", EditorStyles.miniButton)) weight.floatValue = 0.3f;
+            if (GUILayout.Button("ふつう", EditorStyles.miniButton)) weight.floatValue = 1f;
+            if (GUILayout.Button("よく出る", EditorStyles.miniButton)) weight.floatValue = 3f;
         }
-        EditorGUILayout.LabelField(" ", "＝ " + EventDescriber.CooldownText(cooldown.intValue), EditorStyles.miniLabel);
+        EditorGUILayout.LabelField(" ", WeightShareText(e, weight.floatValue), EditorStyles.wordWrappedMiniLabel);
+    }
 
-        DrawOnceInLifetime(so, e);
+    /// <summary>同じ種類の抽選イベントの重みを足して、このイベントの割合を出す（条件は見ない、おおよその目安）。</summary>
+    private static string WeightShareText(EventData e, float w)
+    {
+        if (w <= 0f) return "重みが 0 なので、抽選では選ばれません。";
+
+        float total = 0f;
+        int count = 0;
+        bool hasSelf = false;
+        foreach (var ev in EventRegistry.All())
+        {
+            if (ev == null || ev.trigger != EventTrigger.Random || ev.category != e.category) continue;
+            float ew = ev == e ? w : ev.weight;
+            if (ew <= 0f) continue;
+            total += ew;
+            count++;
+            if (ev == e) hasSelf = true;
+        }
+        if (!hasSelf) { total += w; count++; }
+
+        string kind = e.category == EventCategory.Demerit ? "デメリット" : "メリット";
+        if (count <= 1) return $"同じ{kind}の抽選イベントは、これだけです（条件を満たせば必ず選ばれます）。";
+        int pct = Mathf.RoundToInt(w / total * 100f);
+        return $"目安：{kind}の抽選イベント {count} 件が全部出られるとき、約 {pct}%。条件で出られないイベントが多いほど、この数字は上がります。";
+    }
+
+    private static void DrawCooldown(SerializedObject so, EventData e)
+    {
+        var cooldown = so.FindProperty("cooldownDays");
+        int id = e.GetInstanceID();
+        int days = cooldown.intValue;
+
+        int preset = System.Array.IndexOf(CooldownPresetDays, days);
+        bool custom = customCooldown.Contains(id) || preset < 0;
+        int popupIndex = custom ? CooldownPresetNames.Length - 1 : preset;
+
+        using (new EditorGUILayout.HorizontalScope())
+        {
+            EditorGUILayout.PrefixLabel(new GUIContent("出たあと、しばらく出さない", "一度起きたら、この期間は同じイベントを選ばない。「なし」なら毎月の候補に毎回入る。"));
+            int next = EditorGUILayout.Popup(popupIndex, CooldownPresetNames);
+            if (next != popupIndex)
+            {
+                if (next == CooldownPresetNames.Length - 1)
+                {
+                    customCooldown.Add(id);
+                    if (days <= 0) cooldown.intValue = 30;
+                }
+                else
+                {
+                    customCooldown.Remove(id);
+                    cooldown.intValue = CooldownPresetDays[next];
+                }
+            }
+        }
+
+        if (custom)
+        {
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                EditorGUILayout.PrefixLabel("日数");
+                int c = EditorGUILayout.IntField(cooldown.intValue, GUILayout.Width(60));
+                if (c != cooldown.intValue) cooldown.intValue = Mathf.Max(0, c);
+                GUILayout.Label("日（30日 ≒ 1ヶ月）", EditorStyles.miniLabel);
+                GUILayout.FlexibleSpace();
+            }
+        }
+
+        int d = cooldown.intValue;
+        string note = d <= 0
+            ? "制限なし：毎月の抽選に毎回入ります（ただし直前に出たものは、他に候補があれば外されます）。"
+            : $"一度出たら、{EventDescriber.CooldownText(d)}のあいだは抽選に入りません。";
+        EditorGUILayout.LabelField(" ", note, EditorStyles.wordWrappedMiniLabel);
     }
 
     private static void DrawOnceInLifetime(SerializedObject so, EventData e)
@@ -84,7 +169,7 @@ public static class EventTimingSection
         bool current = cond != null;
 
         EditorGUI.BeginChangeCheck();
-        bool next = EditorGUILayout.Toggle(new GUIContent("一生に1回だけ", "ON にすると「このイベントが起きていない」条件を自動で追加し、一度発生した後は抽選されなくなります。"), current);
+        bool next = EditorGUILayout.Toggle(new GUIContent("一生に1回だけ", "ON にすると、一度起きたあとは二度と出ません（「このイベントが起きていない」条件を自動で足します）。"), current);
         if (EditorGUI.EndChangeCheck() && next != current)
         {
             if (next)

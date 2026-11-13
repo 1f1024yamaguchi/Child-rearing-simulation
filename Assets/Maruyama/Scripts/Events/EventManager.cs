@@ -532,6 +532,28 @@ namespace Maruyama.Events
             ShowDialog(PickValidEvent(demeritPool, ref lastDemeritId), PickValidEvent(meritPool, ref lastMeritId));
         }
 
+        /// <summary>
+        /// 条件も順番待ちも無視して、今すぐこのイベントのダイアログを出す（編集ウィンドウの確認用）。
+        /// 食事選択が開いていても待たずに出る（イベントは最前面に出る）。
+        /// すでにイベントのダイアログが開いているときは何もしない。
+        /// 注意：出したあとに選択肢を選ぶと、効果は実際に適用される。
+        /// </summary>
+        /// <returns>ダイアログを出せたら true</returns>
+        public bool ShowNow(EventData e)
+        {
+            if (e == null) return false;
+            if (isDialogOpen)
+            {
+                // すでに開いているイベントは閉じて、こちらに切り替える（確認用に続けて見られるように）
+                if (dialogUI == null) dialogUI = FindFirstObjectByType<EventDialogUI>(FindObjectsInactive.Include);
+                if (dialogUI != null) dialogUI.Close();
+                isDialogOpen = false;
+            }
+            ShowDialog(e.category == EventCategory.Demerit ? e : null,
+                       e.category == EventCategory.Merit ? e : null);
+            return isDialogOpen;
+        }
+
         private void ShowDialog(EventData demerit, EventData merit)
         {
             if (demerit == null && merit == null)

@@ -12,7 +12,14 @@ public static class EventPlayModeSection
 
     public static void Draw(EventData e)
     {
-        if (!EditorApplication.isPlaying) return;
+        // 再生しなくても見られる見た目プレビュー（選んだイベントに合わせて自動で切り替わる）
+        EventCardPreview.DrawBox(e);
+
+        if (!EditorApplication.isPlaying)
+        {
+            DrawEditModeBox(e);
+            return;
+        }
 
         if (Event.current.type == EventType.Layout)
         {
@@ -171,9 +178,35 @@ public static class EventPlayModeSection
             return;
         }
 
-        if (GUILayout.Button("今すぐ出す（条件を無視）", GUILayout.Height(24)))
+        if (GUILayout.Button("今すぐ出す（条件を無視・すぐ画面に出す）", GUILayout.Height(26)))
         {
-            manager.Enqueue(e);
+            manager.ShowNow(e);
+        }
+        using (new EditorGUILayout.HorizontalScope())
+        {
+            if (GUILayout.Button("出番待ちに入れる（食事選択が閉じたあとに出る）", EditorStyles.miniButton))
+            {
+                manager.Enqueue(e);
+            }
+        }
+        EditorGUILayout.LabelField("出したあとに選択肢を選ぶと、効果は実際に適用されます。", EditorStyles.miniLabel);
+    }
+
+    /// <summary>再生していないとき：再生を始めて、そのイベントを今すぐ画面に出す。</summary>
+    private static void DrawEditModeBox(EventData e)
+    {
+        using (new SupportEditorGUI.BoxScope("実際にゲームで確認（再生が必要）"))
+        {
+            EditorGUILayout.HelpBox("ボタンの動きや効果の適用まで確かめたいときだけ使います。ゲームを再生して、このイベントを今すぐ画面に出します（条件は無視）。選択肢を選ぶと効果は実際に適用されます。再生を止めればゲームの状態は戻ります。", MessageType.Info);
+
+            bool canRun = e != null && AssetDatabase.Contains(e);
+            using (new EditorGUI.DisabledScope(!canRun))
+            {
+                if (GUILayout.Button("再生して今すぐ出す", GUILayout.Height(26)))
+                {
+                    EventPreviewLauncher.RequestAndPlay(e);
+                }
+            }
         }
     }
 }

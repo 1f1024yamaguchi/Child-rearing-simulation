@@ -164,26 +164,29 @@ public static class EventRegistry
         var names = new List<string>();
         if (cond == null) return names;
 
-        if (conditionUsers == null)
+        // 作っている途中で索引が空に戻されても落ちないよう、手元の辞書に作ってから差し替える
+        var map = conditionUsers;
+        if (map == null)
         {
-            conditionUsers = new Dictionary<EventConditionSO, List<EventData>>();
+            map = new Dictionary<EventConditionSO, List<EventData>>();
             foreach (var e in All())
             {
                 if (e == null || e.conditions == null) continue;
                 foreach (var c in e.conditions)
                 {
                     if (c == null) continue;
-                    if (!conditionUsers.TryGetValue(c, out var list))
+                    if (!map.TryGetValue(c, out var list))
                     {
                         list = new List<EventData>();
-                        conditionUsers[c] = list;
+                        map[c] = list;
                     }
                     if (!list.Contains(e)) list.Add(e);
                 }
             }
+            conditionUsers = map;
         }
 
-        if (conditionUsers.TryGetValue(cond, out var users))
+        if (map.TryGetValue(cond, out var users))
         {
             foreach (var e in users)
             {
