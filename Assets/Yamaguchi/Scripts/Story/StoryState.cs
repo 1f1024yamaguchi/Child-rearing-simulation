@@ -279,7 +279,7 @@ public class StoryState : MonoBehaviour
         return 0;
     }
 
-    // ─── 続きの予約（④で使用。入れ物だけ今作る）─────────
+    // ─── 続きの予約 ─────────────────────────────────
 
     public void Schedule(string eventId, int scheduledAgeDay)
     {
@@ -296,23 +296,39 @@ public class StoryState : MonoBehaviour
     }
 
     /// <summary>
-    /// 予約日が指定日（通算日数）以前のイベントをすべて取り出し、予約リストから削除する。
+    /// 予約日が指定日（通算日数）以前の予約を、登録順に返す。**予約リストからは消さない。**
+    /// 消すのは、そのイベントで選択肢が選ばれたとき（RemoveScheduled）。
+    /// 出番待ちに入れた時点で消すと、選ばれる前にセーブされたとき（月初めの自動セーブなど）に
+    /// 予約にも出番待ちにも残らず、ロード後に二度と出なくなるため（EventManager の出番待ちはセーブされない）。
     /// 「== 今日」だと、0日後の予約（今日はもう終わっている）や日が飛んだときに永遠に出なくなるため「<=」。
     /// </summary>
-    public List<ScheduledEventEntry> ConsumeScheduledForDay(int ageDay)
+    public List<ScheduledEventEntry> GetDueScheduled(int ageDay)
     {
         var due = new List<ScheduledEventEntry>();
-        for (int i = scheduledEvents.Count - 1; i >= 0; i--)
+        foreach (var e in scheduledEvents)
         {
-            if (scheduledEvents[i].scheduledAgeDay <= ageDay)
-            {
-                due.Add(scheduledEvents[i]);
-                scheduledEvents.RemoveAt(i);
-            }
+            if (e.scheduledAgeDay <= ageDay) due.Add(e);
         }
-        due.Reverse(); // 元の登録順に戻す
-        if (due.Count > 0) SyncInspectorLists();
         return due;
+    }
+
+    /// <summary>
+    /// 予約を1件消す（同じイベントの予約が複数あれば、予約日がいちばん早いもの）。
+    /// 選択肢が選ばれたとき・条件を満たさず捨てるとき・デバッグで消すときに使う。消せたら true。
+    /// </summary>
+    public bool RemoveScheduled(string eventId)
+    {
+        if (string.IsNullOrEmpty(eventId)) return false;
+        int best = -1;
+        for (int i = 0; i < scheduledEvents.Count; i++)
+        {
+            if (scheduledEvents[i].eventId != eventId) continue;
+            if (best < 0 || scheduledEvents[i].scheduledAgeDay < scheduledEvents[best].scheduledAgeDay) best = i;
+        }
+        if (best < 0) return false;
+        scheduledEvents.RemoveAt(best);
+        SyncInspectorLists();
+        return true;
     }
 
     public IReadOnlyList<ScheduledEventEntry> ScheduledEvents => scheduledEvents;

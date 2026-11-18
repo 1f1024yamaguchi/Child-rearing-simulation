@@ -4,7 +4,8 @@ using UnityEngine.SceneManagement;
 
 /// <summary>
 /// 本編シーン（EventManager があるシーン）が読み込まれたら、ストーリーの部品
-/// （StoryState / StorySaveParticipant / StoryEventScheduler）を1つの GameObject「Story」にまとめて作る。
+/// （StoryState / StorySaveParticipant / StoryEventScheduler / DreamSystem）を1つの GameObject「Story」にまとめて作る。
+/// DreamSystem（将来の夢・Core）もここで作る。夢の条件がストーリーの入口になるため、同じ場所で作り忘れを防ぐ。
 ///
 /// なぜ自動で作るか：
 /// - シーンに置き忘れると「続き」「条件を満たしたら」のイベントが出ず、ストーリーもセーブされない。
@@ -41,6 +42,8 @@ public static class StoryBootstrap
                 existing.AddComponent<StorySaveParticipant>();
             if (Object.FindFirstObjectByType<StoryEventScheduler>(FindObjectsInactive.Include) == null)
                 existing.AddComponent<StoryEventScheduler>();
+            if (Object.FindFirstObjectByType<DreamSystem>(FindObjectsInactive.Include) == null)
+                existing.AddComponent<DreamSystem>();
             return;
         }
 
@@ -49,6 +52,8 @@ public static class StoryBootstrap
         go.AddComponent<StoryState>();
         go.AddComponent<StorySaveParticipant>();
         go.AddComponent<StoryEventScheduler>();
+        if (Object.FindFirstObjectByType<DreamSystem>(FindObjectsInactive.Include) == null)
+            go.AddComponent<DreamSystem>();
         Debug.Log($"[StoryBootstrap] シーン「{scene.name}」にストーリーの部品を作りました。");
     }
 }

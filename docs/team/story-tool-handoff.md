@@ -1,7 +1,7 @@
 ---
 title: ストーリー管理・制作ツールの引き継ぎ
-updated: 2026-11-13
-status: イベント制作ツールは完成。次はストーリーウィンドウ（未着手）
+updated: 2026-11-18
+status: ストーリーウィンドウの回A・回B（フラグ・再生中・流れ図）まで済み。次はストーリーの文章（回C）
 related: [event-editor.md, story-tool.md, antigravity-event-editor.md]
 ---
 
@@ -40,7 +40,7 @@ story-tool.md 4章の「まだ決めること」（流れ図の「全部」の�
 | 部品 | 役目・使い方 |
 |---|---|
 | `StoryFlag`（ScriptableObject） | id・displayName・description・趣味の呼び名（useCustomHobbyName／customHobbyName／hobbyKind）。**アセットはまだ1つも無い**（story-tool.md は `Assets/Yamaguchi/Data/Story/Flags/Flag_<ID>.asset` に作る案） |
-| `StoryState`（`StoryState.I`） | 窓口：`SetFlag` `ClearFlag` `HasFlag` `GetFlagAsset` `ActiveFlagOrder` `GetFlagSetDay`、`HasOccurred` `TimesOccurred` `ChoiceOf`、`Schedule` `ConsumeScheduledForDay` `ScheduledEvents`、`CaptureSaveData` `RestoreSaveData` `Clear`。イベント：`OnFlagChanged` `OnFlagIdChanged` `OnChoiceRecorded` `OnRestored`。**変更は必ずこの窓口を通す**（中のリストを直接触ると通知が出ない） |
+| `StoryState`（`StoryState.I`） | 窓口：`SetFlag` `ClearFlag` `HasFlag` `GetFlagAsset` `ActiveFlagOrder` `GetFlagSetDay`、`HasOccurred` `TimesOccurred` `ChoiceOf`、`Schedule` `GetDueScheduled` `RemoveScheduled` `ScheduledEvents`、`CaptureSaveData` `RestoreSaveData` `Clear`。イベント：`OnFlagChanged` `OnFlagIdChanged` `OnChoiceRecorded` `OnRestored`。**変更は必ずこの窓口を通す**（中のリストを直接触ると通知が出ない） |
 | `StorySaveParticipant` | セーブキー `"story"`、RestoreOrder 115 |
 | `StoryEventScheduler`（`.I`） | 毎日、予約日が来た「続き」と、条件を満たした「条件」イベントを `EventManager.Enqueue` する。予約日は `scheduledAgeDay <= ageDay` で判定（飛び越えても拾う）。同じ「条件」イベントを二重に積まない |
 | `StoryBootstrap` | シーンに `EventManager` があって `StoryState` が無いとき、"Story" オブジェクト（StoryState・StorySaveParticipant・StoryEventScheduler）を自動で作る。手でシーンに置かなくてよい |
@@ -88,6 +88,21 @@ story-tool.md 4章の「まだ決めること」（流れ図の「全部」の�
 - `Maruyama/` 以下を変えたので、丸山さんに一声かける（決定事項）。
 - `StoryFlag` のアセットが無いので、動作確認用のフラグ（例：`plays_baseball`／野球・スポーツ）は A の回で作る。
 - CareerDefinition（職業）はまだ無い。流れ図の職業の箱はその後。
+
+## 6.5 2026-11-18 に決めた・直したこと
+
+- **続きの予約は選ばれたときに消す**（ADR 0037）。月の1日の続きがセーブ・ロードで消える穴を塞いだ。予約・出番待ち・選ばれたら消える、まではリフレクションで確認済み。実機での「セーブ → タイトル → つづきから」は未確認。
+- **年齢ジャンプ**：`DayTicker` が1日ずつ通知するので、予約日を飛び越えることはない。ジャンプ中はオートが「最初の選択肢」で答えるので、分岐を試すときは「選択肢を固定」を使う。
+- **ストーリーは職業（夢）ごとに作る。** 夢は `DreamSystem` が 12歳4月1日に決める（点数が一番高い職業）。入口は条件「将来の夢」（`DreamCondition`）、文章は `{dream}`。家出が優先（家出で時間が止まる）。
+- 職業：`CareerDefinition`（`Resources/Careers/`）・`CareerJudge`。いまは「会社員」（既定）だけ。ほかの職業の重みは未定。
+- ストーリーウィンドウの絞り込みは「夢の職業」を基本にする。
+- リザルトは「将来の夢」「なった職業」の2欄を並べる。叶った／叶わなかったとは書かない。ただし end シーンは見た目だけで、値を流す仕組み（result-scene.md の EndingFlow・EndingResultBuilder・ResultCarrier・ResultScreenUI）はまだ無い。
+- 職業の仮データ12個と、メニュー「子育て → 職業 → 新しい職業を作る／一覧とチェック」を作った。
+- **ストーリーウィンドウの回A が済んだ**（メニュー：子育て → ストーリー → ストーリーウィンドウ）。動作確認用フラグ `plays_baseball`（呼び名：野球）を作った。再生中タブは本編シーンでの実機確認がまだ。
+- 流れ図（回B）も済み（2026-11-18 午後）。仮のイベント6つで描画を確かめ、確かめたあとは消した。
+- ストーリーの文章（回C）も済み。リザルトに値を流す仕組みも済み（end シーン・将来の夢／なった職業の欄。Build Settings に end を追加済み）。学期末テスト・進路（依頼1〜4）も済み（ADR 0038）。
+- 次の候補：進路・テストの専用の画面（依頼6）、学費（依頼8）、LifeRecorder（振り返り）。
+- 旧メモ：残りの順番：ストーリーの文章（回C）→ リザルトに値を流す → 学期末テスト・進路（antigravity-ending.md 依頼1〜4）。
 
 ## 7. 決まっていること（変えないこと）
 

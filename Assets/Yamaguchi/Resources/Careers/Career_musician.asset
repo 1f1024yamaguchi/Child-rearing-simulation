@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ffa552779faa57c4da9034190bcf10b3, type: 3}
+  m_Name: Career_musician
+  m_EditorClassIdentifier: Assembly-CSharp::CareerDefinition
+  id: musician
+  displayName: "\u30DF\u30E5\u30FC\u30B8\u30B7\u30E3\u30F3"
+  illustration: {fileID: 0}
+  isFallback: 0
+  minGrade: 0
+  minHealth: 0
+  hobby: 2
+  minHobbyLevel: 10
+  requirements: []
+  gradeWeight: 0
+  hobbyWeight: 5
+  healthWeight: 0
+  traitBonuses: []
+  epilogue: 

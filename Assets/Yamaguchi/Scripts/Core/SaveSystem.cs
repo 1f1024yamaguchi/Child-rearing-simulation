@@ -61,7 +61,9 @@ public static class SaveSystem
             money = GameState.I.Money,
             isGameOver = GameState.I.IsGameOver,
             stress = GameState.I.Stress,
-            workLifeBalance = GameState.I.WorkLifeBalance
+            workLifeBalance = GameState.I.WorkLifeBalance,
+            goalAgeDays = GameState.I.GoalAgeDays,
+            goalLabel = GameState.I.GoalLabel
         };
 
         foreach (var p in participants.ToArray())
@@ -276,6 +278,8 @@ public static class SaveSystem
             // ③ 年齢・お金・ストレスゲージ・バランス（古いセーブで値が無いものは今の値のまま）
             int   stress  = data.stress >= 0 ? data.stress : GameState.I.Stress;
             float balance = data.workLifeBalance >= 0f ? data.workLifeBalance : GameState.I.WorkLifeBalance;
+            // ゴールは LoadValues より先に戻す（LoadValues が年齢とゴールから IsGameOver を計算するため）
+            if (data.goalAgeDays > 0) GameState.I.SetGoal(data.goalAgeDays, data.goalLabel, checkEnd: false);
             GameState.I.LoadValues(data.money, stress, data.ageDays, balance, data.isGameOver);
 
             // ④ 参加者を RestoreOrder の小さい順に

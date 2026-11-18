@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ffa552779faa57c4da9034190bcf10b3, type: 3}
+  m_Name: Career_game_creator
+  m_EditorClassIdentifier: Assembly-CSharp::CareerDefinition
+  id: game_creator
+  displayName: "\u30B2\u30FC\u30E0\u30AF\u30EA\u30A8\u30A4\u30BF\u30FC"
+  illustration: {fileID: 0}
+  isFallback: 0
+  minGrade: 0
+  minHealth: 0
+  hobby: 4
+  minHobbyLevel: 8
+  requirements: []
+  gradeWeight: 0.3
+  hobbyWeight: 4
+  healthWeight: 0
+  traitBonuses: []
+  epilogue: 

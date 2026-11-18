@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 363777cb2595e3d4aa4d0732c46c45d9, type: 3}
+  m_Name: Path_senmon
+  m_EditorClassIdentifier: Assembly-CSharp::PathDefinition
+  id: senmon
+  displayName: "\u5C02\u9580\u5B66\u6821"
+  kind: 2
+  years: 2
+  passLine: 40
+  baseRate: 0.5
+  slope: 0.04
+  minRate: 0.05
+  maxRate: 0.95
+  requiredHobby: 0
+  requiredHobbyLevel: 10
+  requiredHyotei: 3
+  inSchoolPassLine: 40
+  requirements: []
+  careers:
+  - {fileID: 11400000, guid: 77ab2163854a90648a76f3e33b3e3bf8, type: 2}
+  - {fileID: 11400000, guid: 1be6549c67ee71540a0db73f2a5e32b0, type: 2}
+  - {fileID: 11400000, guid: c69d9c24156cd344797ced0cbf276d2e, type: 2}
+  - {fileID: 11400000, guid: c0402b6339f8e9245b8e29ed45ae346e, type: 2}
+  fallbackCareer: {fileID: 0}

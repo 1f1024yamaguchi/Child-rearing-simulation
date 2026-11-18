@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 363777cb2595e3d4aa4d0732c46c45d9, type: 3}
+  m_Name: Path_univ
+  m_EditorClassIdentifier: Assembly-CSharp::PathDefinition
+  id: univ
+  displayName: "\u5927\u5B66"
+  kind: 3
+  years: 4
+  passLine: 65
+  baseRate: 0.5
+  slope: 0.04
+  minRate: 0.05
+  maxRate: 0.95
+  requiredHobby: 0
+  requiredHobbyLevel: 10
+  requiredHyotei: 3
+  inSchoolPassLine: 40
+  requirements: []
+  careers:
+  - {fileID: 11400000, guid: 30431db7f49c6c2458f5b06367293eea, type: 2}
+  - {fileID: 11400000, guid: 3c48404fbe691c541b99a3f96081fb44, type: 2}
+  - {fileID: 11400000, guid: eadfb9d50d0d62945bc59955d3861b4c, type: 2}
+  - {fileID: 11400000, guid: e03dd114dd70df44094abf90c71c49e1, type: 2}
+  - {fileID: 11400000, guid: fcdac51290b8a7c4aba7ff405ed17746, type: 2}
+  fallbackCareer: {fileID: 0}

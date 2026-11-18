@@ -134,7 +134,7 @@ public class SupportScheme : ScriptableObject
 
     private static GameDay Fix(GameDay d)
     {
-        d.year  = Mathf.Clamp(d.year, 0, 19);
+        d.year  = Mathf.Clamp(d.year, 0, 29);   // 大学生の間の制度も作れるように（ending.md 依頼1）
         d.month = Mathf.Clamp(d.month, 1, 12);
         d.day   = Mathf.Clamp(d.day, 1, GameDate.DaysInMonth(d.month));
         return d;
