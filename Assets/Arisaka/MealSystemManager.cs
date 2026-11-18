@@ -129,22 +129,18 @@ namespace Arisaka
         /// </summary>
         private void OnDayPassed(int totalDays)
         {
-            // 1. 前日（過ごし終えた日）の日割り食費を引き落とす
-            // 1日目に使った食費は2日目（totalDays = 1）になった瞬間に引かれて2日目に表示され、
-            // 月末（例えば31日）に使った食費は次の月の1日目（totalDays = 31）になった瞬間に引かれる。
-            int consumedAgeDay = totalDays - 1;
-            if (consumedAgeDay >= 0)
+            // 今日の日付を取得
+            GameDate.FromAgeDays(totalDays, out int year, out int month, out int day);
+
+            // 1. 月初（1日）なら新しい月の食事選択ダイアログをトリガーする（食費引き落とし前）
+            //    1日分の食費を新しい月のプランで計算するために先に行う
+            if (day == 1)
             {
-                GameDate.FromAgeDays(consumedAgeDay, out int cYear, out int cMonth, out int cDay);
-                DeductDailyMealCost(cYear, cMonth, cDay, consumedAgeDay);
+                TriggerMonthlyMealProcess(year, month);
             }
 
-            // 2. 迎えた新しい日が「1日」なら、新しい月の食事選択ダイアログをトリガーする
-            GameDate.FromAgeDays(totalDays, out int nextYear, out int nextMonth, out int nextDay);
-            if (nextDay == 1)
-            {
-                TriggerMonthlyMealProcess(nextYear, nextMonth);
-            }
+            // 2. 当日分の食費をその日のうちに引き落とす（当月の家計簿に記録される）
+            DeductDailyMealCost(year, month, day, totalDays);
         }
 
         /// <summary>
@@ -180,12 +176,17 @@ namespace Arisaka
         }
 
         /// <summary>
-        /// 前日（過ごし終えた日: year, month, day）の食費日割り額を所持金から引き落とす。
+        /// 当日分（year, month, day）の食費日割り額を所持金から引き落とす。
         /// 月末に合計が月額費用と完全に一致するよう累積差分で計算する。
+        /// selectionPending（今月の食事プランが未選択）の場合は引き落としを行わない。
         /// </summary>
         public void DeductDailyMealCost(int year, int month, int day, int ageDay)
         {
             if (lastDeductedAgeDay == ageDay) return; // 本日分は既に引き落とし済み
+
+            // 今月の食事プランがまだ選択されていない場合は引き落としを見送る
+            // （ダイアログが表示中で1日の引き落とし分は選択確定後に実行される）
+            if (selectionPending) return;
 
             var plan = GetCurrentPlan();
             if (plan == null) return;
@@ -219,13 +220,18 @@ namespace Arisaka
             selectionPending = false;
             currentGrade = plan.grade;
             lastChosenGrade = plan.grade;
-            Debug.Log($"[MealSystemManager] 今月の食事プランが '{plan.title}' に決定されました。（費用はその月の日数で日割りされ、翌日以降に一日ごとに引き落とされます）");
+            Debug.Log($"[MealSystemManager] 今月の食事プランが '{plan.title}' に決定されました。当日分から引き落とし開始。");
 
-            // 食事グレードに応じて今月の病気イベント発生日をスケジュールする（仕様 §2〜§5）
-            if (GameState.I != null && Maruyama.Events.EventManager.Instance != null)
+            // プラン確定直後に当日分（1日）の食費を引き落とす（選択待ちでスキップしていた分）
+            if (GameState.I != null)
             {
-                GameDate.FromAgeDays(GameState.I.AgeDays, out int year, out int month, out int _);
-                Maruyama.Events.EventManager.Instance.ScheduleForMeal(plan.grade, year, month);
+                GameDate.FromAgeDays(GameState.I.AgeDays, out int year, out int month, out int day);
+                int ageDay = Mathf.FloorToInt(GameState.I.AgeDays);
+                DeductDailyMealCost(year, month, day, ageDay);
+
+                // 食事グレードに応じて今月の病気イベント発生日をスケジュールする（仕様 §2〜§5）
+                if (Maruyama.Events.EventManager.Instance != null)
+                    Maruyama.Events.EventManager.Instance.ScheduleForMeal(plan.grade, year, month);
             }
         }
 

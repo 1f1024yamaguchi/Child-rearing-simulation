@@ -88,7 +88,7 @@ public class SupportManager : MonoBehaviour, ISaveParticipant
         if (DayTicker.I != null) DayTicker.I.OnDayPassed += HandleDayPassed;
         else Debug.LogError("SupportManager: DayTicker が見つかりません");
 
-        if (MonthTicker.I != null) MonthTicker.I.OnMonthChanged += HandleMonthChanged;
+        if (MonthTicker.I != null) MonthTicker.I.OnMonthEnding += HandleMonthChanged;
         else Debug.LogError("SupportManager: MonthTicker が見つかりません");
 
         EnsurePostpartumLeave();
@@ -98,7 +98,7 @@ public class SupportManager : MonoBehaviour, ISaveParticipant
     private void OnDestroy()
     {
         if (DayTicker.I != null) DayTicker.I.OnDayPassed -= HandleDayPassed;
-        if (MonthTicker.I != null) MonthTicker.I.OnMonthChanged -= HandleMonthChanged;
+        if (MonthTicker.I != null) MonthTicker.I.OnMonthEnding -= HandleMonthChanged;
         if (I == this) I = null;
     }
 

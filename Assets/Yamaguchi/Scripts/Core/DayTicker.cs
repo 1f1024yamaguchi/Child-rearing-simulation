@@ -5,7 +5,8 @@ using UnityEngine;
 public class DayTicker : MonoBehaviour
 {
     public static DayTicker I { get; private set; }
-    public event Action<int> OnDayPassed;   // 通算日数
+    public event Action<int> OnDayPassed;      // 通算日数（日単位の処理）
+    public event Action<int> OnDayCompleted;   // その日の通常処理（積立・食費等）が完了した直後
 
     private int lastDay = -1;
 
@@ -33,6 +34,7 @@ public class DayTicker : MonoBehaviour
         {
             lastDay++;
             OnDayPassed?.Invoke(lastDay);
+            OnDayCompleted?.Invoke(lastDay);
         }
     }
 }

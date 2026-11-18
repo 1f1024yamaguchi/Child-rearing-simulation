@@ -51,7 +51,7 @@ public class ExpenseManager : MonoBehaviour, ISaveParticipant
             Debug.LogError("ExpenseManager: MonthTicker が見つかりません");
             return;
         }
-        MonthTicker.I.OnMonthChanged += HandleMonthChanged;
+        MonthTicker.I.OnMonthEnding += HandleMonthChanged;
         subscribed = true;
     }
 
@@ -59,7 +59,7 @@ public class ExpenseManager : MonoBehaviour, ISaveParticipant
     {
         if (subscribed && MonthTicker.I != null)
         {
-            MonthTicker.I.OnMonthChanged -= HandleMonthChanged;
+            MonthTicker.I.OnMonthEnding -= HandleMonthChanged;
         }
         subscribed = false;
     }

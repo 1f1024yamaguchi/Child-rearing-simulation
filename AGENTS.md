@@ -121,6 +121,8 @@ Unity 製の子育てシミュレーションゲーム。**このファイルは
 - [0033-no-runaway-until-elementary-ends.md](docs/decisions/0033-no-runaway-until-elementary-ends.md) — 小学生まではルールを覚える期間として家出させず、中学入学（12歳4月1日）から家出を判定する理由
 - [0034-tutorial-panel.md](docs/decisions/0034-tutorial-panel.md) — チュートリアルを「画像＋見出し＋説明文」のページのデータにして共通の画面で出す理由と、家出のチュートリアルを12歳4月1日に出す理由
 - [0035-tutorial-timing-in-data.md](docs/decisions/0035-tutorial-timing-in-data.md) — チュートリアルを出すタイミングをデータ（TutorialData）に持たせ、共通の TutorialScheduler で出す理由
+- [0036-review-records-and-family-ending.md](docs/decisions/0036-review-records-and-family-ending.md) — 振り返り（成長グラフ・できごとの記録）と家庭の結末（家計・親の一文）の設計
+- [0037-semi-annual-bonus-system.md](docs/decisions/0037-semi-annual-bonus-system.md) — 6月・12月の賞与（ボーナス）支給と源泉徴収税額算出モデル
 
 ---
 

@@ -21,14 +21,14 @@ public class HouseholdIncome : MonoBehaviour
             Debug.LogError("HouseholdIncome: MonthTicker が見つかりません");
             return;
         }
-        MonthTicker.I.OnMonthChanged += Payday;
+        MonthTicker.I.OnMonthEnding += Payday;
     }
 
     private void OnDestroy()
     {
         if (MonthTicker.I != null)
         {
-            MonthTicker.I.OnMonthChanged -= Payday;
+            MonthTicker.I.OnMonthEnding -= Payday;
         }
     }
 

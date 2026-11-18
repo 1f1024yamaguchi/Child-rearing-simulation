@@ -40,3 +40,5 @@ status: 運用中
 | [0026](0026-tokyo-018-support-payout-schedule.md) | 018サポートを4・8・12月にまとめて支給する | 採用 |
 | [0027](0027-postnatal-care-and-child-medical-aid.md) | 産後ケアと子ども医療費助成をゲーム用の簡略モデルとして定義する | 一部変更（ストレス効果は0028参照） |
 | [0028](0028-postnatal-care-stress-fixed-reduction.md) | 産後ケアのストレス効果を固定値10減少にする | 採用 |
+| [0037](0037-semi-annual-bonus-system.md) | 6月・12月の賞与（ボーナス）支給と源泉徴収税額算出モデル | 採用 |
+| [0038](0038-month-end-settlement-for-ledger.md) | 家計簿の収支・支出を月末締めで当月に記録する設計への変更 | 採用 |
