@@ -15,6 +15,7 @@ Unity 製の子育てシミュレーションゲーム。**このファイルは
 3. **効果はデータで持つ。** 食事・イベント・制度の効果は `List<Effect>` として持ち、適用は共通の `EffectApplier` に任せる。各機能から `GameState` を直接叩かない。→ [docs/design/effects.md](docs/design/effects.md)
 4. **`GameState` を経由する。** お金・ストレス・年齢を自前のフィールドで持たず、`GameState.I` の窓口メソッドを呼ぶ。詳細は [docs/code/architecture.md](docs/code/architecture.md)。
 5. **他のメンバーの担当領域に踏み込まない。** 作業は `Assets/<担当者名>/` の中で完結させ、同じシーンファイルを複数人で同時に編集しない（自分の UI はプレハブ化する）。担当は下の表。
+   - 例外：`Assets/Maruyama/Scripts/UI/EventChoiceButtonUI.cs` は、子どもの名前（`{name}`）対応のため山口が変更してよい（家計簿に書く名前の置き換えのみ）。→ [docs/team/antigravity-child-name.md](docs/team/antigravity-child-name.md)
 6. **仕様やコードを変えたら、同じ PR で該当ドキュメントも更新する。** 更新したファイルの frontmatter の `updated` を当日の日付にする。
 7. **設計判断をしたら `docs/decisions/` に 1 ファイル追加する。**（テンプレート：`docs/decisions/_template.md`）
 8. **判断画面を作るときは時間を止める。** 画面の `OnEnable` で `GameClock.I.PushPause()`、`OnDisable` で `PopPause()` を呼ぶ（`CalendarUI` と同じ形）。`GameClock.SetRunning` は画面の開閉に使わない。→ [docs/decisions/0004-pause-during-decisions.md](docs/decisions/0004-pause-during-decisions.md)
@@ -97,6 +98,7 @@ Unity 製の子育てシミュレーションゲーム。**このファイルは
 | [antigravity-child-status.md](docs/team/antigravity-child-status.md) | 子どもステータス・特性・状態を AI に実装依頼するための段階別プロンプト |
 | [antigravity-title-screen.md](docs/team/antigravity-title-screen.md) | タイトル画面とセーブ2枠を AI に実装依頼するためのプロンプト |
 | [antigravity-ending.md](docs/team/antigravity-ending.md) | 進路・受験・職業の判定・リザルト・奨学金を AI に実装依頼するための段階別プロンプト |
+| [antigravity-child-name.md](docs/team/antigravity-child-name.md) | 開始直後に子どもの名前を決める画面と、名前の保存・画面への反映を AI に実装依頼するための段階別プロンプト |
 
 ### 設計判断の履歴 — `docs/decisions/`
 
@@ -123,6 +125,8 @@ Unity 製の子育てシミュレーションゲーム。**このファイルは
 - [0035-tutorial-timing-in-data.md](docs/decisions/0035-tutorial-timing-in-data.md) — チュートリアルを出すタイミングをデータ（TutorialData）に持たせ、共通の TutorialScheduler で出す理由
 - [0036-review-records-and-family-ending.md](docs/decisions/0036-review-records-and-family-ending.md) — 振り返り（成長グラフ・できごとの記録）と家庭の結末（家計・親の一文）の設計
 - [0037-semi-annual-bonus-system.md](docs/decisions/0037-semi-annual-bonus-system.md) — 6月・12月の賞与（ボーナス）支給と源泉徴収税額算出モデル
+- [0038-school-and-path-with-event-dialogs.md](docs/decisions/0038-school-and-path-with-event-dialogs.md) — 学期末テスト・進路を Core に作り、判断の画面をイベントのダイアログで代用する理由
+- [0037-follow-up-removed-on-choice-and-dream.md](docs/decisions/0037-follow-up-removed-on-choice-and-dream.md) — 続きの予約を選ばれたときに消す理由と、将来の夢（DreamSystem）をストーリーの条件（DreamCondition）で見る理由
 
 ---
 

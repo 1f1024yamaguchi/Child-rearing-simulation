@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 363777cb2595e3d4aa4d0732c46c45d9, type: 3}
+  m_Name: Path_recommend
+  m_EditorClassIdentifier: Assembly-CSharp::PathDefinition
+  id: recommend
+  displayName: "\u63A8\u85A6\uFF08\u30B9\u30DD\u30FC\u30C4\u30FB\u82B8\u8853\uFF09"
+  kind: 4
+  years: 4
+  passLine: 50
+  baseRate: 0.5
+  slope: 0.04
+  minRate: 0.05
+  maxRate: 0.95
+  requiredHobby: 0
+  requiredHobbyLevel: 10
+  requiredHyotei: 3
+  inSchoolPassLine: 40
+  requirements: []
+  careers:
+  - {fileID: 11400000, guid: 2c8a8736b9ca3274ea847b020ae039af, type: 2}
+  - {fileID: 11400000, guid: c69d9c24156cd344797ced0cbf276d2e, type: 2}
+  - {fileID: 11400000, guid: 1be6549c67ee71540a0db73f2a5e32b0, type: 2}
+  - {fileID: 11400000, guid: 30431db7f49c6c2458f5b06367293eea, type: 2}
+  fallbackCareer: {fileID: 0}

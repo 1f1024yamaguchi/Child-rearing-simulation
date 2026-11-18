@@ -92,6 +92,7 @@
 | （コードから） | コードから呼んだときだけ | 新規・おまけ |
 
 - 「続き」「条件を満たしたら」は抽選の候補に入れない（`EventManager.AddToPool` で除く）。判定と予約は `StoryEventScheduler` が持ち、出すときは `EventManager.Enqueue(EventData)` で順番待ちに入れる。
+- 続きの予約は、**選択肢が選ばれたときに消す**（出番待ちに入れたときではない）。出番待ちはセーブされないため、選ばれる前にセーブ・ロードしても予約から拾い直せるようにする（2026-11-18 → [../decisions/0037-follow-up-removed-on-choice-and-dream.md](../decisions/0037-follow-up-removed-on-choice-and-dream.md)）。
 - 「抽選」にも **「一生に1回だけ」** のチェックを付ける（いまは `cooldownDays` しか無い）。中身は「このイベントがまだ起きていない」という条件（3.2）を自動で付けるだけ。
 
 ### 3.2 条件の部品（足すもの）

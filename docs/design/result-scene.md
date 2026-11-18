@@ -1,7 +1,7 @@
 ---
 title: リザルト画面を end シーンで出す（巣立ち・家出・家計破綻）と育成記録への保存
-updated: 2026-10-29
-status: 設計済み（依頼前）
+updated: 2026-11-18
+status: 実装済み（2026-11-18。振り返りのグラフ・家計・親の20年・できごとは LifeRecorder 待ちで隠している）
 related: [docs/design/ending.md, docs/team/antigravity-result-scene.md, docs/design/title-screen.md, docs/decisions/0020-ending-on-leaving-home.md, docs/decisions/0024-bankruptcy-and-game-end-reasons.md]
 ---
 
@@ -76,7 +76,8 @@ end シーン
 | `childName` | 子の名前 | 今は名前の項目が無いので EndingFlow の Inspector（既定「みらい」） |
 | `endAgeDays` | 終わった日の年齢（日数）。表示は「○歳○か月」 | GameState.AgeDays |
 | `finishedAt` | 実時間の日時（文字列 `yyyy/MM/dd HH:mm`。育成記録の並び順用） | DateTime.Now |
-| `careerId` / `careerName` | 職業（今は空。依頼5 で埋める。家出・破綻は常に空） | CareerJudge（未作成） |
+| `careerId` / `careerName` | なった職業（今は空。依頼5 で埋める。家出・破綻は常に空） | CareerJudge |
+| `dreamId` / `dreamName` | 将来の夢（中1で決まる。決まる前に終わったら空）。画面では「将来の夢」「なった職業」の2欄を並べ、叶った／叶わなかったとは書かない（2026-11-18 決定） | DreamSystem |
 | `totalChildCost` | 子育てにかかったお金の合計 | `Ledger.I.TotalChildCost` |
 | `totalSupport` | 受け取った支援の合計 | `Ledger.I.TotalSupport` |
 | `totalIncome` | 親が稼いだお金の合計 | `Ledger.I` の年ごとのまとめ（`YearSummary(age).income`）を0歳〜今の歳まで足す |

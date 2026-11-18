@@ -32,6 +32,13 @@ public class StoryEventScheduler : MonoBehaviour
     /// </summary>
     private readonly HashSet<string> queuedOnCondition = new HashSet<string>();
 
+    /// <summary>
+    /// 予約日が来て順番待ちに入れたが、まだ選ばれていない「続き」（イベントid）。
+    /// 予約は選ばれたときに StoryState から消すので、それまで毎日入れ直さないための目印。
+    /// セーブはしない（ロードで出番待ちは捨てられるので、ロード後は予約から拾い直すのが正しい）。
+    /// </summary>
+    private readonly HashSet<string> queuedFollowUps = new HashSet<string>();
+
     private void Awake()
     {
         if (instance != null && instance != this)
@@ -61,10 +68,17 @@ public class StoryEventScheduler : MonoBehaviour
         EventManager.OnEventResolved -= HandleEventResolved;
     }
 
-    /// <summary>選ばれたイベントを「順番待ち中」から外す。</summary>
+    /// <summary>
+    /// 選ばれたイベントを「順番待ち中」から外す。「続き」なら、ここで初めて予約を消す。
+    /// </summary>
     private void HandleEventResolved(EventResolvedInfo info)
     {
-        if (!string.IsNullOrEmpty(info.eventId)) queuedOnCondition.Remove(info.eventId);
+        if (string.IsNullOrEmpty(info.eventId)) return;
+        queuedOnCondition.Remove(info.eventId);
+        if (queuedFollowUps.Remove(info.eventId) && StoryState.I != null)
+        {
+            StoryState.I.RemoveScheduled(info.eventId);
+        }
     }
 
     private void OnDestroy()
@@ -133,35 +147,42 @@ public class StoryEventScheduler : MonoBehaviour
     {
         if (StoryState.I == null) return;
 
-        var due = StoryState.I.ConsumeScheduledForDay(totalAgeDays);
+        var due = StoryState.I.GetDueScheduled(totalAgeDays);
         if (due == null || due.Count == 0) return;
 
         foreach (var entry in due)
         {
             if (string.IsNullOrEmpty(entry.eventId)) continue;
 
+            // 順番待ちに入れたが、まだ選ばれていない（予約は選ばれたときに消す）
+            if (queuedFollowUps.Contains(entry.eventId)) continue;
+
             if (!eventMap.TryGetValue(entry.eventId, out var eventData) || eventData == null)
             {
-                Debug.LogWarning($"[StoryEventScheduler] 予約されたイベント '{entry.eventId}' が Resources/{resourcesPath} に見つかりません。");
+                Debug.LogWarning($"[StoryEventScheduler] 予約されたイベント '{entry.eventId}' が Resources/{resourcesPath} に見つかりません。予約を消します。");
+                StoryState.I.RemoveScheduled(entry.eventId);
                 continue;
             }
 
             // 条件を判定
             if (eventData.CheckConditions())
             {
-                Debug.Log($"[StoryEventScheduler] 続きイベント '{eventData.title}' ({eventData.id}) を Enqueue します（day{totalAgeDays}）");
                 if (EventManager.Instance != null)
                 {
+                    Debug.Log($"[StoryEventScheduler] 続きイベント '{eventData.title}' ({eventData.id}) を Enqueue します（day{totalAgeDays}）");
+                    queuedFollowUps.Add(eventData.id);
                     EventManager.Instance.Enqueue(eventData);
                 }
                 else
                 {
+                    // 予約は残す（EventManager が出てきたら次の日に拾う）
                     Debug.LogWarning("[StoryEventScheduler] EventManager.Instance が見つかりません。");
                 }
             }
             else
             {
                 Debug.Log($"[StoryEventScheduler] 続きイベント '{eventData.title}' ({eventData.id}) は条件を満たさないため破棄されました（day{totalAgeDays}）。");
+                StoryState.I.RemoveScheduled(entry.eventId);
             }
         }
     }

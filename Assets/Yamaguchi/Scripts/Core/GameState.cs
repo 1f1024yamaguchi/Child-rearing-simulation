@@ -20,7 +20,10 @@ public class GameState : MonoBehaviour
     [SerializeField] private float workLifeBalance = 0.5f; // 0=ライフ寄り 1=ワーク寄り
 
     [Header("設定")]
-    [SerializeField] private int goalAgeYears = 20;   // ゴール年齢（歳）
+    [Tooltip("ゴール（巣立ち）の日（通算日数）。既定は高校卒業の翌日＝18歳4月1日（6660）。進路が決まると PathSystem が SetGoal で変える")]
+    [SerializeField] private int goalAgeDays = 6660;
+    [Tooltip("成長ゲージの右端の文字")]
+    [SerializeField] private string goalLabel = "高校卒業";
     [SerializeField] private int daysPerYear = 365;   // 1年の日数
 
     // ---- 変更通知イベント（UI・SEなどがこれを購読する）----
@@ -30,6 +33,8 @@ public class GameState : MonoBehaviour
     public event Action<float> OnBalanceChanged;
     public event Action OnGameOver;                         // 移行期間用（GoalReached のときだけ発火）
     public event Action<GameEndReason> OnGameEnded;
+    /// <summary>ゴールの日・ラベルが変わったとき（通算日数, ラベル）。</summary>
+    public event Action<int, string> OnGoalChanged;
 
     // ---- 読み取り専用プロパティ ----
     public int Money => money;
@@ -37,7 +42,8 @@ public class GameState : MonoBehaviour
     public float AgeDays => ageDays;
     public float AgeYears => ageDays / daysPerYear;   // 歳での表示用
     public float WorkLifeBalance => workLifeBalance;
-    public int GoalAgeDays => goalAgeYears * daysPerYear;
+    public int GoalAgeDays => goalAgeDays;
+    public string GoalLabel => goalLabel;
     public bool IsGameOver { get; private set; }
 
     private void Awake()
@@ -92,6 +98,18 @@ public class GameState : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// ゴール（巣立ちの日）を変える（ending.md 6.1）。進路が決まった・浪人・留年のときに PathSystem が呼ぶ。
+    /// checkEnd が true で、すでに年齢がゴール以上ならゲームを終える（AddAgeDays と同じ）。ロード中は false で呼ぶ。
+    /// </summary>
+    public void SetGoal(int days, string label, bool checkEnd = true)
+    {
+        goalAgeDays = Mathf.Max(1, days);
+        if (!string.IsNullOrEmpty(label)) goalLabel = label;
+        OnGoalChanged?.Invoke(goalAgeDays, goalLabel);
+        if (checkEnd && !IsGameOver && ageDays >= goalAgeDays) EndGame(GameEndReason.GoalReached);
+    }
+
     public void SetBalance(float value)
     {
         workLifeBalance = Mathf.Clamp01(value);
@@ -130,7 +148,7 @@ public class GameState : MonoBehaviour
 /// </summary>
 public enum GameEndReason
 {
-    GoalReached, // 20歳到達（ゴール）
+    GoalReached, // 巣立ち（ゴールの日に到達）
     Runaway,     // 子どもの家出
     Bankrupt     // 家計破綻（赤字が規定月数継続）
 }

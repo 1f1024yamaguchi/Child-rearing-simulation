@@ -217,6 +217,7 @@ public static class EventDescriber
         if (t == typeof(RequirementCondition)) return "支援条件の流用";
         if (t == typeof(ChoiceHistoryCondition)) return "前の選択・履歴";
         if (t == typeof(StoryFlagCondition)) return "フラグ";
+        if (t == typeof(DreamCondition)) return "将来の夢";
         return t.Name;
     }
 

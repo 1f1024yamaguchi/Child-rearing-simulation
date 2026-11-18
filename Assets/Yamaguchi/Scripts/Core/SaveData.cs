@@ -13,5 +13,7 @@ public class SaveData
     public bool   isGameOver;
     public int    stress = -1;            // 画面のストレスゲージ（GameState.Stress）。-1 = 古いセーブで値なし
     public float  workLifeBalance = -1f;  // GameState.WorkLifeBalance。-1 = 古いセーブで値なし
+    public int    goalAgeDays = -1;       // ゴール（巣立ちの日）。-1 = 古いセーブで値なし（今の値のまま）
+    public string goalLabel = "";
     public List<SaveSection> sections = new List<SaveSection>();
 }

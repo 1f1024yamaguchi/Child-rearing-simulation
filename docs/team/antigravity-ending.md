@@ -1,6 +1,6 @@
 ---
 title: 進路と巣立ちエンディングの実装法と Antigravity への依頼文
-updated: 2026-10-19
+updated: 2026-11-18
 status: 依頼前
 related: [docs/design/ending.md, docs/design/child-status.md, docs/design/support-apply.md, docs/design/save-system.md, docs/decisions/0020-ending-on-leaving-home.md]
 ---
@@ -419,11 +419,11 @@ docs/design/ending.md 3.3 と docs/design/support-apply.md（5章・7.3）、doc
 
 | 依頼 | 内容 | 状態 |
 |---|---|---|
-| 1 | 学年の計算・ゴールの日数・成長ゲージの表記 | 未依頼 |
-| 2 | 学期末テスト・通知表・評定 | 未依頼 |
-| 3 | 進路のデータ・合格率・進路決定（画面なし） | 未依頼 |
-| 4 | 受験の合否・浪人・留年 | 未依頼 |
-| 5 | 職業の判定・将来の夢・巣立ち（ログ） | 未依頼 |
+| 1 | 学年の計算・ゴールの日数・成長ゲージの表記 | 済み（2026-11-18 Claude。ゲージの右端の文字は本編シーンに無いので未） |
+| 2 | 学期末テスト・通知表・評定 | 済み（2026-11-18 Claude） |
+| 3 | 進路のデータ・合格率・進路決定（画面なし） | 済み（2026-11-18 Claude。判断はイベントのダイアログで代用 → ADR 0038） |
+| 4 | 受験の合否・浪人・留年 | 済み（2026-11-18 Claude） |
+| 5 | 職業の判定・将来の夢・巣立ち（ログ） | 一部済み（2026-11-18 Claude が直接実装：CareerDefinition・CareerJudge・DreamSystem。職業は Resources/Careers、夢は 12歳4月1日。PathDefinition・不合格回数の条件・EndingResult・GraduationWatcher は依頼1〜4のあと） |
 | 6 | 画面（進路決定・選び直し・リザルト・子カード） | 未依頼 |
 | 7 | 奨学金（貸与型・給付型） | 未依頼 |
 | 8 | 学費・減免・私立高校 | 保留（expenses.md の実装待ち） |
