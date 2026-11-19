@@ -126,6 +126,7 @@ Unity 製の子育てシミュレーションゲーム。**このファイルは
 - [0036-review-records-and-family-ending.md](docs/decisions/0036-review-records-and-family-ending.md) — 振り返り（成長グラフ・できごとの記録）と家庭の結末（家計・親の一文）の設計
 - [0037-semi-annual-bonus-system.md](docs/decisions/0037-semi-annual-bonus-system.md) — 6月・12月の賞与（ボーナス）支給と源泉徴収税額算出モデル
 - [0038-school-and-path-with-event-dialogs.md](docs/decisions/0038-school-and-path-with-event-dialogs.md) — 学期末テスト・進路を Core に作り、判断の画面をイベントのダイアログで代用する理由
+- [0039-path-panel-and-child-decides.md](docs/decisions/0039-path-panel-and-child-decides.md) — 進路の判断を専用パネルで出し、決めなかったときは子どもが自分の希望で決める理由
 - [0037-follow-up-removed-on-choice-and-dream.md](docs/decisions/0037-follow-up-removed-on-choice-and-dream.md) — 続きの予約を選ばれたときに消す理由と、将来の夢（DreamSystem）をストーリーの条件（DreamCondition）で見る理由
 
 ---

@@ -44,6 +44,7 @@ public class DebugDialogResolver
         any |= TryDeficit();
         any |= TryMiniGame();
         any |= TryTutorial();
+        any |= TryPath();
 
         // 閉じた画面の記録を消す（次に開いたときは待ち直す）
         toRemove.Clear();
@@ -56,6 +57,15 @@ public class DebugDialogResolver
     // ------------------------------------------------------------
     // 画面ごとの処理
     // ------------------------------------------------------------
+
+    /// 進路の判断・お知らせ（専用パネル）：★の希望があればそれ、無ければ最初に選べるものを選ぶ。
+    private bool TryPath()
+    {
+        var panel = PathPanelUI.I;
+        if (panel == null || !panel.IsOpen) return false;
+        if (!Ready(panel)) return false;
+        return panel.AutoResolve();
+    }
 
     /// 食事の選択：画面自身のオート選択（先月と同じ／初回は「普通」）をすぐに実行する。
     private bool TryMeal()

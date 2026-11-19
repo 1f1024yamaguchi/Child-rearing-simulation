@@ -44,6 +44,8 @@ public class ChildCardUI : MonoBehaviour
     private const string KeyPassLine = "passLine";
     private const string KeyRunaway  = "runaway";
     private const string KeyGradeNotice = "gradeNotice";
+    private const string KeyPath = "path";
+    private string shownPathLine = "";   // 進路の行の、いま出している中身（変わったときだけ描き直す）
 
     // ─── 初期化 ───────────────────────────────────────────
     private void Start()
@@ -78,6 +80,7 @@ public class ChildCardUI : MonoBehaviour
         ShowHealth(child.Health);
         ShowHobby(child.Hobby, child.HobbyLevel);
         RefreshGradeVisibility();
+        ShowPathLine();
 
         // 購読開始
         Subscribe();
@@ -119,6 +122,10 @@ public class ChildCardUI : MonoBehaviour
         if (GameState.I != null)
             GameState.I.OnAgeChanged += HandleAgeChanged;
 
+        // 進路が決まったとき・変わったとき（進路の行をすぐ描き直す）
+        if (PathSystem.I != null)
+            PathSystem.I.OnPathChanged += HandlePathChanged;
+
         // 家出ウォッチャー
         if (runawayWatcher != null)
             runawayWatcher.OnDangerDaysChanged += ShowRunaway;
@@ -152,6 +159,9 @@ public class ChildCardUI : MonoBehaviour
         if (GameState.I != null)
             GameState.I.OnAgeChanged -= HandleAgeChanged;
 
+        if (PathSystem.I != null)
+            PathSystem.I.OnPathChanged -= HandlePathChanged;
+
         if (runawayWatcher != null)
             runawayWatcher.OnDangerDaysChanged -= ShowRunaway;
 
@@ -176,9 +186,12 @@ public class ChildCardUI : MonoBehaviour
         }
     }
 
+    private void HandlePathChanged(PathDefinition _) => ShowPathLine();
+
     private void HandleAgeChanged(float _)
     {
         ShowProfile();
+        ShowPathLine();
         RefreshGradeVisibility();
     }
 
@@ -208,8 +221,23 @@ public class ChildCardUI : MonoBehaviour
     // ─── 表示メソッド ─────────────────────────────────────
     private void ShowProfile()
     {
-        if (profileLineText != null && child != null)
-            profileLineText.text = child.ProfileLine;
+        if (profileLineText == null || child == null) return;
+        // 学年が付く年齢になったら頭に出す（例「中2・14歳・スポーツが好き」）
+        string grade = GameState.I != null ? GameDate.SchoolLabel(GameState.I.AgeDays) : "";
+        profileLineText.text = string.IsNullOrEmpty(grade) ? child.ProfileLine : grade + "・" + child.ProfileLine;
+    }
+
+    /// <summary>進路の行（志望／進路／在学）。出す条件と中身は PathSystem.TryGetCardLine。</summary>
+    private void ShowPathLine()
+    {
+        if (statusList == null) return;
+        string label = "", value = "";
+        bool show = PathSystem.I != null && PathSystem.I.TryGetCardLine(out label, out value);
+        string now = show ? label + "|" + value : "";
+        if (now == shownPathLine) return;
+        shownPathLine = now;
+        if (show) statusList.SetStatus(KeyPath, label, value);
+        else statusList.RemoveStatus(KeyPath);
     }
 
     private void ShowGrade(int grade)
@@ -217,6 +245,7 @@ public class ChildCardUI : MonoBehaviour
         gradeMeter?.SetValue(grade);
         // 合格ラインの「不足」表示も成績が変わるたびに更新する
         ShowPassLine();
+        ShowPathLine();   // 模試の判定は成績で変わる
     }
 
     private void ShowStress(int stress)

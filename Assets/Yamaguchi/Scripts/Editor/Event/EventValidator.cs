@@ -201,7 +201,7 @@ public static class EventValidator
         {
             var c = e.choices[i];
             if (c == null) continue;
-            if (c.effects == null || c.effects.Count == 0)
+            if ((c.effects == null || c.effects.Count == 0) && !PathScreens.IsPathScreen(e.id))   // 進路の画面は効果を使わない
                 list.Add(Warning($"選択肢{i + 1}は効果が0個です（「何もしない」でよいなら無視してください）"));
             if (n == MaxChoices && c.label != null && c.label.Length > LongLabelLength)
                 list.Add(Warning($"選択肢{i + 1}のラベルが{LongLabelLength}文字より長いです（4つのときは 2×2 で入りきらないかもしれません）"));

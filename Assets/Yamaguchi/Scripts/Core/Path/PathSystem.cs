@@ -1,15 +1,14 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Maruyama.Events;
 using UnityEngine;
 
 /// <summary>
 /// 進路（ending.md 2章〜4章）。高校受験・進路決定・推薦・一般入試・不合格の選び直し・留年・ゴール（巣立ちの日）の更新。
 /// セーブキー "path"。本編シーンでは SchoolBootstrap が自動で作る。進路のアセットは Resources/Paths から読む。
 ///
-/// 判断の画面は、専用の画面ができるまでイベントのダイアログ（EventManager）を使う（PathDialogs）。
-/// 選ばれた選択肢は EventManager.OnEventResolved で受け取る。時間はダイアログが止める。
+/// 判断・お知らせの画面は専用パネル（PathPanelUI。PathDialogs が作る）。選ばれたら、カードに付けた処理が Decide / Retry を呼ぶ。
+/// 時間はパネルが止める。
 /// 合否の乱数はセーブに入れない（ロードで引き直せてよい。ending.md 0章）。
 /// </summary>
 public class PathSystem : MonoBehaviour, ISaveParticipant
@@ -63,7 +62,6 @@ public class PathSystem : MonoBehaviour, ISaveParticipant
     private void OnEnable()
     {
         SaveSystem.Register(this);
-        EventManager.OnEventResolved += HandleEventResolved;
         Subscribe();
     }
 
@@ -72,7 +70,6 @@ public class PathSystem : MonoBehaviour, ISaveParticipant
     private void OnDisable()
     {
         SaveSystem.Unregister(this);
-        EventManager.OnEventResolved -= HandleEventResolved;
         if (subscribed && MonthTicker.I != null) MonthTicker.I.OnMonthChanged -= HandleMonthChanged;
         if (testSubscribed && TermTestSystem.I != null) TermTestSystem.I.OnTermTest -= HandleTermTest;
         subscribed = testSubscribed = false;
@@ -120,13 +117,81 @@ public class PathSystem : MonoBehaviour, ISaveParticipant
         int sy = GameDate.SchoolYear(Today);
 
         if (sy == 14 && month == examMonth && !state.highSchoolExamDone) HighSchoolExam();
-        if (sy == 17 && month == decideMonth && TargetPath == null && !state.enrolled) RequestDecision();
+        // 高3の7月から、決めるまで毎月出し直す（パネルは選ぶまで閉じられないので、ふつうは7月の1回で決まる。古いセーブなどで取りこぼしたときの保険）。
+        // 2月になっても決まっていなければ、子どもが自分の希望で決める（就職を望んでいれば就職）。
+        if (sy == 17 && TargetPath == null && !state.enrolled && state.pendingDialog != "decide")
+        {
+            if (month == examMonth) AutoDecideByChild();
+            else if (InDecideWindow(month)) RequestDecision();
+        }
         if (sy == 17 && month == recommendMonth && TargetPath != null && TargetPath.kind == PathKind.推薦 && !state.recommendationDone) Recommendation();
         if (month == examMonth && !state.enrolled && sy == 17 + state.roninCount)
         {
             var t = TargetPath;
             if (t != null && (t.kind == PathKind.大学 || t.kind == PathKind.専門学校)) GeneralExam(t, sy);
         }
+    }
+
+    // ─── 子カードの1行（志望／進路／在学）─────────────────────────────────
+    /// <summary>
+    /// 子カードに出す進路の1行。高校生になってから出す。
+    /// 決める前は「志望：大学 B判定」（子どもの希望と模試の判定）、決めたあとは「進路：大学 B判定」、在学中は「在学：大学 2年」。
+    /// </summary>
+    public bool TryGetCardLine(out string label, out string value)
+    {
+        label = value = "";
+        var child = Child;
+        if (child == null) return false;
+        int sy = GameDate.SchoolYear(Today);
+
+        if (state.enrolled)
+        {
+            var cur = CurrentPath;
+            if (cur == null) return false;
+            label = "在学"; value = $"{cur.DisplayNameOrName} {state.yearInSchool}年";
+            return true;
+        }
+        var target = TargetPath;
+        if (target != null)
+        {
+            label = "進路";
+            value = target.DisplayNameOrName + CardRank(child, target) + (state.roninCount > 0 ? $"（浪人{state.roninCount}年目）" : "");
+            return true;
+        }
+        if (sy < 15) return false;   // 高校生になってから
+        var wish = Wish();
+        if (wish == null) return false;
+        label = "志望"; value = wish.DisplayNameOrName + CardRank(child, wish);
+        return true;
+    }
+
+    private static string CardRank(ChildStatus child, PathDefinition p)
+        => p.kind == PathKind.就職 ? "" : " " + AdmissionCalc.MockRank(AdmissionCalc.PassRate(child.Grade, p)) + "判定";
+
+    /// <summary>高3の7月〜1月（2月は子どもが決める）。</summary>
+    private bool InDecideWindow(int month) => month >= decideMonth || month == 1;
+
+    /// <summary>推薦に出願できる時期か（高3の11月に結果が出るので、決めるのが11月より前でなければ間に合わない）。</summary>
+    public bool RecommendationOpen
+    {
+        get
+        {
+            int sy = GameDate.SchoolYear(Today);
+            if (sy < 17) return true;
+            if (sy > 17) return false;
+            GameDate.FromAgeDays(Today, out _, out int month, out _);
+            return month >= 4 && month < recommendMonth;
+        }
+    }
+
+    /// <summary>期限（2月）までに親が決めなかったとき、子どもが自分の希望で決める。希望どおりなので、希望違いのストレスは無い。</summary>
+    private void AutoDecideByChild()
+    {
+        var p = Wish();
+        if (p == null) p = Find(PathKind.就職);
+        if (p == null) return;
+        Decide(p);
+        PathDialogs.Notice(p, "", "path_auto_decided");
     }
 
     // ─── 子どもの希望 ─────────────────────────────────
@@ -146,12 +211,12 @@ public class PathSystem : MonoBehaviour, ISaveParticipant
             {
                 var p = Find(k);
                 if (p == null || p.careers == null || !p.careers.Contains(dream)) continue;
-                if (k == PathKind.推薦 && !AdmissionCalc.CanApplyRecommendation(child, Academic, p, out _)) continue;
+                if (k == PathKind.推薦 && (!RecommendationOpen || !AdmissionCalc.CanApplyRecommendation(child, Academic, p, out _))) continue;
                 return p;
             }
         }
         var rec = Find(PathKind.推薦);
-        if (rec != null && AdmissionCalc.CanApplyRecommendation(child, Academic, rec, out _)) return rec;
+        if (rec != null && RecommendationOpen && AdmissionCalc.CanApplyRecommendation(child, Academic, rec, out _)) return rec;
         var univ = Find(PathKind.大学);
         if (univ != null && child != null && child.Grade >= univ.passLine) return univ;
         if (child != null && child.Hobby != HobbyKind.なし && Find(PathKind.専門学校) != null) return Find(PathKind.専門学校);
@@ -201,9 +266,7 @@ public class PathSystem : MonoBehaviour, ISaveParticipant
             state.isPrivateHighSchool = true;
             child.AddStress(highSchoolFailStress);
         }
-        PathDialogs.ShowNotice(passed ? "公立高校に合格" : "公立高校は不合格",
-            passed ? "{name}は第一志望の公立高校に合格した。" : "{name}は公立高校に届かず、私立高校に通うことになった。入学金や制服代がかかる。",
-            passed ? EventCategory.Merit : EventCategory.Demerit);
+        PathDialogs.Notice(p, "", passed ? "path_hs_pass" : "path_hs_fail");
         OnExamResult?.Invoke(rec);
     }
 
@@ -218,7 +281,7 @@ public class PathSystem : MonoBehaviour, ISaveParticipant
         if (!AdmissionCalc.CanApplyRecommendation(child, Academic, p, out string reason))
         {
             if (univ != null) state.targetPathId = univ.id;
-            PathDialogs.ShowNotice("推薦に出願できなかった", $"推薦の条件を満たしていない（{reason}）。2月の一般入試で大学を受ける。", EventCategory.Demerit);
+            PathDialogs.Notice(p, reason, "path_rec_cannot");
             return;
         }
         int sy = GameDate.SchoolYear(Today);
@@ -228,12 +291,12 @@ public class PathSystem : MonoBehaviour, ISaveParticipant
         if (passed)
         {
             Admit(p, sy + 1);
-            PathDialogs.ShowNotice("推薦で合格", "{name}は推薦で合格した！ 春から" + p.DisplayNameOrName + "の道に進む。", EventCategory.Merit);
+            PathDialogs.Notice(p, "", "path_rec_pass");
         }
         else
         {
             if (univ != null) state.targetPathId = univ.id;
-            PathDialogs.ShowNotice("推薦は不合格", "推薦は届かなかった。2月の一般入試で大学を受ける。", EventCategory.Demerit);
+            PathDialogs.Notice(p, "", "path_rec_fail");
         }
         OnExamResult?.Invoke(rec);
     }
@@ -249,7 +312,7 @@ public class PathSystem : MonoBehaviour, ISaveParticipant
         if (passed)
         {
             Admit(p, sy + 1);
-            PathDialogs.ShowNotice("合格", "{name}は" + p.DisplayNameOrName + "に合格した！" + (state.roninCount > 0 ? $"（浪人{state.roninCount}年）" : ""), EventCategory.Merit);
+            PathDialogs.Notice(p, "", "path_pass_" + p.id, p.kind == PathKind.専門学校 ? "path_pass_senmon" : "path_pass_univ");
         }
         else RequestRetry(p);
         OnExamResult?.Invoke(rec);
@@ -300,7 +363,7 @@ public class PathSystem : MonoBehaviour, ISaveParticipant
                 if (passed)
                 {
                     Admit(senmon, sy + 1);
-                    PathDialogs.ShowNotice("専門学校に合格", "{name}は" + senmon.DisplayNameOrName + "に合格した。", EventCategory.Merit);
+                    PathDialogs.Notice(senmon, "", "path_pass_" + senmon.id, "path_pass_senmon");
                 }
                 else RequestRetry(senmon);
                 OnExamResult?.Invoke(rec);
@@ -365,13 +428,6 @@ public class PathSystem : MonoBehaviour, ISaveParticipant
         state.exams.Add(rec);
         Debug.Log($"[PathSystem] {kind}：{p.DisplayNameOrName} 合格率{rate:P0}（{rec.mockRank}判定）→ {(passed ? "合格" : "不合格")}");
         return rec;
-    }
-
-    // ─── ダイアログの選択 ─────────────────────────────────
-    private void HandleEventResolved(EventResolvedInfo info)
-    {
-        if (info.eventId == PathDialogs.DecideId) Decide(Find(info.choiceId));
-        else if (info.eventId == PathDialogs.RetryId && Enum.TryParse(info.choiceId, out RetryChoice c)) Retry(c);
     }
 
     // ─── セーブ ─────────────────────────────────

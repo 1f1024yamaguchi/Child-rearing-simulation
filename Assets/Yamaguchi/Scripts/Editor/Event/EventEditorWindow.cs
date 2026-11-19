@@ -186,6 +186,12 @@ public class EventEditorWindow : EditorWindow
                 if (created != null) Select(created);
             });
         }
+        menu.AddSeparator("");
+        menu.AddItem(new GUIContent("進路の画面をまとめて作る（足りない分だけ）"), false, () =>
+        {
+            PathScreenFactory.CreateMissing();
+            if (Selection.activeObject is EventData created) Select(created);
+        });
         menu.ShowAsContext();
     }
 
@@ -205,6 +211,8 @@ public class EventEditorWindow : EditorWindow
 
         EditorGUILayout.Space(4);
         EditorGUILayout.HelpBox(EventDescriber.Summary(eventData), MessageType.None);
+        string pathHelp = PathScreenFactory.HelpFor(eventData);
+        if (pathHelp != null) EditorGUILayout.HelpBox(pathHelp, MessageType.Info);
 
         EventBasicSection.Draw(so, this);
         EventTimingSection.Draw(so);

@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 463b3c7a53d14514babdcef341064d35, type: 3}
+  m_Name: Path_hs_fail
+  m_EditorClassIdentifier: Assembly-CSharp::Maruyama.Events.EventData
+  id: path_hs_fail
+  category: 0
+  title: "\u516C\u7ACB\u9AD8\u6821\u306F\u4E0D\u5408\u683C"
+  description: "{name}\u306F\u516C\u7ACB\u9AD8\u6821\u306B\u5C4A\u304B\u305A\u3001\u79C1\u7ACB\u9AD8\u6821\u306B\u901A\u3046\u3053\u3068\u306B\u306A\u3063\u305F\u3002\u5165\u5B66\u91D1\u3084\u5236\u670D\u4EE3\u304C\u304B\u304B\u308B\u3002"
+  iconSprite: {fileID: 0}
+  imageNote: "\u79C1\u7ACB\u9AD8\u6821\u306E\u5236\u670D\u3092\u53D7\u3051\u53D6\u308B\u5B50"
+  choices:
+  - id: c1
+    label: "\u308F\u304B\u3063\u305F"
+    effects: []
+    ledgerCategory: 8
+    insuredMedicalExpense: 0
+    showConditions: []
+  conditions: []
+  weight: 1
+  cooldownDays: 0
+  trigger: 4
+  fixedMonth: 1
+  fixedDay: 1
+  fixedMinAgeYears: 0
+  fixedMaxAgeYears: 0

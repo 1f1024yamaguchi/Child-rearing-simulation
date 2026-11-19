@@ -88,6 +88,19 @@ public class GameDate : MonoBehaviour
         }
     }
 
+    /// <summary>学年の呼び名（小3・中2・高1）。未就学・高校卒業後は空文字。</summary>
+    public static string SchoolLabel(float ageDays)
+    {
+        int g = GradeInStage(ageDays);
+        switch (Stage(ageDays))
+        {
+            case SchoolStage.小学校: return "小" + g;
+            case SchoolStage.中学校: return "中" + g;
+            case SchoolStage.高校: return "高" + g;
+            default: return "";
+        }
+    }
+
     /// <summary>学期末の月（7・12・3月）か。</summary>
     public static bool IsTermEndMonth(int month) => month == 7 || month == 12 || month == 3;
 
