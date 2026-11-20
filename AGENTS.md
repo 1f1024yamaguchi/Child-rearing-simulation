@@ -87,6 +87,7 @@ Unity 製の子育てシミュレーションゲーム。**このファイルは
 | [sound-system.md](docs/code/sound-system.md) | サウンド（SE・BGM・音量設定パネル）のスクリプト構成と Unity 設定手順 | SE・BGM・音量設定画面を設定・利用する |
 | [how-to-add-support-scheme.md](docs/code/how-to-add-support-scheme.md) | 支援制度（カード）の足し方と、制度アセットの各項目（年齢の日付・期限・支給表・条件）の意味 | 制度を追加・調整する |
 | [ui-tutorial.md](docs/code/ui-tutorial.md) | チュートリアル画面（画像＋見出し＋説明文・スワイプでページ送り）、新しいチュートリアルの足し方、編集ツール | チュートリアルを足す・画面を調整する |
+| [ui-tutorial-guide.md](docs/code/ui-tutorial-guide.md) | スポットライト型スタートガイド（暗幕くり抜き・操作誘導・画面解説チュートリアル） | スタート直後のチュートリアルを調整する（草尾） |
 | [support-editor.md](docs/code/support-editor.md) | 支援制度の編集ウィンドウ（メニュー「子育て/支援制度/編集ウィンドウ」）の使い方、各欄の仕様、チェック項目、テンプレ | 制度を作る・直す・登録する／編集ウィンドウを直す |
 | [event-editor-window.md](docs/code/event-editor-window.md) | イベントの編集ウィンドウ（メニュー「子育て/イベント/編集ウィンドウ」）の使い方、出方・条件・選択肢、チェック項目 | イベントを作る・直す／条件部品を足す |
 
@@ -128,6 +129,12 @@ Unity 製の子育てシミュレーションゲーム。**このファイルは
 - [0038-school-and-path-with-event-dialogs.md](docs/decisions/0038-school-and-path-with-event-dialogs.md) — 学期末テスト・進路を Core に作り、判断の画面をイベントのダイアログで代用する理由
 - [0039-path-panel-and-child-decides.md](docs/decisions/0039-path-panel-and-child-decides.md) — 進路の判断を専用パネルで出し、決めなかったときは子どもが自分の希望で決める理由
 - [0037-follow-up-removed-on-choice-and-dream.md](docs/decisions/0037-follow-up-removed-on-choice-and-dream.md) — 続きの予約を選ばれたときに消す理由と、将来の夢（DreamSystem）をストーリーの条件（DreamCondition）で見る理由
+- [0036-review-records-and-family-ending.md](docs/decisions/0036-review-records-and-family-ending.md) — 振り返り（成長グラフ・できごとの記録）と家庭の結末（家計・親の一文）の設計
+- [0037-semi-annual-bonus-system.md](docs/decisions/0037-semi-annual-bonus-system.md) — 6月・12月の賞与（ボーナス）支給と源泉徴収税額算出モデル
+- [0038-school-and-path-with-event-dialogs.md](docs/decisions/0038-school-and-path-with-event-dialogs.md) — 学期末テスト・進路を Core に作り、判断の画面をイベントのダイアログで代用する理由
+- [0039-path-panel-and-child-decides.md](docs/decisions/0039-path-panel-and-child-decides.md) — 進路の判断を専用パネルで出し、決めなかったときは子どもが自分の希望で決める理由
+- [0037-follow-up-removed-on-choice-and-dream.md](docs/decisions/0037-follow-up-removed-on-choice-and-dream.md) — 続きの予約を選ばれたときに消す理由と、将来の夢（DreamSystem）をストーリーの条件（DreamCondition）で見る理由
+- [0037-spotlight-interactive-system-tutorial.md](docs/decisions/0037-spotlight-interactive-system-tutorial.md) — スポットライト型システムチュートリアル（暗幕くり抜きとプレイヤー操作誘導）の導入理由
 
 ---
 
