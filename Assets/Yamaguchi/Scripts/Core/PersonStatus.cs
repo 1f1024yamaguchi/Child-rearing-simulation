@@ -32,6 +32,9 @@ public abstract class PersonStatus : MonoBehaviour
     /// ストレス値（整数）が変わったときに通知される。
     public event Action<int> OnStressChanged;
 
+    /// 表示名が変わったときに通知される。引数は新しい名前。
+    public event Action<string> OnDisplayNameChanged;
+
     // ─── 読み取り ───────────────────────────────────────────
     /// この人の表示名。
     public string DisplayName => displayName;
@@ -158,6 +161,31 @@ public abstract class PersonStatus : MonoBehaviour
         stress = Mathf.Clamp(value, 0f, 100f);
         if (Stress != prev)
             OnStressChanged?.Invoke(Stress);
+    }
+
+    /// 表示名を変更する。前後の空白を削り、変わらないときは通知しない。
+    /// 空文字は受け付けず LogWarning を出す。{ } を含む名前も拒否する（{name} 置き換えを壊すため）。
+    public void SetDisplayName(string value)
+    {
+        if (string.IsNullOrEmpty(value))
+        {
+            Debug.LogWarning($"[PersonStatus] 空の名前は設定できません。({gameObject.name})");
+            return;
+        }
+        value = value.Trim();
+        if (string.IsNullOrEmpty(value))
+        {
+            Debug.LogWarning($"[PersonStatus] 空白のみの名前は設定できません。({gameObject.name})");
+            return;
+        }
+        if (value.Contains("{") || value.Contains("}"))
+        {
+            Debug.LogWarning($"[PersonStatus] '{{' '}}' を含む名前は設定できません。({gameObject.name})");
+            return;
+        }
+        if (displayName == value) return;   // 変化なし → 通知しない
+        displayName = value;
+        OnDisplayNameChanged?.Invoke(displayName);
     }
 
     /// <summary>セーブ復元用。特性リストを丸ごと入れ直す。</summary>

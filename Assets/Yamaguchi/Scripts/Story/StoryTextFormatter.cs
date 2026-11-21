@@ -7,15 +7,18 @@ using UnityEngine;
 public static class StoryTextFormatter
 {
     /// <summary>
-    /// 現在の子どもの表示名。Household や Child が未設定の場合は「みらい」を返す。
+    /// 現在の子どもの表示名。Household や Child が未設定の場合、または名前が空か「未設定」の場合は「みらい」を返す。
+    /// （PersonStatus の既定値が「未設定」なので、シーンで名前を入れ忘れても「未設定」と出さない）
     /// </summary>
     public static string ChildName
     {
         get
         {
-            if (Household.I != null && Household.I.Child != null && !string.IsNullOrEmpty(Household.I.Child.DisplayName))
+            if (Household.I != null && Household.I.Child != null)
             {
-                return Household.I.Child.DisplayName;
+                string name = Household.I.Child.DisplayName;
+                if (!string.IsNullOrEmpty(name) && name != "未設定")
+                    return name;
             }
             return "みらい";
         }

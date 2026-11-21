@@ -13,6 +13,12 @@ namespace Kusao.TutorialGuide
     /// </summary>
     public class TutorialGuideController : MonoBehaviour
     {
+        /// <summary>チュートリアルを完了またはスキップしたときに通知する（新ゲーム開始後の名前決定画面用）。</summary>
+        public static event Action OnGuideCompleted;
+
+        /// <summary>現在のシーンでガイドがすでに完了したか。</summary>
+        public static bool HasCompletedInSession { get; private set; }
+
         [Header("基本設定")]
         [Tooltip("テスト用: すでに閲覧済みでもゲーム開始時に常にチュートリアルを実行するか")]
         [SerializeField] private bool forceShowOnStart = true;
@@ -55,6 +61,7 @@ namespace Kusao.TutorialGuide
 
         private void Awake()
         {
+            HasCompletedInSession = false;
             EnsureCanvasAndComponents();
 
             if (popup != null)
@@ -158,6 +165,8 @@ namespace Kusao.TutorialGuide
             if (!forceShowOnStart && PlayerPrefs.GetInt(saveKey, 0) == 1)
             {
                 gameObject.SetActive(false);
+                HasCompletedInSession = true;
+                OnGuideCompleted?.Invoke();
                 return;
             }
 
@@ -374,6 +383,8 @@ namespace Kusao.TutorialGuide
 
             ResumeGameTime();
             gameObject.SetActive(false);
+            HasCompletedInSession = true;
+            OnGuideCompleted?.Invoke();
         }
 
         // ---------------- 食事選択ダイアログなどの退避制御 ----------------

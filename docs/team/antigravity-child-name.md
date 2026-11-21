@@ -1,6 +1,6 @@
 ---
 title: Antigravity 用プロンプト（誕生イベント＝子どもの名前を決める）
-updated: 2026-11-18
+updated: 2026-11-21
 status: 運用前
 related: [docs/team/antigravity-event-editor.md, docs/team/antigravity-title-screen.md, docs/design/child-status.md, docs/design/tutorial.md, docs/decisions/0004-pause-during-decisions.md]
 ---
@@ -21,13 +21,13 @@ related: [docs/team/antigravity-event-editor.md, docs/team/antigravity-title-scr
 
 | 項目 | 現状 | 影響 |
 |---|---|---|
-| 開始の流れ | `Start_scene` の `TitleMenuUI.StartNewGame` → `GameLaunchRequest.RequestNewGame()` → `Main_test2` | 本編側で NewGame を見て名前画面を出せる |
-| `GameStartup` | `GameLaunchRequest.Consume` を呼び、Continue のときだけロード。NewGame は何もしない | **ここに名前画面を出す処理を足す**（Consume は1回しか読めないので、別の所で読まない） |
-| 名前の持ち方 | `PersonStatus.displayName`（private）。シーンの子どもは「みらい」、母「母親」、父「父親」。**書き込む窓口と変更通知が無い** | `SetDisplayName` と `OnDisplayNameChanged` を足す |
-| セーブ | `FamilySaveParticipant` の `SavedChild` に**名前が無い** | **足さないと、ロードで名前が「みらい」に戻る**（重要） |
-| `{name}` の置き換え | **実装済み。** `Story/StoryTextFormatter.Format()`。名前が空なら「みらい」を返す | イベントのタイトル・説明（`EventCardUI`）、選択肢のラベル（`EventChoiceButtonUI`）、チュートリアル（`TutorialPanelUI`）はすでに対応。**新しい置き換え処理は作らない** |
-| 置き換え漏れ | `EventChoiceButtonUI` 129行目：家計簿に書く名前（`ledgerName`）が `choice.label` をそのまま使っている | `{name}` を書いた選択肢を選ぶと、家計簿に「{name}」のまま残る。段階C で直す |
-| 子どもカードの名前 | 「子ども」と書いた TMP がシーンにあるだけ。`ChildCardUI` に名前欄の参照が無い | 欄を足してシーンで繋ぐ |
+| 開始の流れ | `Start_scene` → `TitleMenuUI` → `GameLaunchRequest` → `Main_test2`。名前画面はスポットライト型チュートリアルの完了後に表示 | 「続きから」では表示せず、直接 Play は `showInEditorPlay` が ON のときだけ表示 |
+| `GameStartup` | `Consume` の結果に応じてロードまたは名前決めを開始 | `Consume` はこのクラスで1回だけ読む |
+| 名前の持ち方 | `PersonStatus.displayName` に保持し、`SetDisplayName` と `OnDisplayNameChanged` で変更・通知する | 母・父にも使える基底クラスの窓口 |
+| セーブ | `FamilySaveParticipant.SavedChild` に表示名を保存する | 古いセーブで名前が無い場合は既存名を維持 |
+| `{name}` の置き換え | `Story/StoryTextFormatter.Format()` が置換する。名前が空または「未設定」なら「みらい」を返す | イベント・チュートリアル・選択肢表示はこの窓口を使う |
+| 置き換え漏れ | 選択肢の家計簿名も `eventTitle` と `choice.label` を `Format()` に通す | イベント表示ラベルと家計簿名を一致させる |
+| 子どもカードの名前 | `ChildCardUI.nameLabel` に表示し、名前変更通知を購読する。未接続時は子カード内の「子ども」等の TMP を探す | シーンの参照接続が無くても表示できる |
 | 時間停止 | AGENTS.md ルール8：判断画面は `OnEnable` で `GameClock.I.PushPause()`、`OnDisable` で `PopPause()`（`CalendarUI` と同じ形） | 名前のパネル自身が時間を止める。流れの担当（`ChildNamingFlow`）では止めない |
 
 ## 決めておくこと（たたき台。変えてよい）
@@ -171,6 +171,10 @@ docs/decisions/0004-pause-during-decisions.md を読んでから作業してく�
 「最初から」で本編が始まった直後に「子どもが生まれた！！！名前を決めよう」の画面を出し、
 プレイヤーが決めた名前を ChildStatus に入れる。決めるまで時間を止める。
 
+開始時のスポットライト型チュートリアル（TutorialGuideController）がある場合は、
+チュートリアルの完了またはスキップを待ってから名前画面を開く。
+チュートリアルを確認済み、またはシーンにチュートリアルが無い場合はすぐに開く。
+
 【変更してよい Assets/Maruyama/ のファイル】
 なし。
 
@@ -197,6 +201,7 @@ ChildNamePanelUI.cs（画面の部品。流れの制御はしない）
 - ［決定］→ 確認「○○でいいですか？」［はい］［やり直す］
   （ConfirmDialogUI の文言を外から変えられるなら使い回す。変えられないなら
    Naming/ に小さな確認部品を足す。ConfirmDialogUI 自体は変えない）
+- 確認画面の質問文・［はい］・［やり直す］の文字色は黒
 - ［はい］で onDecided(name) を呼んで閉じる
 
 ChildNamingFlow.cs（流れの担当。時間は止めない）
@@ -260,13 +265,15 @@ Assets/Maruyama/Scripts/UI/EventChoiceButtonUI.cs を読んでから作業して
 - ChildCardUI に TextMeshProUGUI nameLabel を [SerializeField] で足す（Tooltip：カード上部の名前）
 - StoryTextFormatter.ChildName を表示し、PersonStatus.OnDisplayNameChanged を購読して更新
 - 購読と解除は既存の Subscribe / Unsubscribe に入れる（ラムダにしない）
-- nameLabel が未設定なら何もしない
+- nameLabel が未設定なら、カード内にある「子ども」「こども」「みらい」の TMP を名前欄として探す
 
 【2】家計簿の置き換え漏れ
 - EventChoiceButtonUI の ledgerName を作るところで、eventTitle と choice.label の両方を
   StoryTextFormatter.Format に通す（表示のラベルと同じ文字になるように）
 - 医療費などの付け足しの文字（label += …）は家計簿に入れない今の動きを変えない
 - Debug.Log の中身は変えなくてよい
+- 既存イベントアセットに「みらい」が直書きされている場合は `{name}` に置き換える。
+  イベント作成用の Editor スクリプト側も同様にし、再生成後に固定名へ戻らないようにする
 
 【3】名前を出したい他の場所を洗い出す（実装はしない）
 - 画面に「子ども」「こども」「みらい」を固定で出している箇所を探し、一覧で報告する

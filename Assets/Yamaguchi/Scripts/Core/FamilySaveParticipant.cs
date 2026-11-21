@@ -38,6 +38,7 @@ public class FamilySaveParticipant : MonoBehaviour, ISaveParticipant
     [Serializable]
     private class SavedChild
     {
+        public string displayName;   // 子どもの表示名（空または null の場合はロード時に上書きしない）
         public float stress;
         public float grade;
         public float health;
@@ -106,6 +107,7 @@ public class FamilySaveParticipant : MonoBehaviour, ISaveParticipant
     {
         var c = new SavedChild
         {
+            displayName = child.DisplayName,   // 子どもの名前をセーブ
             stress = child.Stress,
             grade = child.Grade,
             health = child.Health,
@@ -198,6 +200,10 @@ public class FamilySaveParticipant : MonoBehaviour, ISaveParticipant
 
     private void RestoreChild(ChildStatus child, SavedChild data, DefinitionCatalog catalog)
     {
+        // 名前：古いセーブ（displayName が null・空）はロードしない。設定済みの名前を維持する
+        if (!string.IsNullOrEmpty(data.displayName))
+            child.SetDisplayName(data.displayName);
+
         child.SetStress(data.stress);
         child.RestoreValues(data.grade, data.health, data.studyPlayBalance, (HobbyKind)data.hobby, data.hobbyExp);
 

@@ -15,7 +15,7 @@ MonoBehaviour:
   id: fixed_otoshidama
   category: 1
   title: "\u304A\u5E74\u7389\u3092\u3082\u3089\u3063\u305F"
-  description: "\u89AA\u621A\u304B\u3089\u3001\u307F\u3089\u3044\u306B\u304A\u5E74\u7389\u3002\u3069\u3046\u4F7F\u304A\u3046\uFF1F"
+  description: "\u89AA\u621A\u304B\u3089\u3001{name}\u306B\u304A\u5E74\u7389\u3002\u3069\u3046\u4F7F\u304A\u3046\uFF1F"
   iconSprite: {fileID: 0}
   imageNote: 
   choices:

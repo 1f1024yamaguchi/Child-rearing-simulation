@@ -20,11 +20,11 @@ namespace Maruyama.Editor
             EnsureFolder("Assets/Maruyama", "Data");
             EnsureFolder("Assets/Maruyama/Data", "Events");
 
-            // 1. デメリットイベント: みらいが風邪をひいた
+            // 1. デメリットイベント: 子どもが風邪をひいた
             var childSick = ScriptableObject.CreateInstance<EventData>();
             childSick.id = "demerit_child_sick";
             childSick.category = EventCategory.Demerit;
-            childSick.title = "みらいが風邪をひいた";
+            childSick.title = "{name}が風邪をひいた";
             childSick.description = "熱があるみたい。\n病院で診てもらう？それとも家で様子を見る？";
 
             var sickChoice1 = new EventChoice

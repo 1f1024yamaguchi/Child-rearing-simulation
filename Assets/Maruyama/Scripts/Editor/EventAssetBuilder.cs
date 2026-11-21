@@ -45,7 +45,7 @@ namespace Maruyama.Editor
 
             // ---- デメリット ----
             Create("Event_Demerit_Injury", Event("demerit_injury", EventCategory.Demerit,
-                "みらいが転んでケガをした", "公園で転んで、膝をすりむいた。血が出ている。",
+                "{name}が転んでケガをした", "公園で転んで、膝をすりむいた。血が出ている。",
                 1f, new EventConditionSO[] { age1to5 },
                 Choice("病院に行く", ExpenseCategory.医療, true,
                     Fx(EffectKind.Money, EffectTarget.Household, -5000)),
@@ -152,7 +152,7 @@ namespace Maruyama.Editor
                     Fx(EffectKind.Stress, EffectTarget.Parents, -8))));
 
             Create("Event_Fixed_Birthday", Fixed("fixed_birthday", EventCategory.Merit,
-                "みらいの誕生日", "また一つ大きくなった。どんなお祝いにしよう？",
+                "{name}の誕生日", "また一つ大きくなった。どんなお祝いにしよう？",
                 1, 1, 1, 5,
                 Choice("ケーキとプレゼントでお祝い", ExpenseCategory.その他, false,
                     Fx(EffectKind.Money, EffectTarget.Household, -5000),
@@ -161,7 +161,7 @@ namespace Maruyama.Editor
                     Fx(EffectKind.Stress, EffectTarget.Everyone, -3))));
 
             Create("Event_Fixed_Otoshidama", Fixed("fixed_otoshidama", EventCategory.Merit,
-                "お年玉をもらった", "親戚から、みらいにお年玉。どう使おう？",
+                "お年玉をもらった", "親戚から、{name}にお年玉。どう使おう？",
                 1, 3, 1, 5,
                 Choice("全部貯金する", ExpenseCategory.その他, false,
                     Fx(EffectKind.Money, EffectTarget.Household, 10000),
@@ -170,7 +170,7 @@ namespace Maruyama.Editor
                     Fx(EffectKind.Stress, EffectTarget.Child, -12))));
 
             Create("Event_Fixed_Recital", Fixed("fixed_recital", EventCategory.Merit,
-                "お遊戯会の日", "練習の成果を見せる日。ステージの上で、みらいが堂々と踊っている。",
+                "お遊戯会の日", "練習の成果を見せる日。ステージの上で、{name}が堂々と踊っている。",
                 12, 15, 3, 5,
                 Choice("客席から見守る", ExpenseCategory.その他, false,
                     Fx(EffectKind.Stress, EffectTarget.Parents, -6),

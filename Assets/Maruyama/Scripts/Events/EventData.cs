@@ -24,7 +24,7 @@ namespace Maruyama.Events
     {
         public string id;                           // 識別用ID
         public EventCategory category;              // メリット / デメリット
-        public string title;                        // タイトル（例: "みらいが風邪をひいた"）
+        public string title;                        // タイトル（例: "{name}が風邪をひいた"）
         [TextArea(2, 5)]
         public string description;                  // 説明文
         public Sprite iconSprite;                   // アイコン画像

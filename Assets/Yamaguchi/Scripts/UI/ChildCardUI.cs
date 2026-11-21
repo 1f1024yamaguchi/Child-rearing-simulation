@@ -9,6 +9,9 @@ using UnityEngine.UI;
 public class ChildCardUI : MonoBehaviour
 {
     [Header("参照：子どものステータス")]
+    [Tooltip("カード上部の子どもの名前")]
+    [SerializeField] private TextMeshProUGUI nameLabel;
+
     [Tooltip("勉強⇔遊びスライダー（右=勉強 / 左=遊び。値が変わったら反転して ChildStatus.SetStudyPlayBalance を呼ぶ）")]
     [SerializeField] private Slider studyPlaySlider;
 
@@ -57,6 +60,8 @@ public class ChildCardUI : MonoBehaviour
             return;
         }
 
+        BindNameLabel();
+
         // スライダーの初期値（画面上は右[1]が勉強、左[0]が遊び）
         if (studyPlaySlider != null)
             studyPlaySlider.SetValueWithoutNotify(1f - child.StudyPlayBalance);
@@ -74,6 +79,7 @@ public class ChildCardUI : MonoBehaviour
         }
 
         // 初期表示
+        ShowName();
         ShowProfile();
         ShowGrade(child.Grade);
         ShowStress(child.Stress);
@@ -116,6 +122,7 @@ public class ChildCardUI : MonoBehaviour
             child.OnHealthChanged           += ShowHealth;
             child.OnHobbyChanged            += ShowHobby;
             child.OnStudyPlayBalanceChanged += ShowBalance;
+            child.OnDisplayNameChanged      += ShowName;
         }
 
         // 年齢の購読（プロフィール行の更新に必要）
@@ -154,6 +161,7 @@ public class ChildCardUI : MonoBehaviour
             child.OnHealthChanged           -= ShowHealth;
             child.OnHobbyChanged            -= ShowHobby;
             child.OnStudyPlayBalanceChanged -= ShowBalance;
+            child.OnDisplayNameChanged      -= ShowName;
         }
 
         if (GameState.I != null)
@@ -219,6 +227,27 @@ public class ChildCardUI : MonoBehaviour
     }
 
     // ─── 表示メソッド ─────────────────────────────────────
+    private void BindNameLabel()
+    {
+        if (nameLabel != null) return;
+
+        var labels = GetComponentsInChildren<TextMeshProUGUI>(true);
+        foreach (var label in labels)
+        {
+            if (label.text == "子ども" || label.text == "こども" || label.text == "みらい")
+            {
+                nameLabel = label;
+                return;
+            }
+        }
+    }
+
+    private void ShowName(string _ = null)
+    {
+        if (nameLabel == null) return;
+        nameLabel.text = StoryTextFormatter.ChildName;
+    }
+
     private void ShowProfile()
     {
         if (profileLineText == null || child == null) return;

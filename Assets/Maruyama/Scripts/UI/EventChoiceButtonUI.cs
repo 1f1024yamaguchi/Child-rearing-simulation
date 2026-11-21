@@ -126,7 +126,11 @@ namespace Maruyama.UI
             if (currentChoice != null)
             {
                 Debug.Log($"[EventChoiceButtonUI] 選択肢 '{currentChoice.label}' がクリックされました。Effect を適用します。");
-                string ledgerName = string.IsNullOrEmpty(eventTitle) ? currentChoice.label : $"{eventTitle}：{currentChoice.label}";
+                string formattedTitle = StoryTextFormatter.Format(eventTitle);
+                string formattedLabel = StoryTextFormatter.Format(currentChoice.label);
+                string ledgerName = string.IsNullOrEmpty(formattedTitle)
+                    ? formattedLabel
+                    : $"{formattedTitle}：{formattedLabel}";
                 EffectApplier.Apply(
                     currentChoice.effects,
                     new LedgerSource(ledgerName, currentChoice.ledgerCategory),
