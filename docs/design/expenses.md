@@ -1,8 +1,8 @@
 ---
 title: 支出の仕組み（家計簿）
-updated: 2026-10-30
+updated: 2026-11-25
 status: 設計中（たたき台）・担当：山口
-related: [docs/design/support-apply.md, docs/design/food-system.md, docs/design/events.md, docs/design/effects.md, docs/code/architecture.md, docs/decisions/0015-real-money-and-expenses.md]
+related: [docs/design/support-apply.md, docs/design/food-system.md, docs/design/events.md, docs/design/effects.md, docs/code/architecture.md, docs/decisions/0015-real-money-and-expenses.md, docs/decisions/0040-monthly-budget-living-expenses.md, docs/decisions/0041-ledger-flat-expenses-and-event-only-other.md, docs/decisions/0042-event-medical-to-other-and-remove-education-budget.md, docs/decisions/0043-monthly-living-expense-random-variance.md]
 ---
 
 # 支出の仕組み（家計簿）
@@ -57,7 +57,12 @@ related: [docs/design/support-apply.md, docs/design/food-system.md, docs/design/
 ### 3.1 支出項目（ExpenseItem・アセット1つ＝支出1つ）
 
 ```csharp
-public enum ExpenseCategory { 住居, 光熱費, 通信, 食費, 保育, 学校, 塾習い事, 医療, その他 }
+public enum ExpenseCategory
+{
+    住居, 光熱費, 通信, 食費, 保育, 学校, 塾習い事, 医療, その他,
+    給料, 税金社会保険, 支援制度,
+    家具家事用品, 被服履物, 交通, 教養娯楽, 諸雑費
+}
 public enum ExpenseMode     { Auto, Optional }   // 自動でかかる／プレイヤーが申し込んだらかかる
 
 [System.Serializable]
@@ -158,7 +163,9 @@ public class LedgerLine
 
 ### 5.1 見せ方（たたき台）
 
-1. **月の家計簿**：ステータスパネルか下部ボタンから開く。今月と先月の「収入／支出（カテゴリ別）／支援で助かった額／差し引き」。
+1. **月の家計簿**：ステータスパネルか下部ボタンから開く。今月と先月の「収入／支出（独立項目＋イベント限定その他）／支援で助かった額／差し引き」。
+   - **毎月の支出の独立表示**（[0041](../decisions/0041-ledger-flat-expenses-and-event-only-other.md)）：家賃、光熱・水道、家具・家事用品、被服及び履物、保健医療、交通、通信、食費、教育、教養娯楽、諸雑費、保育料などは「住居」「光熱費」等の親カテゴリで束ねず、項目名（`source`）を直接独立行として表示する。
+   - **「その他」カテゴリのイベント限定化**：「その他」はイベント発生時の突発出費（`ExpenseCategory.その他`）のみを表示する。
 2. **誕生日のまとめ**：子どもが1歳になるたびに「この1年でかかったお金：○○円（うち支援 ○○円）」を出す（時間を止める）。
 3. **最後のまとめ**：20歳のエンディングで「子育てにかかった合計」と、全国の平均（文科省・内閣府の調査）を並べて見せる。
 

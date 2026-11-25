@@ -139,48 +139,72 @@ public class LedgerMonthView : MonoBehaviour
         }
 
         // ------------------------------------------------------------
-        // 右：支出（種類ごとに見出し＋小計＋行）
+        // 右：支出（毎月かかるものは独立行、その他はイベント発生時のみ見出し＋行）
         // ------------------------------------------------------------
         if (expenseContent != null && rowPrefab != null)
         {
-            ExpenseCategory[] expenseCategories = new[]
-            {
-                ExpenseCategory.住居,
-                ExpenseCategory.光熱費,
-                ExpenseCategory.通信,
-                ExpenseCategory.食費,
-                ExpenseCategory.保育,
-                ExpenseCategory.学校,
-                ExpenseCategory.塾習い事,
-                ExpenseCategory.医療,
-                ExpenseCategory.その他
-            };
+            var regularLines = new List<LedgerLine>();
+            var otherLines = new List<LedgerLine>();
 
-            foreach (var cat in expenseCategories)
+            foreach (var l in lines)
             {
-                var catLines = new List<LedgerLine>();
-                int catSubtotal = 0;
-
-                foreach (var l in lines)
+                // 収入系はスキップ
+                if (l.category == ExpenseCategory.給料 ||
+                    l.category == ExpenseCategory.税金社会保険 ||
+                    l.category == ExpenseCategory.支援制度)
                 {
-                    if (l.category != cat) continue;
-                    // 0円で肩代わりもない行は出さない
-                    if (l.amount == 0 && l.covered == 0) continue;
-
-                    catLines.Add(l);
-                    int cost = Math.Abs(l.amount);
-                    catSubtotal += cost;
-                    expenseTotal += cost;
-                    if (Ledger.IsChildCost(cat)) childCostTotal += cost;
+                    continue;
                 }
 
-                if (catLines.Count == 0) continue;
+                // 0円で肩代わりもない行は出さない
+                if (l.amount == 0 && l.covered == 0) continue;
 
-                // 種類見出し行（小計つき）
-                SpawnRow(expenseContent, cat.ToString(), $"{catSubtotal:N0}", null, headColor, true);
+                int cost = Math.Abs(l.amount);
+                expenseTotal += cost;
+                if (Ledger.IsChildCost(l.category)) childCostTotal += cost;
 
-                // 個別行
-                foreach (var l in catLines)
+                // イベントで発生した支出（「イベント名：選択肢名」形式のものや「その他」カテゴリ）はその他に分類
+                bool isEventOrOther = l.category == ExpenseCategory.その他 ||
+                                      (!string.IsNullOrEmpty(l.source) && (l.source.Contains("：") || l.source.Contains(":")));
+
+                if (isEventOrOther)
+                {
+                    otherLines.Add(l);
+                }
+                else
+                {
+                    regularLines.Add(l);
+                }
+            }
+
+            // 毎月かかる通常の支出を生活費の順に整列して独立表示
+            regularLines.Sort((a, b) =>
+            {
+                int orderA = GetExpenseSortOrder(a.category);
+                int orderB = GetExpenseSortOrder(b.category);
+                if (orderA != orderB) return orderA.CompareTo(orderB);
+                return string.Compare(a.source, b.source, StringComparison.Ordinal);
+            });
+
+            foreach (var l in regularLines)
+            {
+                int cost = Math.Abs(l.amount);
+                string note = l.covered > 0 ? $"（支援 −{l.covered:N0}円）" : null;
+                SpawnRow(expenseContent, l.source, $"{cost:N0}", note, expColor, false);
+            }
+
+            // イベントで発生した「その他」の支出がある場合のみ、その他見出し＋個別行を表示
+            if (otherLines.Count > 0)
+            {
+                int otherSubtotal = 0;
+                foreach (var l in otherLines)
+                {
+                    otherSubtotal += Math.Abs(l.amount);
+                }
+
+                SpawnRow(expenseContent, "その他", $"{otherSubtotal:N0}", null, headColor, true);
+
+                foreach (var l in otherLines)
                 {
                     int cost = Math.Abs(l.amount);
                     string note = l.covered > 0 ? $"（支援 −{l.covered:N0}円）" : null;
@@ -228,5 +252,27 @@ public class LedgerMonthView : MonoBehaviour
             if (r != null) Destroy(r.gameObject);
         }
         spawnedRows.Clear();
+    }
+
+    private static int GetExpenseSortOrder(ExpenseCategory cat)
+    {
+        switch (cat)
+        {
+            case ExpenseCategory.住居: return 10;
+            case ExpenseCategory.光熱費: return 20;
+            case ExpenseCategory.家具家事用品: return 30;
+            case ExpenseCategory.被服履物: return 40;
+            case ExpenseCategory.医療: return 50;
+            case ExpenseCategory.交通: return 60;
+            case ExpenseCategory.通信: return 70;
+            case ExpenseCategory.食費: return 80;
+            case ExpenseCategory.保育: return 90;
+            case ExpenseCategory.学校: return 100;
+            case ExpenseCategory.塾習い事: return 110;
+            case ExpenseCategory.教養娯楽: return 120;
+            case ExpenseCategory.諸雑費: return 130;
+            case ExpenseCategory.その他: return 999;
+            default: return 500;
+        }
     }
 }

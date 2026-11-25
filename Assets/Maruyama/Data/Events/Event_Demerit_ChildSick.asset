@@ -28,7 +28,7 @@ MonoBehaviour:
       duration: 0
       days: 0
       asset: {fileID: 0}
-    ledgerCategory: 7
+    ledgerCategory: 8
     insuredMedicalExpense: 1
     showConditions: []
   - id: c2
@@ -46,7 +46,7 @@ MonoBehaviour:
       duration: 0
       days: 0
       asset: {fileID: 0}
-    ledgerCategory: 7
+    ledgerCategory: 8
     insuredMedicalExpense: 0
     showConditions: []
   conditions:

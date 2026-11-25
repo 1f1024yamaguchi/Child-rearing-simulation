@@ -42,3 +42,9 @@ status: 運用中
 | [0028](0028-postnatal-care-stress-fixed-reduction.md) | 産後ケアのストレス効果を固定値10減少にする | 採用 |
 | [0037](0037-semi-annual-bonus-system.md) | 6月・12月の賞与（ボーナス）支給と源泉徴収税額算出モデル | 採用 |
 | [0038](0038-month-end-settlement-for-ledger.md) | 家計簿の収支・支出を月末締めで当月に記録する設計への変更 | 採用 |
+| [0039](0039-path-panel-and-child-decides.md) | 進路の判断を専用パネルで出し、決めなかったときは子どもが自分の希望で決める理由 | 採用 |
+| [0040](0040-monthly-budget-living-expenses.md) | budget01〜12（東京都区部）に基づく月別生活変動支出の導入 | 採用 |
+| [0041](0041-ledger-flat-expenses-and-event-only-other.md) | 家計簿の毎月支出の独立表示と「その他」カテゴリのイベント限定化 | 採用 |
+| [0042](0042-event-medical-to-other-and-remove-education-budget.md) | イベント医療費の「その他」分類と月別教育費の撤廃 | 採用 |
+| [0043](0043-monthly-living-expense-random-variance.md) | 月別変動生活費への±5%ランダム変動幅の導入 | 採用 |
+| [0044](0044-washing-machine-event-expense-revision.md) | 洗濯機故障イベントの費用見直しと説明文改定 | 採用 |

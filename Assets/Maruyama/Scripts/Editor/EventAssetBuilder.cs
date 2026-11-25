@@ -1,4 +1,4 @@
-#if UNITY_EDITOR
+﻿#if UNITY_EDITOR
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
@@ -47,9 +47,9 @@ namespace Maruyama.Editor
             Create("Event_Demerit_Injury", Event("demerit_injury", EventCategory.Demerit,
                 "{name}が転んでケガをした", "公園で転んで、膝をすりむいた。血が出ている。",
                 1f, new EventConditionSO[] { age1to5 },
-                Choice("病院に行く", ExpenseCategory.医療, true,
+                Choice("病院に行く", ExpenseCategory.その他, true,
                     Fx(EffectKind.Money, EffectTarget.Household, -5000)),
-                Choice("家で手当てする", ExpenseCategory.医療, false,
+                Choice("家で手当てする", ExpenseCategory.その他, false,
                     Fx(EffectKind.Health, EffectTarget.Child, -8),
                     Fx(EffectKind.Stress, EffectTarget.Child, 5))));
 
@@ -73,12 +73,12 @@ namespace Maruyama.Editor
                     Fx(EffectKind.Stress, EffectTarget.Parents, 2))));
 
             Create("Event_Demerit_SuddenExpense", Cooldown(730, Event("demerit_sudden_expense", EventCategory.Demerit,
-                "洗濯機が壊れた", "毎日使うものが、突然動かなくなった。",
+                "洗濯機が壊れた", "毎日使う洗濯機が、突然動かなくなった。新しく買い替えるか、修理を頼むか……",
                 0.25f, new EventConditionSO[] { age0to5 },
                 Choice("新しく買い替える", ExpenseCategory.その他, false,
-                    Fx(EffectKind.Money, EffectTarget.Household, -40000)),
+                    Fx(EffectKind.Money, EffectTarget.Household, -80000)),
                 Choice("修理して、しばらく様子を見る", ExpenseCategory.その他, false,
-                    Fx(EffectKind.Money, EffectTarget.Household, -12000),
+                    Fx(EffectKind.Money, EffectTarget.Household, -25000),
                     Fx(EffectKind.Stress, EffectTarget.Parents, 4)))));
 
             // ---- メリット ----

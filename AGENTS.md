@@ -126,15 +126,16 @@ Unity 製の子育てシミュレーションゲーム。**このファイルは
 - [0035-tutorial-timing-in-data.md](docs/decisions/0035-tutorial-timing-in-data.md) — チュートリアルを出すタイミングをデータ（TutorialData）に持たせ、共通の TutorialScheduler で出す理由
 - [0036-review-records-and-family-ending.md](docs/decisions/0036-review-records-and-family-ending.md) — 振り返り（成長グラフ・できごとの記録）と家庭の結末（家計・親の一文）の設計
 - [0037-semi-annual-bonus-system.md](docs/decisions/0037-semi-annual-bonus-system.md) — 6月・12月の賞与（ボーナス）支給と源泉徴収税額算出モデル
-- [0038-school-and-path-with-event-dialogs.md](docs/decisions/0038-school-and-path-with-event-dialogs.md) — 学期末テスト・進路を Core に作り、判断の画面をイベントのダイアログで代用する理由
-- [0039-path-panel-and-child-decides.md](docs/decisions/0039-path-panel-and-child-decides.md) — 進路の判断を専用パネルで出し、決めなかったときは子どもが自分の希望で決める理由
-- [0037-follow-up-removed-on-choice-and-dream.md](docs/decisions/0037-follow-up-removed-on-choice-and-dream.md) — 続きの予約を選ばれたときに消す理由と、将来の夢（DreamSystem）をストーリーの条件（DreamCondition）で見る理由
-- [0036-review-records-and-family-ending.md](docs/decisions/0036-review-records-and-family-ending.md) — 振り返り（成長グラフ・できごとの記録）と家庭の結末（家計・親の一文）の設計
-- [0037-semi-annual-bonus-system.md](docs/decisions/0037-semi-annual-bonus-system.md) — 6月・12月の賞与（ボーナス）支給と源泉徴収税額算出モデル
-- [0038-school-and-path-with-event-dialogs.md](docs/decisions/0038-school-and-path-with-event-dialogs.md) — 学期末テスト・進路を Core に作り、判断の画面をイベントのダイアログで代用する理由
-- [0039-path-panel-and-child-decides.md](docs/decisions/0039-path-panel-and-child-decides.md) — 進路の判断を専用パネルで出し、決めなかったときは子どもが自分の希望で決める理由
 - [0037-follow-up-removed-on-choice-and-dream.md](docs/decisions/0037-follow-up-removed-on-choice-and-dream.md) — 続きの予約を選ばれたときに消す理由と、将来の夢（DreamSystem）をストーリーの条件（DreamCondition）で見る理由
 - [0037-spotlight-interactive-system-tutorial.md](docs/decisions/0037-spotlight-interactive-system-tutorial.md) — スポットライト型システムチュートリアル（暗幕くり抜きとプレイヤー操作誘導）の導入理由
+- [0038-month-end-settlement-for-ledger.md](docs/decisions/0038-month-end-settlement-for-ledger.md) — 家計簿の収支・支出を月末締めで当月に記録する設計への変更
+- [0038-school-and-path-with-event-dialogs.md](docs/decisions/0038-school-and-path-with-event-dialogs.md) — 学期末テスト・進路を Core に作り、判断の画面をイベントのダイアログで代用する理由
+- [0039-path-panel-and-child-decides.md](docs/decisions/0039-path-panel-and-child-decides.md) — 進路の判断を専用パネルで出し、決めなかったときは子どもが自分の希望で決める理由
+- [0040-monthly-budget-living-expenses.md](docs/decisions/0040-monthly-budget-living-expenses.md) — budget01〜12（東京都区部）に基づく月別生活変動支出の導入
+- [0041-ledger-flat-expenses-and-event-only-other.md](docs/decisions/0041-ledger-flat-expenses-and-event-only-other.md) — 家計簿の毎月支出の独立表示と「その他」カテゴリのイベント限定化
+- [0042-event-medical-to-other-and-remove-education-budget.md](docs/decisions/0042-event-medical-to-other-and-remove-education-budget.md) — イベント医療費の「その他」分類と月別教育費の撤廃
+- [0043-monthly-living-expense-random-variance.md](docs/decisions/0043-monthly-living-expense-random-variance.md) — 月別変動生活費への±5%ランダム変動幅の導入
+- [0044-washing-machine-event-expense-revision.md](docs/decisions/0044-washing-machine-event-expense-revision.md) — 洗濯機故障イベントの費用見直しと説明文改定
 
 ---
 

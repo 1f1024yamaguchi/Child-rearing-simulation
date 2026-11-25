@@ -1,4 +1,4 @@
-%YAML 1.1
+﻿%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!114 &11400000
 MonoBehaviour:
@@ -15,7 +15,7 @@ MonoBehaviour:
   id: demerit_sudden_expense
   category: 0
   title: "\u6D17\u6FEF\u6A5F\u304C\u58CA\u308C\u305F"
-  description: "\u6BCE\u65E5\u4F7F\u3046\u3082\u306E\u304C\u3001\u7A81\u7136\u52D5\u304B\u306A\u304F\u306A\u3063\u305F\u3002"
+  description: "毎日使う洗濯機が、突然動かなくなった。新しく買い替えるか、修理を頼むか……"
   iconSprite: {fileID: 0}
   imageNote: 
   choices:
@@ -24,7 +24,7 @@ MonoBehaviour:
     effects:
     - kind: 0
       target: 0
-      value: -40000
+      value: -80000
       duration: 0
       days: 0
       asset: {fileID: 0}
@@ -36,7 +36,7 @@ MonoBehaviour:
     effects:
     - kind: 0
       target: 0
-      value: -12000
+      value: -25000
       duration: 0
       days: 0
       asset: {fileID: 0}
