@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 463b3c7a53d14514babdcef341064d35, type: 3}
+  m_Name: Event_Fixed_ElementarySchool
+  m_EditorClassIdentifier: Assembly-CSharp::Maruyama.Events.EventData
+  id: fixed_elementary_school
+  category: 1
+  title: "\u5C0F\u5B66\u6821\u5165\u5B66"
+  description: "\u5C0F\u5B66\u751F\u306B\u306A\u3063\u305F\u3088\uFF01"
+  iconSprite: {fileID: 0}
+  imageNote: 
+  choices:
+  - id: c1
+    label: "\u304A\u3081\u3067\u3068\u3046\uFF01"
+    effects:
+    - kind: 1
+      target: 4
+      value: -10
+      duration: 0
+      days: 0
+      asset: {fileID: 0}
+    ledgerCategory: 5
+    insuredMedicalExpense: 0
+    showConditions: []
+  conditions: []
+  weight: 1
+  cooldownDays: 0
+  trigger: 1
+  fixedMonth: 4
+  fixedDay: 1
+  fixedMinAgeYears: 6
+  fixedMaxAgeYears: 6

@@ -56,4 +56,4 @@ MonoBehaviour:
   fixedMonth: 1
   fixedDay: 1
   fixedMinAgeYears: 1
-  fixedMaxAgeYears: 5
+  fixedMaxAgeYears: 19

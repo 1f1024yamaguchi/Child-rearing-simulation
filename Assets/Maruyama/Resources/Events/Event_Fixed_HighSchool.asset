@@ -1,0 +1,92 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-6786765645187509453
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 15f34218f53a1344a9645cb3098fbe0b, type: 3}
+  m_Name: Cond_OnceInLifetime
+  m_EditorClassIdentifier: Assembly-CSharp::ChoiceHistoryCondition
+  targetEvent: {fileID: 11400000, guid: 012d7deb32907e34cb5c845bc246e0f5, type: 2}
+  checkType: 2
+  choiceId: c1
+--- !u!114 &-2908559927203939359
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aeb5da4de5ae83b4d8d5b1f6ecfd7ed7, type: 3}
+  m_Name: Cond_ChildStat
+  m_EditorClassIdentifier: Assembly-CSharp::ChildStatCondition
+  statKind: 0
+  minValue: 60
+  maxValue: 100
+  hobbyKind: 1
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 463b3c7a53d14514babdcef341064d35, type: 3}
+  m_Name: Event_Fixed_HighSchool
+  m_EditorClassIdentifier: Assembly-CSharp::Maruyama.Events.EventData
+  id: fixed_high_school
+  category: 1
+  title: "\u9AD8\u6821\u5165\u5B66"
+  description: "\u9AD8\u6821\u751F\u306B\u306A\u3063\u305F\u3088\uFF01\u3069\u306E\u9AD8\u6821\u306B\u5165\u5B66\u3059\u308B\uFF1F\n\uFF08\u79C1\u7ACB\u9AD8\u6821\u306F\u5165\u5B66\u91D125\u4E07\u6255\u3046\u5FC5\u8981\u3042\u308A\uFF09"
+  iconSprite: {fileID: 0}
+  imageNote: 
+  choices:
+  - id: c1
+    label: "\u516C\u7ACB\u9AD8\u6821"
+    effects:
+    - kind: 1
+      target: 4
+      value: -5
+      duration: 0
+      days: 0
+      asset: {fileID: 0}
+    ledgerCategory: 5
+    insuredMedicalExpense: 0
+    showConditions: []
+  - id: c2
+    label: "\u79C1\u7ACB\u9AD8\u6821"
+    effects:
+    - kind: 0
+      target: 0
+      value: -250000
+      duration: 0
+      days: 0
+      asset: {fileID: 0}
+    - kind: 3
+      target: 3
+      value: 5
+      duration: 0
+      days: 0
+      asset: {fileID: 0}
+    ledgerCategory: 5
+    insuredMedicalExpense: 0
+    showConditions:
+    - {fileID: -2908559927203939359}
+  conditions:
+  - {fileID: -6786765645187509453}
+  weight: 1
+  cooldownDays: 0
+  trigger: 1
+  fixedMonth: 4
+  fixedDay: 1
+  fixedMinAgeYears: 16
+  fixedMaxAgeYears: 16
